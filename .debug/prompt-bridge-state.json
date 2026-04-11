@@ -1,0 +1,60 @@
+{
+  "command": {
+    "id": "cmd-1775924765118-bmdk9e",
+    "action": "summarizePrompts",
+    "payload": [
+      "Lewis Road first, then Willowbrook. Prefer morning jobs but nothing before 05:00. Avoid splits. No UP jobs.",
+      "Willowbrook only. Rank by highest overtime, then later starts. No jobs finishing after 02:00.",
+      "Barrie first with early finishes, then Lewis Road but prefer afternoons. No splits at Barrie.",
+      "Kitchener only. No jobs finishing after 18:00."
+    ],
+    "createdAt": "2026-04-11T16:26:05.118Z"
+  },
+  "latestResult": {
+    "commandId": "cmd-1775924765118-bmdk9e",
+    "action": "summarizePrompts",
+    "status": "completed",
+    "completedAt": "2026-04-11T16:49:47.156Z",
+    "payload": {
+      "totalPrompts": 4,
+      "promptsWithViolations": 0,
+      "promptsWithNoResults": 0,
+      "promptsWithInterpretationErrors": 0,
+      "promptsWithAssertionFailures": 0,
+      "results": [
+        {
+          "prompt": "Lewis Road first, then Willowbrook. Prefer morning jobs but nothing before 05:00. Avoid splits. No UP jobs.",
+          "rankedCount": 113,
+          "excludedCount": 76,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Willowbrook only. Rank by highest overtime, then later starts. No jobs finishing after 02:00.",
+          "rankedCount": 68,
+          "excludedCount": 121,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Barrie first with early finishes, then Lewis Road but prefer afternoons. No splits at Barrie.",
+          "rankedCount": 187,
+          "excludedCount": 2,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Kitchener only. No jobs finishing after 18:00.",
+          "rankedCount": 7,
+          "excludedCount": 182,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        }
+      ]
+    }
+  }
+}
