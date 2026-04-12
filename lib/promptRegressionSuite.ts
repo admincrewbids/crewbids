@@ -244,4 +244,125 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
       },
     ],
   },
+  {
+    id: "canonical-barrie-only-finish-by-1800",
+    label: "Barrie only if it finishes by 18:00",
+    prompt: "Barrie only if it finishes by 18:00",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Barrie"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Barrie",
+          filter: {
+            field: "off_duty",
+            operator: "<=",
+            value: "18:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Barrie"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-exclude-willowbrook",
+    label: "Exclude Willowbrook",
+    prompt: "Exclude Willowbrook",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-lewis-road-and-willowbrook-only-exclude-up",
+    label: "Lewis Road and Willowbrook only, exclude UP jobs",
+    prompt: "Lewis Road and Willowbrook only, exclude UP jobs",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lewis Road", "Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lewis road", "willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lewis Road", "Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-three-day-off-first-no-splits",
+    label: "3 day off jobs first, no splits",
+    prompt: "3 day off jobs first, no splits",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "three_day_off_jobs",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "split_time",
+          operator: "=",
+          value: "none",
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
 ];
