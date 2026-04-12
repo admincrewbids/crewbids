@@ -377,4 +377,49 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
       },
     ],
   },
+  {
+    id: "canonical-barrie-finish-by-1800-otherwise-willowbrook",
+    label: "Barrie if it finishes by 18:00, otherwise Willowbrook",
+    prompt: "Barrie if it finishes by 18:00, otherwise Willowbrook",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Barrie", "Willowbrook"],
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Barrie",
+          filter: {
+            field: "off_duty",
+            operator: "<=",
+            value: "18:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "conditional_terminal_fallback",
+        value: {
+          primary: {
+            terminal: "Barrie",
+            requires: [
+              {
+                field: "off_duty",
+                operator: "<=",
+                value: "18:00",
+                strength: "hard",
+              },
+            ],
+          },
+          fallback: {
+            terminal: "Willowbrook",
+          },
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
 ];
