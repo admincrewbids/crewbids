@@ -27,6 +27,12 @@ export type PromptRegressionAssertion =
       value: string[];
     }
   | {
+      type: "parsed_priority_terminal_absent";
+      value: {
+        terminal: string;
+      };
+    }
+  | {
       type: "parsed_global_filter_present";
       value: PromptRegressionFilterExpectation;
     }
@@ -146,6 +152,14 @@ export type PromptRegressionAssertion =
         }>;
         requireAtLeastComparablePairs?: number;
         mode?: "consecutive_pair_evidence";
+      };
+    }
+  | {
+      type: "interpretation_issue_absent";
+      value: {
+        code?: string;
+        scope?: "global" | "scoped";
+        messageIncludes?: string;
       };
     };
 
@@ -321,6 +335,13 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     prompt: "Avoid Willowbrook, but do not exclude it.",
     assertions: [
       {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "Avoid Willowbrook",
+        },
+      },
+      {
         type: "tradeoff_present",
         value: {
           type: "avoid_terminal",
@@ -334,12 +355,9 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
         },
       },
       {
-        type: "parsed_global_filter_absent",
+        type: "parsed_priority_terminal_absent",
         value: {
-          field: "terminal",
-          operator: "not_in",
-          value: ["willowbrook"],
-          strength: "hard",
+          terminal: "Willowbrook",
         },
       },
     ],

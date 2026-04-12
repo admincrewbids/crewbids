@@ -931,6 +931,24 @@ function evaluateAssertion(
         };
   }
 
+  if (assertion.type === "parsed_priority_terminal_absent") {
+    const normalizedExpectedTerminal = normalizeTerminalLabel(assertion.value.terminal);
+    const found = (parsed.priority_groups ?? []).some((group) =>
+      group.conditions.some(
+        (condition) =>
+          condition.field === "terminal" &&
+          normalizeTerminalLabel(String(condition.value ?? "")) === normalizedExpectedTerminal
+      )
+    );
+
+    return !found
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected terminal ${assertion.value.terminal} to be absent from parsed positive priority groups.`,
+        };
+  }
+
   if (assertion.type === "parsed_global_filter_present") {
     const found = (parsed.filters ?? []).some((filter) =>
       matchesFilterExpectation(filter, assertion.value)
@@ -1145,6 +1163,29 @@ function evaluateAssertion(
       assertion.value.mode ?? "consecutive_pair_evidence",
       assertion.value.requireAtLeastComparablePairs ?? 1
     );
+  }
+
+  if (assertion.type === "interpretation_issue_absent") {
+    const matchingIssue = (result.interpretationIssues ?? []).find((issue) => {
+      if (assertion.value.code && issue.code !== assertion.value.code) return false;
+      if (assertion.value.scope && issue.scope !== assertion.value.scope) return false;
+      if (
+        assertion.value.messageIncludes &&
+        !String(issue.message ?? "")
+          .toLowerCase()
+          .includes(assertion.value.messageIncludes.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    return !matchingIssue
+      ? null
+      : {
+          type: assertion.type,
+          message: `Found unexpected interpretation issue${matchingIssue.code ? ` ${matchingIssue.code}` : ""}: ${matchingIssue.message}`,
+        };
   }
 
   return null;
