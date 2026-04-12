@@ -7734,11 +7734,23 @@ useEffect(() => {
             const result = await buildPromptDebugResult(regressionCase.prompt);
             if (!result) continue;
 
+            const baseSummary = summarizePromptDebugResult(
+              result,
+              realCrews.length,
+              formatTerminalDisplayName
+            );
+            const assertionFailures = evaluatePromptRegressionAssertions(
+              regressionCase,
+              result,
+              baseSummary
+            );
+
             summaries.push(
               summarizePromptDebugResult(
                 {
                   ...result,
                   prompt: `${regressionCase.label}: ${result.prompt}`,
+                  assertionFailures,
                 },
                 realCrews.length,
                 formatTerminalDisplayName
