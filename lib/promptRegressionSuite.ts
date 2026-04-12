@@ -247,6 +247,104 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-willowbrook-only-no-finishes-after-0200",
+    label: "Willowbrook only. No jobs finishing after 02:00.",
+    prompt: "Willowbrook only. No jobs finishing after 02:00.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "off_duty",
+            operator: "<=",
+            value: "02:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-lewis-road-willowbrook-barrie-no-other-terminals",
+    label: "Lewis Road first, then Willowbrook, then Barrie. No other terminals.",
+    prompt: "Lewis Road first, then Willowbrook, then Barrie. No other terminals.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lewis Road", "Willowbrook", "Barrie"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lewis road", "willowbrook", "barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lewis Road", "Willowbrook", "Barrie"],
+      },
+      {
+        type: "no_priority_violations",
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-avoid-willowbrook-but-do-not-exclude-it",
+    label: "Avoid Willowbrook, but do not exclude it.",
+    prompt: "Avoid Willowbrook, but do not exclude it.",
+    assertions: [
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "avoid_terminal",
+          value: "willowbrook",
+        },
+      },
+      {
+        type: "avoid_is_not_hard",
+        value: {
+          terminal: "Willowbrook",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["willowbrook"],
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
     id: "canonical-no-splits",
     label: "No splits",
     prompt: "No splits",
@@ -257,6 +355,48 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           field: "split_time",
           operator: "=",
           value: "none",
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-standby-only",
+    label: "Standby only",
+    prompt: "Standby only",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "include_only_standby_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Standby"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-no-shuttle-bus",
+    label: "No shuttle bus",
+    prompt: "No shuttle bus",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "shuttle_bus",
+          operator: "=",
+          value: false,
           strength: "hard",
         },
       },
