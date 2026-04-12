@@ -1,4 +1,8 @@
-import type { PromptDebugResult, PromptDebugSummary } from "./promptDebug";
+import type {
+  PromptDebugRankedCrewLike,
+  PromptDebugResult,
+  PromptDebugSummary,
+} from "./promptDebug";
 import type {
   PromptRegressionAssertion,
   PromptRegressionCase,
@@ -9,7 +13,6 @@ import type {
   ParsedPreferenceFilterLike,
   ParsedPreferenceSortLike,
   ParsedPreferencesLike,
-  ScopedPreferenceLike,
 } from "./promptRuleAnalysis";
 
 export type PromptRegressionAssertionFailure = {
@@ -17,11 +20,72 @@ export type PromptRegressionAssertionFailure = {
   message: string;
 };
 
-type RankedCrewLike = PromptDebugResult<ParsedPreferencesLike>["ranked"][number];
-type ExcludedCrewLike = PromptDebugResult<ParsedPreferencesLike>["excluded"][number];
+type JobDetailLike = {
+  on_duty?: string | null;
+  off_duty?: string | null;
+  has_shuttle_bus?: unknown;
+  raw_text?: unknown;
+};
+
+type DayLike = {
+  day?: string;
+  is_day_off?: boolean;
+  on_duty?: string | null;
+  off_duty?: string | null;
+  job_detail?: JobDetailLike | null;
+};
+
+type RankedCrewLike = PromptDebugRankedCrewLike & {
+  daily?: DayLike[];
+  job_details?: JobDetailLike[];
+  days_off_count?: number;
+  works_weekends?: boolean;
+  split_time_weekly?: string;
+};
 
 function normalizeTerminalLabel(value: string | undefined) {
   return String(value ?? "").trim().toLowerCase();
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isParsedPreferenceFilterLike(value: unknown): value is ParsedPreferenceFilterLike {
+  return (
+    isRecord(value) &&
+    typeof value.field === "string" &&
+    typeof value.operator === "string" &&
+    typeof value.strength === "string" &&
+    "value" in value
+  );
+}
+
+function isParsedPreferenceSortLike(value: unknown): value is ParsedPreferenceSortLike {
+  return (
+    isRecord(value) &&
+    typeof value.field === "string" &&
+    (value.direction === "asc" || value.direction === "desc") &&
+    typeof value.strength === "string"
+  );
+}
+
+function isParsedPreferencesLike(value: unknown): value is ParsedPreferencesLike {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.filters) &&
+    value.filters.every(isParsedPreferenceFilterLike) &&
+    Array.isArray(value.priority_groups) &&
+    Array.isArray(value.sort_preferences) &&
+    value.sort_preferences.every(isParsedPreferenceSortLike) &&
+    Array.isArray(value.tradeoffs) &&
+    Array.isArray(value.unknown_clauses) &&
+    (value.scoped_preferences === undefined || Array.isArray(value.scoped_preferences))
+  );
+}
+
+function toRankedCrewLike(crew: PromptDebugRankedCrewLike): RankedCrewLike {
+  return crew as RankedCrewLike;
 }
 
 function valuesEqual(
@@ -73,7 +137,7 @@ function hhmmToMinutes(value?: string | null) {
   return hours * 60 + minutes;
 }
 
-function getDisplayedDayTimeRange(day: any) {
+function getDisplayedDayTimeRange(day: DayLike) {
   const jobStart =
     typeof day?.job_detail?.on_duty === "string" ? day.job_detail.on_duty : null;
   const jobFinish =
@@ -92,7 +156,7 @@ function getDisplayedDayTimeRange(day: any) {
   };
 }
 
-function isOvernightDisplayedDay(day: any) {
+function isOvernightDisplayedDay(day: DayLike) {
   const { onDuty, offDuty } = getDisplayedDayTimeRange(day);
   const startMinutes = hhmmToMinutes(onDuty);
   const finishMinutes = hhmmToMinutes(offDuty);
@@ -101,7 +165,7 @@ function isOvernightDisplayedDay(day: any) {
   return finishMinutes < startMinutes;
 }
 
-function getDayFinishMinutes(day: any) {
+function getDayFinishMinutes(day: DayLike) {
   const { onDuty, offDuty } = getDisplayedDayTimeRange(day);
   const startMinutes = hhmmToMinutes(onDuty);
   let finishMinutes = hhmmToMinutes(offDuty);
@@ -115,7 +179,7 @@ function getDayFinishMinutes(day: any) {
 }
 
 function evaluateFinishFilterForDay(
-  day: any,
+  day: DayLike,
   filter: ParsedPreferenceFilterLike
 ) {
   if (filter.field !== "off_duty" || typeof filter.value !== "string") {
@@ -174,7 +238,7 @@ function evaluateFinishFilterForDay(
 }
 
 function getWorkedDays(crew: RankedCrewLike) {
-  return (crew.daily ?? []).filter((day: any) => !day?.is_day_off);
+  return (crew.daily ?? []).filter((day) => !day?.is_day_off);
 }
 
 function hasSplitTimeValue(value: unknown) {
@@ -266,20 +330,6 @@ function getDaysOffCount(crew: RankedCrewLike) {
     return getCrewDaysOffList(crew).length;
   }
   return crew.days_off_list?.length ?? 0;
-}
-
-function getRepresentativeJobValue(
-  crew: RankedCrewLike,
-  field: "on_duty" | "off_duty"
-) {
-  const firstWorkedDay = (crew.daily ?? []).find((day: any) => !day?.is_day_off);
-  const detail = firstWorkedDay?.job_detail ?? crew.job_details?.[0] ?? null;
-
-  if (field === "on_duty") {
-    return detail?.on_duty ?? firstWorkedDay?.on_duty ?? null;
-  }
-
-  return detail?.off_duty ?? firstWorkedDay?.off_duty ?? null;
 }
 
 function evaluateHardFilterOnCrew(
@@ -474,16 +524,18 @@ function evaluateHardFilterOnCrew(
 }
 
 function collectVisibleContradictionFailures(
-  result: PromptDebugResult<ParsedPreferencesLike>
+  result: PromptDebugResult,
+  parsed: ParsedPreferencesLike
 ) {
   const failures: PromptRegressionAssertionFailure[] = [];
-  const parsed = result.parsedPreferences;
 
   for (const crew of result.ranked) {
+    const inspectableCrew = toRankedCrewLike(crew);
+
     for (const filter of parsed.filters ?? []) {
       if (filter.strength !== "hard") continue;
 
-      const evaluation = evaluateHardFilterOnCrew(crew, filter);
+      const evaluation = evaluateHardFilterOnCrew(inspectableCrew, filter);
       if (!evaluation.supported) {
         failures.push({
           type: "mechanical_verification",
@@ -495,18 +547,18 @@ function collectVisibleContradictionFailures(
       if (!evaluation.passes) {
         failures.push({
           type: "mechanical_verification",
-          message: `Ranked crew ${crew.crew_number ?? crew.id} violates hard global filter ${filter.field}: ${evaluation.reason}.`,
+          message: `Ranked crew ${inspectableCrew.crew_number ?? inspectableCrew.id} violates hard global filter ${filter.field}: ${evaluation.reason}.`,
         });
       }
     }
 
-    const scoped = getScopedPreference(parsed, crew.terminal);
+    const scoped = getScopedPreference(parsed, inspectableCrew.terminal);
     if (!scoped) continue;
 
     for (const filter of scoped.filters ?? []) {
       if (filter.strength !== "hard") continue;
 
-      const evaluation = evaluateHardFilterOnCrew(crew, filter);
+      const evaluation = evaluateHardFilterOnCrew(inspectableCrew, filter);
       if (!evaluation.supported) {
         failures.push({
           type: "mechanical_verification",
@@ -518,25 +570,25 @@ function collectVisibleContradictionFailures(
       if (!evaluation.passes) {
         failures.push({
           type: "mechanical_verification",
-          message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} violates hard scoped filter ${filter.field}: ${evaluation.reason}.`,
+          message: `Ranked crew ${inspectableCrew.crew_number ?? inspectableCrew.id} at ${inspectableCrew.terminal} violates hard scoped filter ${filter.field}: ${evaluation.reason}.`,
         });
       }
     }
 
-    if (scoped.requires_weekends_off && crew.works_weekends) {
+    if (scoped.requires_weekends_off && inspectableCrew.works_weekends) {
       failures.push({
         type: "mechanical_verification",
-        message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} violates weekends-off-only scoped rule.`,
+        message: `Ranked crew ${inspectableCrew.crew_number ?? inspectableCrew.id} at ${inspectableCrew.terminal} violates weekends-off-only scoped rule.`,
       });
     }
 
     if ((scoped.required_days_off ?? []).length > 0) {
-      const daysOff = new Set(getCrewDaysOffList(crew).map((day) => day.trim().toLowerCase()));
+      const daysOff = new Set(getCrewDaysOffList(inspectableCrew).map((day) => day.trim().toLowerCase()));
       const missing = scoped.required_days_off.filter((day) => !daysOff.has(day.trim().toLowerCase()));
       if (missing.length > 0) {
         failures.push({
           type: "mechanical_verification",
-          message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} is missing required days off: ${missing.join(", ")}.`,
+          message: `Ranked crew ${inspectableCrew.crew_number ?? inspectableCrew.id} at ${inspectableCrew.terminal} is missing required days off: ${missing.join(", ")}.`,
         });
       }
     }
@@ -547,11 +599,10 @@ function collectVisibleContradictionFailures(
 
 function evaluateAssertion(
   assertion: PromptRegressionAssertion,
-  result: PromptDebugResult<ParsedPreferencesLike>,
-  summary: PromptDebugSummary
+  result: PromptDebugResult,
+  summary: PromptDebugSummary,
+  parsed: ParsedPreferencesLike
 ): PromptRegressionAssertionFailure | null {
-  const parsed = result.parsedPreferences;
-
   if (assertion.type === "no_priority_violations") {
     return summary.priorityViolationsCount === 0
       ? null
@@ -562,7 +613,7 @@ function evaluateAssertion(
   }
 
   if (assertion.type === "no_visible_contradictions") {
-    const failures = collectVisibleContradictionFailures(result);
+    const failures = collectVisibleContradictionFailures(result, parsed);
     return failures.length === 0
       ? null
       : {
@@ -790,15 +841,26 @@ function evaluateAssertion(
 
 export function evaluatePromptRegressionAssertions(
   regressionCase: PromptRegressionCase,
-  result: PromptDebugResult<ParsedPreferencesLike>,
+  result: PromptDebugResult,
   summary: PromptDebugSummary
 ): PromptRegressionAssertionFailure[] {
+  if (!isParsedPreferencesLike(result.parsedPreferences)) {
+    return [
+      {
+        type: "mechanical_verification",
+        message:
+          "Regression assertions could not run because parsedPreferences did not match the inspectable debug shape.",
+      },
+    ];
+  }
+
+  const parsed = result.parsedPreferences;
   const failures: PromptRegressionAssertionFailure[] = [
-    ...collectVisibleContradictionFailures(result),
+    ...collectVisibleContradictionFailures(result, parsed),
   ];
 
   for (const assertion of regressionCase.assertions ?? []) {
-    const failure = evaluateAssertion(assertion, result, summary);
+    const failure = evaluateAssertion(assertion, result, summary, parsed);
     if (failure) {
       failures.push(failure);
     }
