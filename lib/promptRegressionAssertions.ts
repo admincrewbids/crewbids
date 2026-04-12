@@ -195,6 +195,7 @@ function getSortableFieldValue(
     | "van_hours_daily"
     | "overtime_hours_weekly"
     | "total_paid_hours_weekly"
+    | "three_day_off_jobs"
 ) {
   const representativeDay = getRepresentativeWorkedDay(crew);
   const representativeDetail =
@@ -228,6 +229,10 @@ function getSortableFieldValue(
   if (field === "total_paid_hours_weekly") {
     const value = Number(crew.total_paid_hours_weekly);
     return Number.isFinite(value) ? value : null;
+  }
+
+  if (field === "three_day_off_jobs") {
+    return getDaysOffCount(crew) === 3 ? 1 : 0;
   }
 
   return null;
@@ -772,6 +777,106 @@ function evaluateScopedRankOrderRespectsSortAssertion(
   return null;
 }
 
+function evaluateScopedTerminalSuppressesGlobalSortAssertion(
+  result: PromptDebugResult,
+  terminal: string,
+  suppressedGlobalSort: {
+    field:
+      | "on_duty"
+      | "off_duty"
+      | "operating_hours_daily"
+      | "van_hours_daily"
+      | "overtime_hours_weekly"
+      | "total_paid_hours_weekly"
+      | "three_day_off_jobs";
+    direction: "asc" | "desc";
+  },
+  enforcedScopedSorts: Array<{
+    field:
+      | "on_duty"
+      | "off_duty"
+      | "operating_hours_daily"
+      | "van_hours_daily"
+      | "overtime_hours_weekly"
+      | "total_paid_hours_weekly";
+    direction: "asc" | "desc";
+  }>,
+  mode: "consecutive_pair_evidence",
+  requireAtLeastComparablePairs: number
+): PromptRegressionAssertionFailure | null {
+  if (mode !== "consecutive_pair_evidence") {
+    return {
+      type: "scoped_terminal_suppresses_global_sort",
+      message: `Unsupported scoped override mode ${mode}.`,
+    };
+  }
+
+  const scopedCrews = result.ranked
+    .map((crew) => toRankedCrewLike(crew))
+    .filter((crew) => normalizeTerminalLabel(crew.terminal) === normalizeTerminalLabel(terminal));
+
+  let overrideEvidencePairs = 0;
+
+  for (let index = 0; index < scopedCrews.length - 1; index += 1) {
+    const currentCrew = scopedCrews[index];
+    const nextCrew = scopedCrews[index + 1];
+    const currentSuppressedValue = getSortableFieldValue(
+      currentCrew,
+      suppressedGlobalSort.field
+    );
+    const nextSuppressedValue = getSortableFieldValue(
+      nextCrew,
+      suppressedGlobalSort.field
+    );
+
+    if (currentSuppressedValue == null || nextSuppressedValue == null) continue;
+    if (currentSuppressedValue === nextSuppressedValue) continue;
+
+    const respectsSuppressedGlobalSort =
+      suppressedGlobalSort.direction === "asc"
+        ? currentSuppressedValue <= nextSuppressedValue
+        : currentSuppressedValue >= nextSuppressedValue;
+
+    let respectsAtLeastOneScopedSort = false;
+    let hasComparableScopedSort = false;
+
+    for (const scopedSort of enforcedScopedSorts) {
+      const currentScopedValue = getSortableFieldValue(currentCrew, scopedSort.field);
+      const nextScopedValue = getSortableFieldValue(nextCrew, scopedSort.field);
+
+      if (currentScopedValue == null || nextScopedValue == null) continue;
+      if (currentScopedValue === nextScopedValue) continue;
+
+      hasComparableScopedSort = true;
+
+      const respectsScopedSort =
+        scopedSort.direction === "asc"
+          ? currentScopedValue <= nextScopedValue
+          : currentScopedValue >= nextScopedValue;
+
+      if (respectsScopedSort) {
+        respectsAtLeastOneScopedSort = true;
+        break;
+      }
+    }
+
+    if (!hasComparableScopedSort) continue;
+
+    if (!respectsSuppressedGlobalSort && respectsAtLeastOneScopedSort) {
+      overrideEvidencePairs += 1;
+    }
+  }
+
+  if (overrideEvidencePairs < requireAtLeastComparablePairs) {
+    return {
+      type: "scoped_terminal_suppresses_global_sort",
+      message: `Within ${terminal}, only ${overrideEvidencePairs} override-evidence pair(s) were found showing scoped sorts suppressing global ${suppressedGlobalSort.field} ${suppressedGlobalSort.direction}; expected at least ${requireAtLeastComparablePairs}.`,
+    };
+  }
+
+  return null;
+}
+
 function evaluateAssertion(
   assertion: PromptRegressionAssertion,
   result: PromptDebugResult,
@@ -1027,6 +1132,17 @@ function evaluateAssertion(
       assertion.value.field,
       assertion.value.direction,
       assertion.value.mode ?? "pairwise_consecutive_distinct",
+      assertion.value.requireAtLeastComparablePairs ?? 1
+    );
+  }
+
+  if (assertion.type === "scoped_terminal_suppresses_global_sort") {
+    return evaluateScopedTerminalSuppressesGlobalSortAssertion(
+      result,
+      assertion.value.terminal,
+      assertion.value.suppressedGlobalSort,
+      assertion.value.enforcedScopedSorts,
+      assertion.value.mode ?? "consecutive_pair_evidence",
       assertion.value.requireAtLeastComparablePairs ?? 1
     );
   }

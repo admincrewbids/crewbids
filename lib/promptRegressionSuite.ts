@@ -118,6 +118,35 @@ export type PromptRegressionAssertion =
         mode?: "pairwise_consecutive_distinct";
         requireAtLeastComparablePairs?: number;
       };
+    }
+  | {
+      type: "scoped_terminal_suppresses_global_sort";
+      value: {
+        terminal: string;
+        suppressedGlobalSort: {
+          field:
+            | "on_duty"
+            | "off_duty"
+            | "operating_hours_daily"
+            | "van_hours_daily"
+            | "overtime_hours_weekly"
+            | "total_paid_hours_weekly"
+            | "three_day_off_jobs";
+          direction: "asc" | "desc";
+        };
+        enforcedScopedSorts: Array<{
+          field:
+            | "on_duty"
+            | "off_duty"
+            | "operating_hours_daily"
+            | "van_hours_daily"
+            | "overtime_hours_weekly"
+            | "total_paid_hours_weekly";
+          direction: "asc" | "desc";
+        }>;
+        requireAtLeastComparablePairs?: number;
+        mode?: "consecutive_pair_evidence";
+      };
     };
 
 export type PromptRegressionCase = {
@@ -402,6 +431,84 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           operator: "=",
           value: "none",
           strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-three-day-off-first-except-not-at-willowbrook",
+    label:
+      "3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.",
+    prompt:
+      "3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "three_day_off_jobs",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Willowbrook",
+          sort: {
+            field: "overtime_hours_weekly",
+            direction: "desc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Willowbrook",
+          sort: {
+            field: "on_duty",
+            direction: "desc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Willowbrook",
+          field: "overtime_hours_weekly",
+          direction: "desc",
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Willowbrook",
+          field: "on_duty",
+          direction: "desc",
+        },
+      },
+      {
+        type: "scoped_terminal_suppresses_global_sort",
+        value: {
+          terminal: "Willowbrook",
+          suppressedGlobalSort: {
+            field: "three_day_off_jobs",
+            direction: "desc",
+          },
+          enforcedScopedSorts: [
+            {
+              field: "overtime_hours_weekly",
+              direction: "desc",
+            },
+            {
+              field: "on_duty",
+              direction: "desc",
+            },
+          ],
         },
       },
       {
