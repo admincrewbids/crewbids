@@ -1,39 +1,573 @@
-import type {
-  PromptDebugResult,
-  PromptDebugSummary,
-} from "./promptDebug";
+import type { PromptDebugResult, PromptDebugSummary } from "./promptDebug";
 import type {
   PromptRegressionAssertion,
   PromptRegressionCase,
+  PromptRegressionFilterExpectation,
+  PromptRegressionSortExpectation,
 } from "./promptRegressionSuite";
+import type {
+  ParsedPreferenceFilterLike,
+  ParsedPreferenceSortLike,
+  ParsedPreferencesLike,
+  ScopedPreferenceLike,
+} from "./promptRuleAnalysis";
 
 export type PromptRegressionAssertionFailure = {
-  type: PromptRegressionAssertion["type"];
+  type: PromptRegressionAssertion["type"] | "mechanical_verification";
   message: string;
 };
 
-function normalizeTerminalLabel(value: string) {
-  return value.trim().toLowerCase();
+type RankedCrewLike = PromptDebugResult<ParsedPreferencesLike>["ranked"][number];
+type ExcludedCrewLike = PromptDebugResult<ParsedPreferencesLike>["excluded"][number];
+
+function normalizeTerminalLabel(value: string | undefined) {
+  return String(value ?? "").trim().toLowerCase();
 }
 
-function hhmmToMinutes(value?: string) {
+function valuesEqual(
+  left: string | number | boolean | string[] | undefined,
+  right: string | number | boolean | string[] | undefined
+) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function matchesFilterExpectation(
+  filter: ParsedPreferenceFilterLike,
+  expected: PromptRegressionFilterExpectation
+) {
+  if (filter.field !== expected.field) return false;
+  if (expected.operator != null && filter.operator !== expected.operator) return false;
+  if (expected.strength != null && filter.strength !== expected.strength) return false;
+  if (expected.value !== undefined && !valuesEqual(filter.value, expected.value)) {
+    return false;
+  }
+  return true;
+}
+
+function matchesSortExpectation(
+  sort: ParsedPreferenceSortLike,
+  expected: PromptRegressionSortExpectation
+) {
+  if (sort.field !== expected.field) return false;
+  if (sort.direction !== expected.direction) return false;
+  if (expected.strength != null && sort.strength !== expected.strength) return false;
+  return true;
+}
+
+function getScopedPreference(
+  parsed: ParsedPreferencesLike,
+  terminal: string
+) {
+  const normalized = normalizeTerminalLabel(terminal);
+  return (parsed.scoped_preferences ?? []).find(
+    (scope) =>
+      normalizeTerminalLabel(scope.normalized_terminal) === normalized ||
+      normalizeTerminalLabel(scope.terminal) === normalized
+  );
+}
+
+function hhmmToMinutes(value?: string | null) {
   if (!value || !value.includes(":")) return null;
   const [hours, minutes] = value.split(":").map(Number);
   if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
   return hours * 60 + minutes;
 }
 
+function getDisplayedDayTimeRange(day: any) {
+  const jobStart =
+    typeof day?.job_detail?.on_duty === "string" ? day.job_detail.on_duty : null;
+  const jobFinish =
+    typeof day?.job_detail?.off_duty === "string" ? day.job_detail.off_duty : null;
+
+  if (jobStart || jobFinish) {
+    return {
+      onDuty: jobStart,
+      offDuty: jobFinish,
+    };
+  }
+
+  return {
+    onDuty: typeof day?.on_duty === "string" ? day.on_duty : null,
+    offDuty: typeof day?.off_duty === "string" ? day.off_duty : null,
+  };
+}
+
+function isOvernightDisplayedDay(day: any) {
+  const { onDuty, offDuty } = getDisplayedDayTimeRange(day);
+  const startMinutes = hhmmToMinutes(onDuty);
+  const finishMinutes = hhmmToMinutes(offDuty);
+
+  if (startMinutes == null || finishMinutes == null) return false;
+  return finishMinutes < startMinutes;
+}
+
+function getDayFinishMinutes(day: any) {
+  const { onDuty, offDuty } = getDisplayedDayTimeRange(day);
+  const startMinutes = hhmmToMinutes(onDuty);
+  let finishMinutes = hhmmToMinutes(offDuty);
+
+  if (finishMinutes == null) return null;
+  if (startMinutes != null && finishMinutes < startMinutes) {
+    finishMinutes += 24 * 60;
+  }
+
+  return finishMinutes;
+}
+
+function evaluateFinishFilterForDay(
+  day: any,
+  filter: ParsedPreferenceFilterLike
+) {
+  if (filter.field !== "off_duty" || typeof filter.value !== "string") {
+    return null;
+  }
+
+  const { offDuty } = getDisplayedDayTimeRange(day);
+  const finish = getDayFinishMinutes(day);
+  const rawFilterMinutes = hhmmToMinutes(filter.value);
+  const isOvernight = isOvernightDisplayedDay(day);
+  const isEarlyMorningCutoff =
+    rawFilterMinutes != null && rawFilterMinutes < 12 * 60;
+
+  if (finish == null || rawFilterMinutes == null) {
+    return {
+      passes: false,
+      displayedFinish: offDuty,
+      reason: "missing finish-time details",
+    };
+  }
+
+  let comparableFilter = rawFilterMinutes;
+
+  if (isEarlyMorningCutoff) {
+    if (!isOvernight && (filter.operator === "<=" || filter.operator === "<")) {
+      return {
+        passes: true,
+        displayedFinish: offDuty,
+      };
+    }
+
+    if (isOvernight) {
+      comparableFilter += 24 * 60;
+    }
+  } else if (isOvernight && comparableFilter < finish) {
+    comparableFilter += 24 * 60;
+  }
+
+  if (filter.operator === ">=" && finish < comparableFilter) {
+    return { passes: false, displayedFinish: offDuty, reason: `finishes before ${filter.value}` };
+  }
+
+  if (filter.operator === ">" && finish <= comparableFilter) {
+    return { passes: false, displayedFinish: offDuty, reason: `finishes at or before ${filter.value}` };
+  }
+
+  if (filter.operator === "<=" && finish > comparableFilter) {
+    return { passes: false, displayedFinish: offDuty, reason: `finishes after ${filter.value}` };
+  }
+
+  if (filter.operator === "<" && finish >= comparableFilter) {
+    return { passes: false, displayedFinish: offDuty, reason: `finishes at or after ${filter.value}` };
+  }
+
+  return { passes: true, displayedFinish: offDuty };
+}
+
+function getWorkedDays(crew: RankedCrewLike) {
+  return (crew.daily ?? []).filter((day: any) => !day?.is_day_off);
+}
+
+function hasSplitTimeValue(value: unknown) {
+  if (typeof value !== "string") return false;
+  const cleaned = value.trim();
+  if (!cleaned || cleaned === "-" || cleaned === "00:00") return false;
+  return cleaned !== "0:00";
+}
+
+function hasShuttleBusValue(value: unknown) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    return (
+      /shuttle\s*bus/i.test(value) ||
+      /^shuttle\b/im.test(value) ||
+      /\bshuttle\b.*\b\d{1,2}:\d{2}\b/i.test(value)
+    );
+  }
+  return false;
+}
+
+function crewHasShuttleBus(crew: RankedCrewLike) {
+  for (const day of crew.daily ?? []) {
+    if (day?.is_day_off) continue;
+    if (
+      hasShuttleBusValue(day?.job_detail?.has_shuttle_bus) ||
+      hasShuttleBusValue(day?.job_detail?.raw_text)
+    ) {
+      return true;
+    }
+  }
+
+  for (const detail of crew.job_details ?? []) {
+    if (
+      hasShuttleBusValue(detail?.has_shuttle_bus) ||
+      hasShuttleBusValue(detail?.raw_text)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getCrewNumber(crew: RankedCrewLike) {
+  return String(crew.crew_number ?? crew.id ?? "").trim();
+}
+
+function isStandbyCrew(crew: RankedCrewLike) {
+  return normalizeTerminalLabel(crew.terminal) === "standby" || crew.is_two_week_stby === true;
+}
+
+function isSpareboardCrew(crew: RankedCrewLike) {
+  return /^3\d{3}$/.test(getCrewNumber(crew));
+}
+
+function isUpCrew(crew: RankedCrewLike) {
+  return getCrewNumber(crew).startsWith("5");
+}
+
+function getCrewDaysOffList(crew: RankedCrewLike) {
+  if (crew.is_two_week_stby) {
+    return [
+      ...(crew.week1?.days_off_list ?? []),
+      ...(crew.week2?.days_off_list ?? []),
+    ];
+  }
+
+  return crew.days_off_list ?? [];
+}
+
+function getWeekdayDaysOffCount(crew: RankedCrewLike) {
+  return getCrewDaysOffList(crew).filter((day) => {
+    const normalized = day.trim().toLowerCase();
+    return !["sat", "saturday", "sun", "sunday"].includes(normalized);
+  }).length;
+}
+
+function hasWeekendDaysOff(crew: RankedCrewLike) {
+  return getCrewDaysOffList(crew).some((day) => {
+    const normalized = day.trim().toLowerCase();
+    return ["sat", "saturday", "sun", "sunday"].includes(normalized);
+  });
+}
+
+function getDaysOffCount(crew: RankedCrewLike) {
+  if (typeof crew.days_off_count === "number") return crew.days_off_count;
+  if (crew.is_two_week_stby) {
+    return getCrewDaysOffList(crew).length;
+  }
+  return crew.days_off_list?.length ?? 0;
+}
+
+function getRepresentativeJobValue(
+  crew: RankedCrewLike,
+  field: "on_duty" | "off_duty"
+) {
+  const firstWorkedDay = (crew.daily ?? []).find((day: any) => !day?.is_day_off);
+  const detail = firstWorkedDay?.job_detail ?? crew.job_details?.[0] ?? null;
+
+  if (field === "on_duty") {
+    return detail?.on_duty ?? firstWorkedDay?.on_duty ?? null;
+  }
+
+  return detail?.off_duty ?? firstWorkedDay?.off_duty ?? null;
+}
+
+function evaluateHardFilterOnCrew(
+  crew: RankedCrewLike,
+  filter: ParsedPreferenceFilterLike
+) {
+  const workedDays = getWorkedDays(crew);
+
+  if (filter.field === "terminal") {
+    if (!Array.isArray(filter.value)) {
+      return { supported: false, passes: false, reason: `terminal filter has unsupported value` };
+    }
+
+    const normalizedCrewTerminal = normalizeTerminalLabel(crew.terminal);
+    const normalizedValues = filter.value.map((value) => normalizeTerminalLabel(String(value)));
+
+    const matchesSpecialValue = normalizedValues.some((value) => {
+      if (value === "standby") return isStandbyCrew(crew);
+      if (value === "spareboard") return isSpareboardCrew(crew);
+      return value === normalizedCrewTerminal;
+    });
+
+    if (filter.operator === "in") {
+      return {
+        supported: true,
+        passes: matchesSpecialValue,
+        reason: `terminal ${crew.terminal} is outside allowed set`,
+      };
+    }
+
+    if (filter.operator === "not_in") {
+      return {
+        supported: true,
+        passes: !matchesSpecialValue,
+        reason: `terminal ${crew.terminal} is explicitly excluded`,
+      };
+    }
+  }
+
+  if (filter.field === "include_only_spareboard_crews" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: isSpareboardCrew(crew),
+      reason: "crew is not spareboard",
+    };
+  }
+
+  if (filter.field === "include_only_standby_crews" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: isStandbyCrew(crew),
+      reason: "crew is not standby",
+    };
+  }
+
+  if (filter.field === "exclude_spareboard_crews" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: !isSpareboardCrew(crew),
+      reason: "crew is spareboard",
+    };
+  }
+
+  if (filter.field === "exclude_up_crews" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: !isUpCrew(crew),
+      reason: "crew is UP",
+    };
+  }
+
+  if (filter.field === "on_duty" && typeof filter.value === "string") {
+    const filterTime = hhmmToMinutes(filter.value);
+    if (filterTime == null) {
+      return { supported: false, passes: false, reason: "invalid on_duty filter value" };
+    }
+
+    for (const day of workedDays) {
+      const start = hhmmToMinutes(getDisplayedDayTimeRange(day).onDuty);
+      if (start == null) {
+        return { supported: false, passes: false, reason: "missing start-time details" };
+      }
+
+      if (filter.operator === ">=" && start < filterTime) {
+        return { supported: true, passes: false, reason: `${day.day} starts before ${filter.value}` };
+      }
+      if (filter.operator === ">" && start <= filterTime) {
+        return { supported: true, passes: false, reason: `${day.day} starts at or before ${filter.value}` };
+      }
+      if (filter.operator === "<=" && start > filterTime) {
+        return { supported: true, passes: false, reason: `${day.day} starts after ${filter.value}` };
+      }
+      if (filter.operator === "<" && start >= filterTime) {
+        return { supported: true, passes: false, reason: `${day.day} starts at or after ${filter.value}` };
+      }
+    }
+
+    return { supported: true, passes: true, reason: "" };
+  }
+
+  if (filter.field === "off_duty" && typeof filter.value === "string") {
+    for (const day of workedDays) {
+      const evaluation = evaluateFinishFilterForDay(day, filter);
+      if (!evaluation) {
+        return { supported: false, passes: false, reason: "finish filter could not be evaluated" };
+      }
+
+      if (!evaluation.passes) {
+        return {
+          supported: true,
+          passes: false,
+          reason: `${day.day} ${evaluation.reason}${evaluation.displayedFinish ? ` (${evaluation.displayedFinish})` : ""}`,
+        };
+      }
+    }
+
+    return { supported: true, passes: true, reason: "" };
+  }
+
+  if (filter.field === "split_time" && filter.operator === "=" && filter.value === "none") {
+    return {
+      supported: true,
+      passes: !hasSplitTimeValue(crew.split_time_weekly),
+      reason: "crew has split time",
+    };
+  }
+
+  if (filter.field === "shuttle_bus" && filter.operator === "=") {
+    const hasShuttle = crewHasShuttleBus(crew);
+    if (filter.value === false) {
+      return {
+        supported: true,
+        passes: !hasShuttle,
+        reason: "crew contains shuttle work",
+      };
+    }
+
+    if (filter.value === true) {
+      return {
+        supported: true,
+        passes: hasShuttle,
+        reason: "crew does not contain shuttle work",
+      };
+    }
+  }
+
+  if (filter.field === "weekday_days_off_count" && filter.operator === "=" && typeof filter.value === "number") {
+    return {
+      supported: true,
+      passes: getWeekdayDaysOffCount(crew) === filter.value,
+      reason: `crew has ${getWeekdayDaysOffCount(crew)} weekdays off instead of ${filter.value}`,
+    };
+  }
+
+  if (filter.field === "weekend_days_off" && filter.operator === "=" && filter.value === false) {
+    return {
+      supported: true,
+      passes: !hasWeekendDaysOff(crew),
+      reason: "crew has weekend days off",
+    };
+  }
+
+  if (filter.field === "weekends_off_hard" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: crew.works_weekends === false,
+      reason: "crew works weekends",
+    };
+  }
+
+  if (filter.field === "include_only_three_day_off_jobs" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: getDaysOffCount(crew) === 3,
+      reason: `crew has ${getDaysOffCount(crew)} days off instead of 3`,
+    };
+  }
+
+  if (filter.field === "exclude_three_day_off_jobs" && filter.operator === "=" && filter.value === true) {
+    return {
+      supported: true,
+      passes: getDaysOffCount(crew) !== 3,
+      reason: "crew is a 3-day-off job",
+    };
+  }
+
+  return {
+    supported: false,
+    passes: false,
+    reason: `unsupported hard filter field ${filter.field}`,
+  };
+}
+
+function collectVisibleContradictionFailures(
+  result: PromptDebugResult<ParsedPreferencesLike>
+) {
+  const failures: PromptRegressionAssertionFailure[] = [];
+  const parsed = result.parsedPreferences;
+
+  for (const crew of result.ranked) {
+    for (const filter of parsed.filters ?? []) {
+      if (filter.strength !== "hard") continue;
+
+      const evaluation = evaluateHardFilterOnCrew(crew, filter);
+      if (!evaluation.supported) {
+        failures.push({
+          type: "mechanical_verification",
+          message: `Cannot mechanically verify hard global filter ${filter.field} ${filter.operator}.`,
+        });
+        continue;
+      }
+
+      if (!evaluation.passes) {
+        failures.push({
+          type: "mechanical_verification",
+          message: `Ranked crew ${crew.crew_number ?? crew.id} violates hard global filter ${filter.field}: ${evaluation.reason}.`,
+        });
+      }
+    }
+
+    const scoped = getScopedPreference(parsed, crew.terminal);
+    if (!scoped) continue;
+
+    for (const filter of scoped.filters ?? []) {
+      if (filter.strength !== "hard") continue;
+
+      const evaluation = evaluateHardFilterOnCrew(crew, filter);
+      if (!evaluation.supported) {
+        failures.push({
+          type: "mechanical_verification",
+          message: `Cannot mechanically verify hard scoped filter ${filter.field} ${filter.operator} for ${scoped.terminal}.`,
+        });
+        continue;
+      }
+
+      if (!evaluation.passes) {
+        failures.push({
+          type: "mechanical_verification",
+          message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} violates hard scoped filter ${filter.field}: ${evaluation.reason}.`,
+        });
+      }
+    }
+
+    if (scoped.requires_weekends_off && crew.works_weekends) {
+      failures.push({
+        type: "mechanical_verification",
+        message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} violates weekends-off-only scoped rule.`,
+      });
+    }
+
+    if ((scoped.required_days_off ?? []).length > 0) {
+      const daysOff = new Set(getCrewDaysOffList(crew).map((day) => day.trim().toLowerCase()));
+      const missing = scoped.required_days_off.filter((day) => !daysOff.has(day.trim().toLowerCase()));
+      if (missing.length > 0) {
+        failures.push({
+          type: "mechanical_verification",
+          message: `Ranked crew ${crew.crew_number ?? crew.id} at ${crew.terminal} is missing required days off: ${missing.join(", ")}.`,
+        });
+      }
+    }
+  }
+
+  return failures;
+}
+
 function evaluateAssertion(
   assertion: PromptRegressionAssertion,
-  result: PromptDebugResult,
+  result: PromptDebugResult<ParsedPreferencesLike>,
   summary: PromptDebugSummary
 ): PromptRegressionAssertionFailure | null {
+  const parsed = result.parsedPreferences;
+
   if (assertion.type === "no_priority_violations") {
     return summary.priorityViolationsCount === 0
       ? null
       : {
           type: assertion.type,
           message: `Expected no priority violations but found ${summary.priorityViolationsCount}.`,
+        };
+  }
+
+  if (assertion.type === "no_visible_contradictions") {
+    const failures = collectVisibleContradictionFailures(result);
+    return failures.length === 0
+      ? null
+      : {
+          type: assertion.type,
+          message: failures.map((failure) => failure.message).join(" "),
         };
   }
 
@@ -46,35 +580,102 @@ function evaluateAssertion(
         };
   }
 
-  if (assertion.type === "normalized_prompt_includes") {
-    const normalizedPrompt = (
-      result.normalizedPrompt ?? result.prompt
-    ).toLowerCase();
-    const missing = assertion.value.filter(
-      (fragment) => !normalizedPrompt.includes(fragment.toLowerCase())
+  if (assertion.type === "parsed_priority_order_exact") {
+    const actual = (parsed.priority_groups ?? [])
+      .sort((left, right) => left.rank - right.rank)
+      .map((group) => {
+        const terminalCondition = group.conditions.find(
+          (condition) => condition.field === "terminal"
+        );
+        return normalizeTerminalLabel(String(terminalCondition?.value ?? ""));
+      })
+      .filter(Boolean);
+    const expected = assertion.value.map(normalizeTerminalLabel);
+
+    return valuesEqual(actual, expected)
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected parsed terminal priority order ${assertion.value.join(", ")} but found ${actual.join(", ")}.`,
+        };
+  }
+
+  if (assertion.type === "parsed_global_filter_present") {
+    const found = (parsed.filters ?? []).some((filter) =>
+      matchesFilterExpectation(filter, assertion.value)
     );
-
-    return missing.length === 0
+    return found
       ? null
       : {
           type: assertion.type,
-          message: `Normalized prompt is missing: ${missing.join(", ")}.`,
+          message: `Expected global filter ${assertion.value.field} to be present.`,
         };
   }
 
-  if (assertion.type === "top_ranked_terminal") {
-    const actualTerminal = summary.topRanked[0]?.terminal;
-    return actualTerminal &&
-      normalizeTerminalLabel(actualTerminal) ===
-        normalizeTerminalLabel(assertion.value)
+  if (assertion.type === "parsed_global_filter_absent") {
+    const found = (parsed.filters ?? []).some((filter) =>
+      matchesFilterExpectation(filter, assertion.value)
+    );
+    return !found
       ? null
       : {
           type: assertion.type,
-          message: `Expected top ranked terminal ${assertion.value} but found ${actualTerminal ?? "none"}.`,
+          message: `Expected global filter ${assertion.value.field} to be absent.`,
         };
   }
 
-  if (assertion.type === "allowed_terminals_only") {
+  if (assertion.type === "parsed_scoped_filter_present") {
+    const scoped = getScopedPreference(parsed, assertion.value.terminal);
+    const found = (scoped?.filters ?? []).some((filter) =>
+      matchesFilterExpectation(filter, assertion.value.filter)
+    );
+    return found
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected scoped filter ${assertion.value.filter.field} to be present for ${assertion.value.terminal}.`,
+        };
+  }
+
+  if (assertion.type === "parsed_scoped_filter_absent") {
+    const scoped = getScopedPreference(parsed, assertion.value.terminal);
+    const found = (scoped?.filters ?? []).some((filter) =>
+      matchesFilterExpectation(filter, assertion.value.filter)
+    );
+    return !found
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected scoped filter ${assertion.value.filter.field} to be absent for ${assertion.value.terminal}.`,
+        };
+  }
+
+  if (assertion.type === "parsed_global_sort_present") {
+    const found = (parsed.sort_preferences ?? []).some((sort) =>
+      matchesSortExpectation(sort, assertion.value)
+    );
+    return found
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected global sort ${assertion.value.field} ${assertion.value.direction} to be present.`,
+        };
+  }
+
+  if (assertion.type === "parsed_scoped_sort_present") {
+    const scoped = getScopedPreference(parsed, assertion.value.terminal);
+    const found = (scoped?.sort_preferences ?? []).some((sort) =>
+      matchesSortExpectation(sort, assertion.value.sort)
+    );
+    return found
+      ? null
+      : {
+          type: assertion.type,
+          message: `Expected scoped sort ${assertion.value.sort.field} ${assertion.value.sort.direction} for ${assertion.value.terminal}.`,
+        };
+  }
+
+  if (assertion.type === "ranked_terminals_only") {
     const allowed = new Set(assertion.value.map(normalizeTerminalLabel));
     const disallowed = result.ranked
       .map((crew) => crew.terminal)
@@ -84,81 +685,103 @@ function evaluateAssertion(
       ? null
       : {
           type: assertion.type,
-          message: `Found ranked crews outside the allowed terminals: ${Array.from(
-            new Set(disallowed)
-          ).join(", ")}.`,
+          message: `Found ranked crews outside the allowed terminals: ${Array.from(new Set(disallowed)).join(", ")}.`,
         };
   }
 
-  if (assertion.type === "terminal_sorted_by_operating") {
-    const matchingCrews = result.ranked.filter(
-      (crew) =>
-        normalizeTerminalLabel(crew.terminal) ===
-        normalizeTerminalLabel(assertion.value.terminal)
+  if (assertion.type === "crew_ranked") {
+    const match = result.ranked.find(
+      (crew) => String(crew.id).trim() === assertion.value.crewId.trim()
     );
-
-    const sample = matchingCrews.slice(
-      0,
-      assertion.value.sampleCount ?? matchingCrews.length
-    );
-
-    if (sample.length < 2) {
+    if (!match) {
       return {
         type: assertion.type,
-        message: `Expected at least 2 ranked crews for ${assertion.value.terminal} but found ${sample.length}.`,
+        message: `Expected crew ${assertion.value.crewId} to be ranked, but it was not found.`,
       };
     }
 
-    for (let index = 1; index < sample.length; index += 1) {
-      const previous = hhmmToMinutes(sample[index - 1].operating_time_weekly);
-      const current = hhmmToMinutes(sample[index].operating_time_weekly);
-
-      if (previous == null || current == null) {
-        return {
-          type: assertion.type,
-          message: `Missing operating-time data while checking ${assertion.value.terminal} sorting.`,
-        };
-      }
-
-      const outOfOrder =
-        assertion.value.direction === "asc"
-          ? current < previous
-          : current > previous;
-
-      if (outOfOrder) {
-        return {
-          type: assertion.type,
-          message: `${assertion.value.terminal} operating order broke between crews ${
-            sample[index - 1].crew_number ?? sample[index - 1].id
-          } (${sample[index - 1].operating_time_weekly}) and ${
-            sample[index].crew_number ?? sample[index].id
-          } (${sample[index].operating_time_weekly}).`,
-        };
-      }
+    if (
+      assertion.value.terminal &&
+      normalizeTerminalLabel(match.terminal) !== normalizeTerminalLabel(assertion.value.terminal)
+    ) {
+      return {
+        type: assertion.type,
+        message: `Expected ranked crew ${assertion.value.crewId} to be at ${assertion.value.terminal}, but found ${match.terminal}.`,
+      };
     }
 
     return null;
   }
 
-  if (assertion.type === "crew_excluded_with_reason") {
+  if (assertion.type === "crew_excluded") {
     const match = result.excluded.find(
       (crew) => String(crew.id).trim() === assertion.value.crewId.trim()
     );
-
     if (!match) {
       return {
         type: assertion.type,
-        message: `Expected crew ${assertion.value.crewId} to be excluded, but it was not found in the excluded list.`,
+        message: `Expected crew ${assertion.value.crewId} to be excluded, but it was not found.`,
       };
     }
 
-    return match.reason
-      .toLowerCase()
-      .includes(assertion.value.includes.toLowerCase())
+    if (
+      assertion.value.reasonIncludes &&
+      !match.reason.toLowerCase().includes(assertion.value.reasonIncludes.toLowerCase())
+    ) {
+      return {
+        type: assertion.type,
+        message: `Expected excluded crew ${assertion.value.crewId} reason to include "${assertion.value.reasonIncludes}" but found "${match.reason}".`,
+      };
+    }
+
+    return null;
+  }
+
+  if (assertion.type === "tradeoff_present") {
+    const found = (parsed.tradeoffs ?? []).some(
+      (tradeoff) =>
+        tradeoff.type === assertion.value.type &&
+        (assertion.value.value == null || String(tradeoff.value) === assertion.value.value)
+    );
+
+    return found
       ? null
       : {
           type: assertion.type,
-          message: `Expected excluded crew ${assertion.value.crewId} reason to include "${assertion.value.includes}" but found "${match.reason}".`,
+          message: `Expected tradeoff ${assertion.value.type} to be present.`,
+        };
+  }
+
+  if (assertion.type === "avoid_is_not_hard") {
+    const normalizedTerminal = normalizeTerminalLabel(assertion.value.terminal);
+    const disallowFilters = assertion.value.disallowFilters ?? [];
+
+    const disallowedMatches = (parsed.filters ?? []).filter((filter) => {
+      if (disallowFilters.some((expected) => matchesFilterExpectation(filter, expected))) {
+        return true;
+      }
+
+      if (
+        normalizedTerminal &&
+        filter.field === "terminal" &&
+        filter.operator === "not_in" &&
+        Array.isArray(filter.value)
+      ) {
+        return filter.value.some(
+          (value) => normalizeTerminalLabel(String(value)) === normalizedTerminal
+        );
+      }
+
+      return false;
+    });
+
+    return disallowedMatches.length === 0
+      ? null
+      : {
+          type: assertion.type,
+          message: `Avoid rule became hard via filters: ${disallowedMatches
+            .map((filter) => `${filter.field} ${filter.operator}`)
+            .join(", ")}.`,
         };
   }
 
@@ -167,10 +790,12 @@ function evaluateAssertion(
 
 export function evaluatePromptRegressionAssertions(
   regressionCase: PromptRegressionCase,
-  result: PromptDebugResult,
+  result: PromptDebugResult<ParsedPreferencesLike>,
   summary: PromptDebugSummary
 ): PromptRegressionAssertionFailure[] {
-  const failures: PromptRegressionAssertionFailure[] = [];
+  const failures: PromptRegressionAssertionFailure[] = [
+    ...collectVisibleContradictionFailures(result),
+  ];
 
   for (const assertion of regressionCase.assertions ?? []) {
     const failure = evaluateAssertion(assertion, result, summary);
