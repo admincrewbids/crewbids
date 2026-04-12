@@ -951,6 +951,13 @@ function getClauseTerminal(clause: string, crews: Crew[]): string | null {
   return matches.length > 0 ? matches[0] : null;
 }
 
+function getAvoidTerminalFromClause(clause: string, crews: Crew[]): string | null {
+  const normalizedClause = clause.toLowerCase().replace(/[â€™]/g, "'");
+  if (!/\bavoid\b/i.test(normalizedClause)) return null;
+
+  return getClauseTerminal(clause, crews);
+}
+
 function dedupeSortPreferences(
   sortPreferences: ParsedPreferences["sort_preferences"]
 ): ParsedPreferences["sort_preferences"] {
@@ -2050,6 +2057,14 @@ function isClauseDeterministicallyHandled(clause: string) {
     return true;
   }
 
+  if (
+    /\bavoid\s+(willowbrook|wb|lewis road|lewis|wrmf|whitby|richmond hill|rh|milton|mil|barrie|bar|bradford|kitchener|kit|lincolnville|linc|lcn|spareboard|spare board|spare|standby|stdby)\b/i.test(
+      clause
+    )
+  ) {
+    return true;
+  }
+
   if (/\bexcept at\b/i.test(clause)) {
     return true;
   }
@@ -2516,6 +2531,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       clause.includes("no ") ||
       clause.includes("anything but ") ||
       clause.includes("not ") ||
+      Boolean(getAvoidTerminalFromClause(rawClause, crews)) ||
       clause.includes("exclude standby") ||
       clause.includes("no standby");
 
@@ -2527,7 +2543,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
   }
 
   const matchedTerminals = Array.from(
-    new Set(extractTerminalPriorities(prompt, crews).map(normalizeTerminalName))
+    new Set(
+      clauses.flatMap((clauseEntry) =>
+        getAvoidTerminalFromClause(clauseEntry.text, crews)
+          ? []
+          : extractTerminalPriorities(clauseEntry.text, crews).map(
+              normalizeTerminalName
+            )
+      )
+    )
   );
 
   const orderedTerminals =
@@ -2678,6 +2702,21 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         value: ["standby"],
         strength: "hard",
       });
+    }
+
+    if (normalizedClauseTerminal) {
+      const avoidTerminal = getAvoidTerminalFromClause(rawClause, crews);
+
+      if (avoidTerminal && normalizeTerminalName(avoidTerminal) === normalizedClauseTerminal) {
+        parsed.tradeoffs.push({
+          type: "avoid_terminal",
+          value: normalizedClauseTerminal,
+          weight: getPreferenceWeight(clause, 25),
+        });
+        activeTerminal = null;
+        activeTerminalSentenceIndex = -1;
+        continue;
+      }
     }
 
     const clauseIntents = detectPhraseIntents(clause);
