@@ -597,6 +597,65 @@ function collectVisibleContradictionFailures(
   return failures;
 }
 
+function evaluateConditionalTerminalFallbackAssertion(
+  result: PromptDebugResult,
+  primaryTerminal: string,
+  requiredFilters: PromptRegressionFilterExpectation[],
+  fallbackTerminal: string
+): PromptRegressionAssertionFailure | null {
+  const normalizedPrimaryTerminal = normalizeTerminalLabel(primaryTerminal);
+  const normalizedFallbackTerminal = normalizeTerminalLabel(fallbackTerminal);
+
+  const rankedCrews = result.ranked.map((crew) => toRankedCrewLike(crew));
+  const primaryCrews = rankedCrews.filter(
+    (crew) => normalizeTerminalLabel(crew.terminal) === normalizedPrimaryTerminal
+  );
+  const fallbackCrews = rankedCrews.filter(
+    (crew) => normalizeTerminalLabel(crew.terminal) === normalizedFallbackTerminal
+  );
+
+  const qualifyingPrimaryCrews = primaryCrews.filter((crew) =>
+    requiredFilters.every((expectedFilter) => {
+      const syntheticFilter: ParsedPreferenceFilterLike = {
+        field: expectedFilter.field,
+        operator: expectedFilter.operator ?? "=",
+        value: expectedFilter.value ?? true,
+        strength: expectedFilter.strength ?? "hard",
+      };
+
+      const evaluation = evaluateHardFilterOnCrew(crew, syntheticFilter);
+      return evaluation.supported && evaluation.passes;
+    })
+  );
+
+  if (qualifyingPrimaryCrews.length > 0) {
+    const rankedIds = rankedCrews.map((crew) => String(crew.id));
+    const qualifyingPrimaryIndexes = qualifyingPrimaryCrews
+      .map((crew) => rankedIds.indexOf(String(crew.id)))
+      .filter((index) => index >= 0);
+
+    const lastQualifyingPrimaryIndex = Math.max(...qualifyingPrimaryIndexes);
+    const violatingFallbackCrew = fallbackCrews.find((crew) => {
+      const index = rankedIds.indexOf(String(crew.id));
+      return index !== -1 && index < lastQualifyingPrimaryIndex;
+    });
+
+    return violatingFallbackCrew
+      ? {
+          type: "conditional_terminal_fallback",
+          message: `Fallback terminal ${fallbackTerminal} appeared before all qualifying ${primaryTerminal} crews were exhausted.`,
+        }
+      : null;
+  }
+
+  return fallbackCrews.length > 0
+    ? null
+    : {
+        type: "conditional_terminal_fallback",
+        message: `No qualifying ${primaryTerminal} crews were ranked, and no ${fallbackTerminal} fallback crew was ranked.`,
+      };
+}
+
 function evaluateAssertion(
   assertion: PromptRegressionAssertion,
   result: PromptDebugResult,
@@ -834,6 +893,15 @@ function evaluateAssertion(
             .map((filter) => `${filter.field} ${filter.operator}`)
             .join(", ")}.`,
         };
+  }
+
+  if (assertion.type === "conditional_terminal_fallback") {
+    return evaluateConditionalTerminalFallbackAssertion(
+      result,
+      assertion.value.primary.terminal,
+      assertion.value.primary.requires,
+      assertion.value.fallback.terminal
+    );
   }
 
   return null;

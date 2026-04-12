@@ -90,6 +90,18 @@ export type PromptRegressionAssertion =
         terminal?: string;
         disallowFilters?: PromptRegressionFilterExpectation[];
       };
+    }
+  | {
+      type: "conditional_terminal_fallback";
+      value: {
+        primary: {
+          terminal: string;
+          requires: PromptRegressionFilterExpectation[];
+        };
+        fallback: {
+          terminal: string;
+        };
+      };
     };
 
 export type PromptRegressionCase = {
