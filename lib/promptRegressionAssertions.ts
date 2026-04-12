@@ -23,6 +23,8 @@ export type PromptRegressionAssertionFailure = {
 type JobDetailLike = {
   on_duty?: string | null;
   off_duty?: string | null;
+  operating_hours_daily?: unknown;
+  van_hours_daily?: unknown;
   has_shuttle_bus?: unknown;
   raw_text?: unknown;
 };
@@ -41,6 +43,8 @@ type RankedCrewLike = PromptDebugRankedCrewLike & {
   days_off_count?: number;
   works_weekends?: boolean;
   split_time_weekly?: string;
+  overtime_hours_weekly?: unknown;
+  total_paid_hours_weekly?: unknown;
 };
 
 function normalizeTerminalLabel(value: string | undefined) {
@@ -176,6 +180,57 @@ function getDayFinishMinutes(day: DayLike) {
   }
 
   return finishMinutes;
+}
+
+function getRepresentativeWorkedDay(crew: RankedCrewLike) {
+  return getWorkedDays(crew)[0] ?? null;
+}
+
+function getSortableFieldValue(
+  crew: RankedCrewLike,
+  field:
+    | "on_duty"
+    | "off_duty"
+    | "operating_hours_daily"
+    | "van_hours_daily"
+    | "overtime_hours_weekly"
+    | "total_paid_hours_weekly"
+) {
+  const representativeDay = getRepresentativeWorkedDay(crew);
+  const representativeDetail =
+    representativeDay?.job_detail ??
+    crew.job_details?.[0] ??
+    null;
+
+  if (field === "on_duty") {
+    return hhmmToMinutes(getDisplayedDayTimeRange(representativeDay ?? {}).onDuty);
+  }
+
+  if (field === "off_duty") {
+    return representativeDay ? getDayFinishMinutes(representativeDay) : null;
+  }
+
+  if (field === "operating_hours_daily") {
+    const value = Number(representativeDetail?.operating_hours_daily);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (field === "van_hours_daily") {
+    const value = Number(representativeDetail?.van_hours_daily);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (field === "overtime_hours_weekly") {
+    const value = Number(crew.overtime_hours_weekly);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (field === "total_paid_hours_weekly") {
+    const value = Number(crew.total_paid_hours_weekly);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  return null;
 }
 
 function evaluateFinishFilterForDay(
@@ -649,11 +704,72 @@ function evaluateConditionalTerminalFallbackAssertion(
   }
 
   return fallbackCrews.length > 0
-    ? null
-    : {
-        type: "conditional_terminal_fallback",
-        message: `No qualifying ${primaryTerminal} crews were ranked, and no ${fallbackTerminal} fallback crew was ranked.`,
+      ? null
+      : {
+          type: "conditional_terminal_fallback",
+          message: `No qualifying ${primaryTerminal} crews were ranked, and no ${fallbackTerminal} fallback crew was ranked.`,
+        };
+}
+
+function evaluateScopedRankOrderRespectsSortAssertion(
+  result: PromptDebugResult,
+  terminal: string,
+  field:
+    | "on_duty"
+    | "off_duty"
+    | "operating_hours_daily"
+    | "van_hours_daily"
+    | "overtime_hours_weekly"
+    | "total_paid_hours_weekly",
+  direction: "asc" | "desc",
+  mode: "pairwise_consecutive_distinct",
+  requireAtLeastComparablePairs: number
+): PromptRegressionAssertionFailure | null {
+  if (mode !== "pairwise_consecutive_distinct") {
+    return {
+      type: "scoped_rank_order_respects_sort",
+      message: `Unsupported scoped rank-order mode ${mode}.`,
+    };
+  }
+
+  const scopedCrews = result.ranked
+    .map((crew) => toRankedCrewLike(crew))
+    .filter((crew) => normalizeTerminalLabel(crew.terminal) === normalizeTerminalLabel(terminal));
+
+  let comparablePairs = 0;
+
+  for (let index = 0; index < scopedCrews.length - 1; index += 1) {
+    const currentCrew = scopedCrews[index];
+    const nextCrew = scopedCrews[index + 1];
+    const currentValue = getSortableFieldValue(currentCrew, field);
+    const nextValue = getSortableFieldValue(nextCrew, field);
+
+    if (currentValue == null || nextValue == null) continue;
+    if (currentValue === nextValue) continue;
+
+    comparablePairs += 1;
+
+    const respectsOrder =
+      direction === "asc"
+        ? currentValue <= nextValue
+        : currentValue >= nextValue;
+
+    if (!respectsOrder) {
+      return {
+        type: "scoped_rank_order_respects_sort",
+        message: `Within ${terminal}, ranked order violates ${field} ${direction} between crews ${currentCrew.crew_number ?? currentCrew.id} and ${nextCrew.crew_number ?? nextCrew.id}.`,
       };
+    }
+  }
+
+  if (comparablePairs < requireAtLeastComparablePairs) {
+    return {
+      type: "scoped_rank_order_respects_sort",
+      message: `Within ${terminal}, only ${comparablePairs} comparable ranked pair(s) were available for ${field} ${direction}; expected at least ${requireAtLeastComparablePairs}.`,
+    };
+  }
+
+  return null;
 }
 
 function evaluateAssertion(
@@ -901,6 +1017,17 @@ function evaluateAssertion(
       assertion.value.primary.terminal,
       assertion.value.primary.requires,
       assertion.value.fallback.terminal
+    );
+  }
+
+  if (assertion.type === "scoped_rank_order_respects_sort") {
+    return evaluateScopedRankOrderRespectsSortAssertion(
+      result,
+      assertion.value.terminal,
+      assertion.value.field,
+      assertion.value.direction,
+      assertion.value.mode ?? "pairwise_consecutive_distinct",
+      assertion.value.requireAtLeastComparablePairs ?? 1
     );
   }
 

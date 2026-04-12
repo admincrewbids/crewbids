@@ -102,6 +102,22 @@ export type PromptRegressionAssertion =
           terminal: string;
         };
       };
+    }
+  | {
+      type: "scoped_rank_order_respects_sort";
+      value: {
+        terminal: string;
+        field:
+          | "on_duty"
+          | "off_duty"
+          | "operating_hours_daily"
+          | "van_hours_daily"
+          | "overtime_hours_weekly"
+          | "total_paid_hours_weekly";
+        direction: "asc" | "desc";
+        mode?: "pairwise_consecutive_distinct";
+        requireAtLeastComparablePairs?: number;
+      };
     };
 
 export type PromptRegressionCase = {
@@ -249,6 +265,22 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
             direction: "desc",
             strength: "strong",
           },
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Lewis Road",
+          field: "on_duty",
+          direction: "asc",
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Willowbrook",
+          field: "on_duty",
+          direction: "desc",
         },
       },
       {
