@@ -23,17 +23,18 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
       : Array.from(content.items ?? []);
 
     const items = rawItems
-      .filter((item: any) => "str" in item && item.str?.trim())
       .map((item: any) => {
+        const text = String(item?.str ?? "").trim();
         const x = item.transform?.[4] ?? 0;
         const y = item.transform?.[5] ?? 0;
 
         return {
-          str: item.str.trim(),
+          str: text,
           x,
           y,
         };
-      });
+      })
+      .filter((item) => item.str.length > 0);
 
     // Sort top-to-bottom, then left-to-right
     items.sort((a, b) => {
