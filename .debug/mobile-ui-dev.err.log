@@ -1,0 +1,4128 @@
+⨯ ReferenceError: Cannot access 'realCrews' before initialization
+    at CrewBidClient (components\CrewBidClient.tsx:7030:3)
+  7028 |   jobPages.length,
+  7029 |   cycleTextPages.length,
+> 7030 |   realCrews.length,
+       |   ^
+  7031 | ]);
+  7032 |
+  7033 | const parsedJobs = useMemo(() => { {
+  digest: '2845224685'
+}
+⨯ ReferenceError: Cannot access 'realCrews' before initialization
+    at CrewBidClient (components\CrewBidClient.tsx:7030:3)
+  7028 |   jobPages.length,
+  7029 |   cycleTextPages.length,
+> 7030 |   realCrews.length,
+       |   ^
+  7031 | ]);
+  7032 |
+  7033 | const parsedJobs = useMemo(() => { {
+  digest: '2845224685'
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+⨯ SyntaxError: Unterminated string in JSON at position 5766448 (line 67610 column 1201)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async POST (app\api\dev\prompt-bridge\route.ts:69:24)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 2134596 (line 25781 column 2)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async GET (app\api\dev\prompt-bridge\route.ts:60:17)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+⨯ SyntaxError: Unterminated string in JSON at position 1048456 (line 12533 column 1368)
+    at JSON.parse (<anonymous>)
+    at readState (app\api\dev\prompt-bridge\route.ts:51:15)
+    at async POST (app\api\dev\prompt-bridge\route.ts:69:24)
+  49 |   await ensureStateFile();
+  50 |   const raw = await readFile(STATE_FILE, "utf8");
+> 51 |   return JSON.parse(raw) as PromptBridgeState;
+     |               ^
+  52 | }
+  53 |
+  54 | async function writeState(state: PromptBridgeState) {
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}
+OpenAI API error: {
+  error: {
+    message: 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.',
+    type: 'insufficient_quota',
+    param: null,
+    code: 'insufficient_quota'
+  }
+}

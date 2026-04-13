@@ -1555,6 +1555,8 @@ const PHRASES = {
   ],
 
   prefer_evenings: [
+    "evenings",
+    "evening",
     "prefer evenings",
     "prefer evening",
     "prefer afternoons",
@@ -1656,6 +1658,16 @@ const PHRASES = {
     "stdby only",
     "just standby",
     "standby crews only",
+  ],
+
+  only_up: [
+    "up only",
+    "only up",
+    "ups only",
+    "only ups",
+    "only up jobs",
+    "up jobs only",
+    "up crews only",
   ],
 
   no_splits: [
@@ -2038,6 +2050,10 @@ const PHRASE_INTENT_DEFINITIONS = {
   only_standby: {
     phrases: PHRASES.only_standby,
     conflictsWith: ["exclude_standby"],
+  },
+  only_up: {
+    phrases: PHRASES.only_up,
+    conflictsWith: ["exclude_up"],
   },
   no_splits: {
     phrases: PHRASES.no_splits,
@@ -2643,10 +2659,11 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
   for (const clauseEntry of clauses) {
     const rawClause = clauseEntry.text;
     const clause = rawClause.toLowerCase().replace(/[â€™]/g, "'");
-    const terminal = getClauseTerminal(rawClause, crews);
-    if (!terminal) continue;
+    const clauseTerminals = extractTerminalPriorities(rawClause, crews)
+      .map(normalizeTerminalName)
+      .filter(Boolean);
 
-    const normalized = normalizeTerminalName(terminal);
+    if (clauseTerminals.length === 0) continue;
 
     const isExclusionClause =
       clause.includes("exclude ") ||
@@ -2660,8 +2677,10 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     if (isExclusionClause) continue;
 
-    if (!clauseOrderedTerminals.includes(normalized)) {
-      clauseOrderedTerminals.push(normalized);
+    for (const normalized of clauseTerminals) {
+      if (!clauseOrderedTerminals.includes(normalized)) {
+        clauseOrderedTerminals.push(normalized);
+      }
     }
   }
 
@@ -3009,7 +3028,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       }
 
       const finishBeforeMatch = clause.match(
-        /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
       );
 
       if (finishBeforeMatch) {
@@ -3202,6 +3221,8 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     // ---- mornings / evenings / nights ----
     const mentionsMorning =
       /\bmorning\b/.test(clause) || /\bmornings\b/.test(clause);
+    const mentionsEvening =
+      /\bevening\b/.test(clause) || /\bevenings\b/.test(clause);
 
     const noMornings = clauseIntents.has("no_mornings");
 
@@ -3220,7 +3241,8 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     const preferEvenings =
       !eveningsOnly &&
-      clauseIntents.has("prefer_evenings");
+      (clauseIntents.has("prefer_evenings") ||
+        (mentionsEvening && !mentionsMorning && !clauseIntents.has("prefer_mornings")));
 
     if (morningsOnly) {
       scoped.filters.push({
@@ -3293,7 +3315,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     }
 
     const finishBeforeMatch = clause.match(
-      /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+      /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
     );
 
     if (finishBeforeMatch) {
@@ -3545,6 +3567,15 @@ function applyDeterministicPreferenceRules(
     });
   }
 
+  if (containsAny(text, PHRASES.only_up)) {
+    nextParsed.filters.push({
+      field: "include_only_up_crews",
+      operator: "=",
+      value: true,
+      strength: "hard",
+    });
+  }
+
   if (containsAny(text, PHRASES.exclude_spareboard)) {
     nextParsed.filters.push({
       field: "exclude_spareboard_crews",
@@ -3704,6 +3735,19 @@ function applyDeterministicPreferenceRulesV2(
 
     nextParsed.filters.push({
       field: "exclude_up_crews",
+      operator: "=",
+      value: true,
+      strength: "hard",
+    });
+  }
+
+  if (intents.has("only_up")) {
+    nextParsed.filters = nextParsed.filters.filter(
+      (filter) => !(filter.field === "exclude_up_crews" && filter.operator === "=")
+    );
+
+    nextParsed.filters.push({
+      field: "include_only_up_crews",
       operator: "=",
       value: true,
       strength: "hard",
@@ -5287,6 +5331,10 @@ const excludeUpCrewsFilter = effectiveFilters.find(
   (f) => f.field === "exclude_up_crews" && f.operator === "=" && f.value === true
 );
 
+const includeOnlyUpCrewsFilter = effectiveFilters.find(
+  (f) => f.field === "include_only_up_crews" && f.operator === "=" && f.value === true
+);
+
 const includeOnlySpareboardCrewsFilter = effectiveFilters.find(
   (f) =>
     f.field === "include_only_spareboard_crews" &&
@@ -5364,13 +5412,14 @@ const shuttleBusExcludedFilter = effectiveFilters.find(
     f.value === false
 );
 
-const crewNumber = String(crew.crew_number ?? crew.id ?? "").trim();
-const isSpareboardCrew = /^3\d{3}$/.test(crewNumber);
-const isStandbyCrew =
-  crewTerminal === "standby" || crewWithSchedule.is_two_week_stby === true;
-const crewHasSplitTime = hasSplitTimeValue(crewWithSchedule.split_time_weekly);
-const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
-const isThreeDayOffCrew = crewWithSchedule.days_off_count === 3;
+  const crewNumber = String(crew.crew_number ?? crew.id ?? "").trim();
+  const isSpareboardCrew = /^3\d{3}$/.test(crewNumber);
+  const isUpCrew = crewNumber.startsWith("5");
+  const isStandbyCrew =
+    crewTerminal === "standby" || crewWithSchedule.is_two_week_stby === true;
+  const crewHasSplitTime = hasSplitTimeValue(crewWithSchedule.split_time_weekly);
+  const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
+  const isThreeDayOffCrew = crewWithSchedule.days_off_count === 3;
 
 if (
   terminalOnlyFilter &&
@@ -5426,12 +5475,25 @@ if (
   continue;
 }
 
-if (
-  includeOnlySpareboardCrewsFilter &&
-  !isSpareboardCrew &&
-  !overridden
-) {
-  excluded.push({
+  if (
+    includeOnlyUpCrewsFilter &&
+    !isUpCrew &&
+    !overridden
+  ) {
+    excluded.push({
+      id: crew.id,
+      terminal: formatTerminalDisplayName(crew.terminal),
+      reason: "Excluded because only UP crews were allowed",
+    });
+    continue;
+  }
+
+  if (
+    includeOnlySpareboardCrewsFilter &&
+    !isSpareboardCrew &&
+    !overridden
+  ) {
+    excluded.push({
     id: crew.id,
     terminal: formatTerminalDisplayName(crew.terminal),
     reason: "Excluded because only spareboard crews (4-digit 3xxx) were allowed",
