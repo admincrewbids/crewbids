@@ -1,20 +1,9 @@
 export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
-  const isE1644Debug = file.name?.toLowerCase?.() === "e1644.pdf";
-  const logStep = (message: string) => {
-    if (!isE1644Debug) return;
-    console.log(`[pdfTextExtractor:${file.name}] ${message}`);
-  };
   const getTextContentWithFallback = async (page: any, pageNum: number) => {
     try {
-      logStep(`page ${pageNum}: before getTextContent`);
       const content = await page.getTextContent();
-      logStep(`page ${pageNum}: after getTextContent`);
       return content;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: getTextContent failed -> ${message}`);
-      logStep(`page ${pageNum}: attempting streamTextContent fallback`);
-
       try {
         const readableStream = page.streamTextContent();
         const reader = readableStream.getReader();
@@ -40,19 +29,12 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
           }
         }
 
-        logStep(
-          `page ${pageNum}: streamTextContent fallback succeeded -> itemCount=${fallbackContent.items.length}`
-        );
-
         return fallbackContent;
       } catch (fallbackError) {
         const fallbackMessage =
           fallbackError instanceof Error
             ? fallbackError.message
             : String(fallbackError);
-        logStep(
-          `page ${pageNum}: streamTextContent fallback failed -> ${fallbackMessage}`
-        );
         throw new Error(
           `extractPdfPagesFromFile failed at page ${pageNum} during getTextContent fallback: ${fallbackMessage}`
         );
@@ -74,18 +56,14 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
   } as any);
 
   const pdf = await loadingTask.promise;
-  logStep(`document loaded -> numPages=${pdf.numPages}`);
   const pages: string[] = [];
 
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     let page: any;
     try {
-      logStep(`page ${pageNum}: before getPage`);
       page = await pdf.getPage(pageNum);
-      logStep(`page ${pageNum}: after getPage`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: getPage failed -> ${message}`);
       throw new Error(
         `extractPdfPagesFromFile failed at page ${pageNum} during getPage: ${message}`
       );
@@ -103,16 +81,11 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
 
     let rawItems: any[] = [];
     try {
-      logStep(`page ${pageNum}: before normalizing content.items`);
       rawItems = Array.isArray(content.items)
         ? content.items
         : Array.from(content.items ?? []);
-      logStep(
-        `page ${pageNum}: after normalizing content.items -> rawItemCount=${rawItems.length}`
-      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: normalize content.items failed -> ${message}`);
       throw new Error(
         `extractPdfPagesFromFile failed at page ${pageNum} during normalize content.items: ${message}`
       );
@@ -120,7 +93,6 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
 
     let items: { str: string; x: number; y: number }[] = [];
     try {
-      logStep(`page ${pageNum}: before mapping text items`);
       items = rawItems
         .map((item: any) => {
           const text = String(item?.str ?? "").trim();
@@ -134,20 +106,14 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
           };
         })
         .filter((item) => item.str.length > 0);
-      logStep(
-        `page ${pageNum}: after mapping text items -> filteredItemCount=${items.length}`
-      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: map/filter text items failed -> ${message}`);
       throw new Error(
         `extractPdfPagesFromFile failed at page ${pageNum} during map/filter text items: ${message}`
       );
     }
 
     try {
-      logStep(`page ${pageNum}: before sorting/grouping/joining page text`);
-
       // Sort top-to-bottom, then left-to-right
       items.sort((a, b) => {
         const yDiff = Math.abs(b.y - a.y);
@@ -187,12 +153,8 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
         .trim();
 
       pages.push(text);
-      logStep(
-        `page ${pageNum}: after sorting/grouping/joining page text -> textLength=${text.length}`
-      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: sort/group/join page text failed -> ${message}`);
       throw new Error(
         `extractPdfPagesFromFile failed at page ${pageNum} during sort/group/join page text: ${message}`
       );

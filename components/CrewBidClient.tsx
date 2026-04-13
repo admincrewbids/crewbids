@@ -6391,11 +6391,6 @@ const [pdfPages, setPdfPages] = useState<string[]>([]);
 const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 const [authUser, setAuthUser] = useState<any>(null);
 const bidPackageInputRef = useRef<HTMLInputElement | null>(null);
-const [uploadDiagnosticTarget, setUploadDiagnosticTarget] = useState<string | null>(null);
-const [uploadDiagnosticStatus, setUploadDiagnosticStatus] = useState<string | null>(null);
-const [uploadDiagnosticError, setUploadDiagnosticError] = useState<string | null>(null);
-const [uploadDiagnosticLines, setUploadDiagnosticLines] = useState<string[]>([]);
-const uploadDiagnosticSnapshotRef = useRef<string>("");
 const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 const [userProfile, setUserProfile] = useState<any>(null);
 const [hasFullAccess, setHasFullAccess] = useState(false);
@@ -6450,12 +6445,6 @@ const labelStyle = {
   color: "#6b7280",
   marginBottom: 4,
 };
-
-function appendUploadDiagnostic(line: string) {
-  const stampedLine = `${new Date().toLocaleTimeString()}: ${line}`;
-  console.log("[CrewBid upload debug]", stampedLine);
-  setUploadDiagnosticLines((prev) => [...prev.slice(-11), stampedLine]);
-}
 
 useEffect(() => {
   if (typeof window === "undefined") return;
@@ -7731,30 +7720,6 @@ const realCrews = useMemo(
   ]
 );
 
-useEffect(() => {
-  if (uploadDiagnosticTarget?.toLowerCase() !== "e1644.pdf") return;
-
-  const snapshot = JSON.stringify({
-    pdfPages: pdfPages.length,
-    jobPages: jobPages.length,
-    cycleTextPages: cycleTextPages.length,
-    realCrews: realCrews.length,
-  });
-
-  if (uploadDiagnosticSnapshotRef.current === snapshot) return;
-  uploadDiagnosticSnapshotRef.current = snapshot;
-
-  appendUploadDiagnostic(
-    `state snapshot -> pdfPages=${pdfPages.length}, jobPages=${jobPages.length}, cycleTextPages=${cycleTextPages.length}, realCrews=${realCrews.length}`
-  );
-}, [
-  uploadDiagnosticTarget,
-  pdfPages.length,
-  jobPages.length,
-  cycleTextPages.length,
-  realCrews.length,
-]);
-
 const getRealCrews = () => realCrews;
 
 async function resolvePromptPreferences(promptText: string) {
@@ -8220,28 +8185,11 @@ async function restoreLatestRunForPackage(
 }
 
 async function processPdfFile(file: File) {
-  const isTargetDebugFile = file.name.toLowerCase() === "e1644.pdf";
   const getCyclePageTextContentWithFallback = async (page: any, pageNumber: number) => {
     try {
-      if (isTargetDebugFile) {
-        appendUploadDiagnostic(`cycle page ${pageNumber}: before getTextContent`);
-      }
       const content = await page.getTextContent();
-      if (isTargetDebugFile) {
-        appendUploadDiagnostic(`cycle page ${pageNumber}: after getTextContent`);
-      }
       return content;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (isTargetDebugFile) {
-        appendUploadDiagnostic(
-          `cycle page ${pageNumber}: getTextContent failed -> ${message}`
-        );
-        appendUploadDiagnostic(
-          `cycle page ${pageNumber}: attempting streamTextContent fallback`
-        );
-      }
-
+    } catch {
       const readableStream = page.streamTextContent();
       const reader = readableStream.getReader();
       const fallbackContent: {
@@ -8268,38 +8216,15 @@ async function processPdfFile(file: File) {
         fallbackContent.items.push(...chunkItems);
       }
 
-      if (isTargetDebugFile) {
-        appendUploadDiagnostic(
-          `cycle page ${pageNumber}: streamTextContent fallback succeeded -> itemCount=${fallbackContent.items.length}`
-        );
-      }
-
       return fallbackContent;
     }
   };
-
-  if (isTargetDebugFile) {
-    setUploadDiagnosticStatus("Starting PDF extraction...");
-    appendUploadDiagnostic(`entered processPdfFile(${file.name})`);
-  }
 
   let pages: string[] = [];
 
   try {
     pages = await extractPdfPagesFromFile(file);
-    if (isTargetDebugFile) {
-      setUploadDiagnosticStatus(`PDF extracted successfully (${pages.length} pages)`);
-      appendUploadDiagnostic(
-        `extractPdfPagesFromFile succeeded -> extractedPageCount=${pages.length}`
-      );
-    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (isTargetDebugFile) {
-      setUploadDiagnosticStatus("PDF extraction failed");
-      setUploadDiagnosticError(message);
-      appendUploadDiagnostic(`extractPdfPagesFromFile failed -> ${message}`);
-    }
     throw error;
   }
 
@@ -8333,12 +8258,6 @@ async function processPdfFile(file: File) {
 
     const detectedCyclePageIndexes =
       detectCyclePageIndexesFromExtractedPages(pages);
-
-    if (isTargetDebugFile) {
-      appendUploadDiagnostic(
-        `classification snapshot -> jobPages=${provisionalJobPages.length}, detectedCyclePageIndexes=${detectedCyclePageIndexes.length}`
-      );
-    }
 
     if (!detectedCyclePageIndexes.length) {
       console.warn("No cycle pages detected from extracted text.");
@@ -8388,80 +8307,25 @@ async function processPdfFile(file: File) {
 
     setCycleImages(renderedCycleImages);
     setCycleTextPages(extractedCycleTextPages);
-
-    if (isTargetDebugFile) {
-      if (
-        provisionalJobPages.length === 0 &&
-        detectedCyclePageIndexes.length === 0
-      ) {
-        setUploadDiagnosticStatus(
-          "Upload finished, but no usable job or cycle pages were recognized."
-        );
-        setUploadDiagnosticError(
-          "Extraction completed, but CrewBid did not recognize any job-sheet or cycle-chart pages in e1644.pdf."
-        );
-      } else {
-        setUploadDiagnosticStatus(
-          `Classification finished: jobPages=${provisionalJobPages.length}, cyclePages=${detectedCyclePageIndexes.length}`
-        );
-      }
-    }
   } catch (imageErr) {
     console.warn("Error rendering cycle pages / parsing cycle text", imageErr);
     setCycleImages([]);
     setCycleTextPages([]);
-    if (isTargetDebugFile) {
-      const message =
-        imageErr instanceof Error ? imageErr.message : String(imageErr);
-      setUploadDiagnosticStatus("Cycle rendering/classification failed");
-      setUploadDiagnosticError(message);
-      appendUploadDiagnostic(`cycle render/classification failed -> ${message}`);
-    }
   }
 }
 async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
   const file = e.target.files?.[0];
 
-  appendUploadDiagnostic(
-    `entered handlePdfUpload -> hasFile=${Boolean(file)}${file ? `, fileName=${file.name}` : ""}`
-  );
-
   if (!file) return;
-
-  const isTargetDebugFile = file.name.toLowerCase() === "e1644.pdf";
-
-  if (isTargetDebugFile) {
-    setUploadDiagnosticTarget(file.name);
-    setUploadDiagnosticStatus("File selected");
-    setUploadDiagnosticError(null);
-    setUploadDiagnosticLines([
-      `${new Date().toLocaleTimeString()}: selected ${file.name}`,
-    ]);
-    uploadDiagnosticSnapshotRef.current = "";
-  } else {
-    setUploadDiagnosticTarget(null);
-    setUploadDiagnosticStatus(null);
-    setUploadDiagnosticError(null);
-    setUploadDiagnosticLines([]);
-    uploadDiagnosticSnapshotRef.current = "";
-  }
 
   if (!authUser) {
     alert("Please sign in before uploading a bid package.");
-    if (isTargetDebugFile) {
-      setUploadDiagnosticStatus("Upload stopped: user not signed in");
-      appendUploadDiagnostic("upload blocked by authUser guard");
-    }
     return;
   }
 
   try {
     setUploadState("uploading");
     setUploadProgress(10);
-    if (isTargetDebugFile) {
-      setUploadDiagnosticStatus("Upload handler started");
-      appendUploadDiagnostic("upload handler started");
-    }
 
     setTimeout(() => setUploadProgress(40), 200);
     setTimeout(() => setUploadProgress(70), 400);
@@ -8513,20 +8377,10 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
 
     setUploadProgress(100);
     setUploadState("success");
-    if (isTargetDebugFile) {
-      setUploadDiagnosticStatus("Upload flow completed");
-      appendUploadDiagnostic("handlePdfUpload completed successfully");
-    }
   } catch (err) {
     console.error("Error processing PDF", err);
     setUploadState("idle");
     setUploadProgress(0);
-    if (isTargetDebugFile) {
-      const message = err instanceof Error ? err.message : String(err);
-      setUploadDiagnosticStatus("Upload flow failed");
-      setUploadDiagnosticError(message);
-      appendUploadDiagnostic(`handlePdfUpload threw -> ${message}`);
-    }
   } finally {
     e.target.value = "";
   }
@@ -10006,74 +9860,6 @@ Upload a different file
 </>
 )}
 
-{uploadDiagnosticTarget?.toLowerCase() === "e1644.pdf" && (
-<div
-style={{
-width: "100%",
-borderRadius: 14,
-border: `1px solid ${uploadDiagnosticError ? "#fecaca" : "#cbd5e1"}`,
-background: uploadDiagnosticError ? "#fff1f2" : "#f8fafc",
-padding: "12px 14px",
-display: "grid",
-gap: 8,
-}}
->
-<div
-style={{
-fontSize: 13,
-fontWeight: 800,
-color: uploadDiagnosticError ? "#9f1239" : "#334155",
-}}
->
-Debug trace for e1644.pdf
-</div>
-
-{uploadDiagnosticStatus && (
-  <div
-    style={{
-      fontSize: 13,
-      color: uploadDiagnosticError ? "#9f1239" : "#475569",
-      fontWeight: 700,
-      lineHeight: 1.4,
-    }}
-  >
-    Status: {uploadDiagnosticStatus}
-  </div>
-)}
-
-{uploadDiagnosticError && (
-  <div
-    style={{
-      fontSize: 13,
-      color: "#be123c",
-      fontWeight: 700,
-      lineHeight: 1.4,
-    }}
-  >
-    Error: {uploadDiagnosticError}
-  </div>
-)}
-
-{uploadDiagnosticLines.length > 0 && (
-  <div
-    style={{
-      display: "grid",
-      gap: 4,
-      maxHeight: 180,
-      overflowY: "auto",
-      fontSize: 12,
-      color: "#475569",
-      lineHeight: 1.45,
-      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-    }}
-  >
-    {uploadDiagnosticLines.map((line, index) => (
-      <div key={`upload-diagnostic-${index}`}>{line}</div>
-    ))}
-  </div>
-)}
-</div>
-)}
 </div>
 </div>
 </div>
