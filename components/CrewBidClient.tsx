@@ -3891,7 +3891,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
 
       if (terminalCondition) {
         items.push(
-          `ðŸ“ ${formatTerminalDisplayName(String(terminalCondition.value))} ${
+          `${formatTerminalDisplayName(String(terminalCondition.value))} ${
             index === 0 ? "(Highest Priority)" : `(Priority ${index + 1})`
           }`
         );
@@ -3904,7 +3904,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       typeof filter.value === "string"
     ) {
-      items.push(`â›” No jobs starting before ${filter.value}`);
+      items.push(`No jobs starting before ${filter.value}`);
     }
 
     if (
@@ -3912,7 +3912,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "<=" &&
       filter.value === TIME_BUCKETS.morning.end
     ) {
-      items.push(`ðŸŒ… Morning jobs only`);
+      items.push(`Morning jobs only`);
     }
 
     if (
@@ -3920,7 +3920,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       filter.value === TIME_BUCKETS.evening.start
     ) {
-      items.push(`ðŸŒ† Evening jobs only`);
+      items.push(`Evening jobs only`);
     }
 
     if (
@@ -3928,7 +3928,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "<=" &&
       filter.value === TIME_BUCKETS.afternoon.end
     ) {
-      items.push(`ðŸŒ™ No night jobs`);
+      items.push(`No night jobs`);
     }
 
     if (
@@ -3940,7 +3940,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       if (visibleValues.length === 0) return;
 
       items.push(
-        `â›” Only these terminals allowed: ${visibleValues
+        `Only these terminals allowed: ${visibleValues
           .map((t) => formatTerminalDisplayName(String(t)))
           .join(", ")}`
       );
@@ -3955,7 +3955,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       if (visibleValues.length === 0) return;
 
       items.push(
-        `ðŸš« Excluded terminals: ${visibleValues
+        `Excluded terminals: ${visibleValues
           .map((t) => formatTerminalDisplayName(String(t)))
           .join(", ")}`
       );
@@ -3966,7 +3966,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("ðŸš« Hide UP crews");
+      items.push("Hide UP crews");
     }
 
     if (
@@ -3982,7 +3982,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       );
 
       if (normalizedValues.includes("up")) {
-        items.push("ðŸš« Hide UP crews");
+        items.push("Hide UP crews");
       }
     }
 
@@ -3991,7 +3991,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("âœ… Spareboard only (4-digit 3xxx)");
+      items.push("Spareboard only (4-digit 3xxx)");
     }
 
     if (
@@ -3999,7 +3999,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("ðŸš« Exclude spareboard crews (4-digit 3xxx)");
+      items.push("Exclude spareboard crews (4-digit 3xxx)");
     }
 
     if (
@@ -4007,7 +4007,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("â›” Only 3 day off jobs");
+      items.push("Only 3 day off jobs");
     }
 
     if (
@@ -4015,7 +4015,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       Number(filter.value) === 3
     ) {
-      items.push("â›” Only 3 day off jobs");
+      items.push("Only 3 day off jobs");
     }
 
     if (
@@ -4023,7 +4023,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("ðŸš« No 3 day off jobs");
+      items.push("No 3 day off jobs");
     }
 
     if (
@@ -4031,7 +4031,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       (filter.operator === "<" || filter.operator === "<=" || filter.operator === "!=") &&
       Number(filter.value) === 3
     ) {
-      items.push("ðŸš« No 3 day off jobs");
+      items.push("No 3 day off jobs");
     }
 
     if (
@@ -4039,7 +4039,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("â›” Must have weekends off");
+      items.push("Must have weekends off");
     }
 
     if (
@@ -4047,7 +4047,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === "none"
     ) {
-      items.push("â›” No split jobs");
+      items.push("No split jobs");
     }
   });
 
@@ -4057,46 +4057,46 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
         sort.field === "operating_hours_weekly") &&
       sort.direction === "asc"
     ) {
-      items.push(`ðŸ“Š Sort by lowest operating time`);
+      items.push(`Sort by lowest operating time`);
     }
 
     if (sort.field === "van_hours_daily" && sort.direction === "asc") {
-      items.push(`ðŸš Sort by lowest van time`);
+      items.push(`Sort by lowest van time`);
     }
 
     if (sort.field === "overtime_hours_weekly" && sort.direction === "desc") {
-      items.push(`ðŸ’° Prefer highest overtime`);
+      items.push(`Prefer highest overtime`);
     }
 
     if (sort.field === "on_duty" && sort.direction === "asc") {
-      items.push(`ðŸŒ… Prefer morning / earlier start jobs`);
+      items.push(`Prefer morning / earlier start jobs`);
     }
 
     if (sort.field === "on_duty" && sort.direction === "desc") {
-      items.push(`ðŸŒ† Prefer evening / later start jobs`);
+      items.push(`Prefer evening / later start jobs`);
     }
 
     if (sort.field === "weekends_off") {
-      items.push(`ðŸ‘ Prefer weekends off`);
+      items.push(`Prefer weekends off`);
     }
 
     if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
-      items.push(`ðŸ‘ Prefer 3 day off jobs`);
+      items.push(`Prefer 3 day off jobs`);
     }
 
     if (sort.field === "three_day_off_jobs" && sort.direction === "asc") {
-      items.push(`â†˜ 3 day off jobs last`);
+      items.push(`3 day off jobs last`);
     }
   });
 
   parsed.tradeoffs.forEach((tradeoff) => {
     if (tradeoff.type === "prefer_closeness_over_finish_time") {
-      items.push(`ðŸ” Will accept later jobs to stay closer to home`);
+      items.push(`Will accept later jobs to stay closer to home`);
     }
 
     if (tradeoff.type === "avoid_terminal" && tradeoff.value) {
       items.push(
-        `âš ï¸ Prefer to avoid terminal: ${formatTerminalDisplayName(tradeoff.value)}`
+        `Prefer to avoid terminal: ${formatTerminalDisplayName(tradeoff.value)}`
       );
     }
   });
@@ -6289,51 +6289,51 @@ function buildMatchBadges(scoreBreakdown: ScoreBreakdownItem[]): string[] {
       const rankMatch = item.label.match(/#(\d+)/);
       const rank = rankMatch?.[1] ?? "1";
 
-      push(`âœ… Priority #${rank} terminal (${terminal})`);
+      push(`Priority #${rank} terminal (${terminal})`);
       continue;
     }
 
     if (label.includes("starts after preferred minimum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`âœ… Starts after ${match?.[1] ?? "minimum"}`);
+      push(`Starts after ${match?.[1] ?? "minimum"}`);
       continue;
     }
 
     if (label.includes("starts before preferred maximum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`âœ… Starts before ${match?.[1] ?? "maximum"}`);
+      push(`Starts before ${match?.[1] ?? "maximum"}`);
       continue;
     }
 
     if (label.includes("finishes before preferred maximum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`âœ… Finishes before ${match?.[1] ?? "maximum"}`);
+      push(`Finishes before ${match?.[1] ?? "maximum"}`);
       continue;
     }
 
     if (label.includes("matches weekends_off preference")) {
-      push(`âœ… Weekends off`);
+      push(`Weekends off`);
       continue;
     }
 
     if (label.includes("matches required days off")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`âœ… Days off: ${match?.[1] ?? "matched"}`);
+      push(`Days off: ${match?.[1] ?? "matched"}`);
       continue;
     }
 
     if (label.includes("on_duty preference (asc)")) {
-      push(`âœ… Earlier starts preferred`);
+      push(`Earlier starts preferred`);
       continue;
     }
 
     if (label.includes("on_duty preference (desc)")) {
-      push(`âœ… Later starts preferred`);
+      push(`Later starts preferred`);
       continue;
     }
 
     if (label.includes("overtime_hours_weekly preference (desc)")) {
-      push(`âœ… Higher overtime`);
+      push(`Higher overtime`);
       continue;
     }
 
@@ -6341,12 +6341,12 @@ function buildMatchBadges(scoreBreakdown: ScoreBreakdownItem[]): string[] {
       label.includes("operating_hours_daily preference (asc)") ||
       label.includes("operating_hours_weekly preference (asc)")
     ) {
-      push(`âœ… Lower operating time`);
+      push(`Lower operating time`);
       continue;
     }
 
     if (label.includes("van_hours_daily preference (asc)")) {
-      push(`âœ… Lower van time`);
+      push(`Lower van time`);
       continue;
     }
   }
@@ -8879,7 +8879,7 @@ async function handleGenerateList() {
     return;
   }
 
-  alert("âœ… Saved to My Bids");
+  alert("Saved to My Bids");
 }
 
 function handleResetOrder() {
@@ -9411,7 +9411,7 @@ letterSpacing: "-0.04em",
 maxWidth: 780,
 }}
 >
-Your Best Crew Picks â€”
+Your Best Crew Picks
 <br />
 <span style={{ color: "#f97316", fontStyle: "italic" }}>
 Ranked for You
@@ -9459,7 +9459,7 @@ gap: 14,
 padding: "22px 24px",
 }}
 >
-<div style={{ fontSize: 20 }}>âœ¨</div>
+<div style={{ fontSize: 16, fontWeight: 800 }}>AI</div>
 <input
 value={prompt}
 onChange={(e) => setPrompt(e.target.value)}
@@ -9519,7 +9519,7 @@ fontSize: 16,
 fontWeight: 500,
 }}
 >
-e.g. â€œWeekends off, no early starts, prefer Lewis Rdâ€
+e.g. &quot;Weekends off, no early starts, prefer Lewis Rd&quot;
 </div>
 
 <div
@@ -9545,7 +9545,7 @@ fontWeight: 800,
 color: "#0f172a",
 }}
 >
-ðŸ“„ Upload Your Bid Package
+Upload Your Bid Package
 </div>
 
 <div
@@ -9602,7 +9602,7 @@ fontWeight: 800,
 color: "#0f172a",
 }}
 >
-Uploading your bid packageâ€¦
+Uploading your bid package...
 </div>
 
 <div
@@ -9646,7 +9646,7 @@ fontWeight: 900,
 color: "#166534",
 }}
 >
-âœ… Upload Complete
+Upload Complete
 </div>
 
 <div
@@ -9843,9 +9843,7 @@ border: "1px solid #e5e7eb",
 }}
 >
 <div style={{ marginBottom: 10 }}>
-<h2 style={{ margin: 0, fontSize: 22 }}>
-ðŸ§  Your Preferences (AI Interpreted)
-</h2>
+<h2 style={{ margin: 0, fontSize: 22 }}>Your Preferences (AI Interpreted)</h2>
 <div style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
 Grouped by terminal and prioritized in the order you requested
 </div>
@@ -10078,7 +10076,7 @@ Must include:{" "}
               flexShrink: 0,
             }}
           >
-            {manualCrewOrder.length > 0 ? "â†•" : "â­"}
+            {manualCrewOrder.length > 0 ? "Reorder" : "Top"}
           </div>
 
           <div style={{ minWidth: 0 }}>
@@ -10129,7 +10127,7 @@ Must include:{" "}
               }}
             >
               {manualCrewOrder.length > 0
-                ? "Custom order active â€” this list has been manually rearranged and no longer reflects the default ranking."
+                ? "Custom order active - this list has been manually rearranged and no longer reflects the default ranking."
                 : "Drag crew cards to reorder your list and build your final bid order."}
             </div>
           </div>
@@ -10159,7 +10157,7 @@ Must include:{" "}
         whiteSpace: "nowrap",
       }}
     >
-      â†• Custom Order Active
+      Custom Order Active
     </div>
   )}
 
@@ -10272,7 +10270,7 @@ Must include:{" "}
             color: "#666",
           }}
         >
-          No crews match your strict preferences. Try "Include Anyway" or adjust
+          No crews match your strict preferences. Try &quot;Include Anyway&quot; or adjust
           your filters.
         </div>
       )}
@@ -10933,7 +10931,7 @@ onDrop={() => {
 
               {crew.included_override && (
                 <p style={{ marginTop: 10, color: "#9c6b00" }}>
-                  ðŸŸ¡ Included (Override) â€” {crew.override_reason}
+                  Included (Override) - {crew.override_reason}
                 </p>
               )}
             </div>
@@ -11612,7 +11610,7 @@ fontSize: 14,
 color: "#64748b",
 }}
 >
-{formatTerminalDisplayName(crew.terminal)} â€” manually excluded
+{formatTerminalDisplayName(crew.terminal)} - manually excluded
 </div>
 </div>
 
@@ -11642,7 +11640,7 @@ rankedCrews.length > 0 &&
 fullIncludedCount > rankedCrews.length && (
 <div style={{ marginTop: 30 }}>
 <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12 }}>
-ðŸ”’ Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
+Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
 </div>
 
 <div style={{ display: "grid", gap: 12 }}>
@@ -11708,7 +11706,7 @@ fullIncludedCount > rankedCrews.length && (
   }}
 >
   <div style={{ fontWeight: 800, fontSize: 18 }}>
-    ðŸ”’ See your full ranking, excluded crews, and WHY
+    See your full ranking, excluded crews, and why
   </div>
 
   <div style={{ marginTop: 6, color: "#555" }}>
@@ -11729,11 +11727,11 @@ fullIncludedCount > rankedCrews.length && (
     }}
     onClick={handleUnlockCheckout}
   >
-    Unlock Full Analysis â€” $9.99
+    Unlock Full Analysis - $9.99
   </button>
 
   <div style={{ marginTop: 10, fontSize: 12, color: "#777" }}>
-    Risk-Free First Unlock â€” refund within 24 hours
+    Risk-Free First Unlock - refund within 24 hours
   </div>
 </div>
 </div>
