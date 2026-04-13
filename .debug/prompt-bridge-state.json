@@ -1,14 +1,14 @@
 {
   "command": {
-    "id": "f758ef81-299d-4a81-9571-76fd050282f0",
+    "id": "930721c8-4c0e-4c4a-bb5a-effc621bcc88",
     "action": "runRegressionSuite",
-    "createdAt": "2026-04-13T01:26:37.9350034-04:00"
+    "createdAt": "2026-04-13T02:16:36.0961274-04:00"
   },
   "latestResult": {
-    "commandId": "f758ef81-299d-4a81-9571-76fd050282f0",
+    "commandId": "930721c8-4c0e-4c4a-bb5a-effc621bcc88",
     "action": "runRegressionSuite",
     "status": "completed",
-    "completedAt": "2026-04-13T05:27:00.808Z",
+    "completedAt": "2026-04-13T06:30:43.978Z",
     "payload": {
       "totalPrompts": 16,
       "promptsWithViolations": 0,

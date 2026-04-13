@@ -9625,6 +9625,7 @@ Select your bid package PDF to begin analysis
 </div>
 
 <label
+htmlFor="bid-package-upload"
 style={{
 display: "inline-flex",
 alignItems: "center",
@@ -9641,6 +9642,7 @@ boxShadow: "0 8px 22px rgba(249, 115, 22, 0.28)",
 >
 Choose PDF
 <input
+id="bid-package-upload"
 type="file"
 accept="application/pdf"
 onChange={handlePdfUpload}
@@ -9727,6 +9729,7 @@ fontWeight: 500,
 </div>
 
 <label
+htmlFor="bid-package-upload"
 style={{
 marginTop: 6,
 display: "inline-flex",
@@ -9744,6 +9747,7 @@ border: "1px solid #e2e8f0",
 >
 Upload a different file
 <input
+id="bid-package-upload"
 type="file"
 accept="application/pdf"
 onChange={handlePdfUpload}
