@@ -100,7 +100,8 @@ export default function AboutPage() {
         style={{
           maxWidth: 1240,
           margin: "0 auto",
-          padding: "28px 24px 48px",
+          padding: "clamp(18px, 4vw, 28px) clamp(16px, 4vw, 24px) clamp(32px, 6vw, 48px)",
+          overflowX: "hidden",
         }}
       >
         <div
@@ -131,6 +132,9 @@ export default function AboutPage() {
               gap: 18,
               flexWrap: "wrap",
               alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              maxWidth: 480,
             }}
           >
             <Link
@@ -169,8 +173,8 @@ export default function AboutPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1.2fr) minmax(320px, 0.9fr)",
-            gap: 28,
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gap: "clamp(20px, 4vw, 28px)",
             alignItems: "start",
           }}
         >
@@ -180,7 +184,7 @@ export default function AboutPage() {
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 borderRadius: 24,
-                padding: 28,
+                padding: "clamp(20px, 5vw, 28px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
               }}
             >
@@ -203,11 +207,12 @@ export default function AboutPage() {
               <h1
                 style={{
                   margin: 0,
-                  fontSize: 54,
+                  fontSize: "clamp(34px, 9vw, 54px)",
                   lineHeight: 1.02,
                   letterSpacing: "-0.04em",
                   fontWeight: 900,
                   maxWidth: 700,
+                  overflowWrap: "anywhere",
                 }}
               >
                 Built to help crews sort bids faster and with more confidence.
@@ -217,7 +222,7 @@ export default function AboutPage() {
                 style={{
                   marginTop: 20,
                   marginBottom: 0,
-                  fontSize: 20,
+                  fontSize: "clamp(17px, 4.5vw, 20px)",
                   lineHeight: 1.55,
                   color: "rgba(255,255,255,0.92)",
                   maxWidth: 760,
@@ -234,7 +239,7 @@ export default function AboutPage() {
                 background: "#ffffff",
                 color: "#0f172a",
                 borderRadius: 22,
-                padding: 24,
+                padding: "clamp(18px, 4vw, 24px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 display: "grid",
@@ -243,28 +248,29 @@ export default function AboutPage() {
             >
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: 900,
                   letterSpacing: "-0.03em",
+                  overflowWrap: "anywhere",
                 }}
               >
                 Disclaimer
               </div>
 
-              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 CrewBids is a decision-support tool. It helps organize bid-package
                 data and rank options based on the preferences you provide, but it
                 does not replace your own review of the source bid package.
               </div>
 
-              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 Users are responsible for confirming job details, terminal rules,
                 operating times, days off, pay impacts, and any final bidding
                 decisions before submitting bids. CrewBids is not legal, employment,
                 tax, union, or financial advice.
               </div>
 
-              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 Parsed data and AI interpretations may occasionally be incomplete,
                 imperfect, or differently interpreted from how you would rank bids
                 manually. Always use your own judgment before relying on results.
@@ -276,7 +282,7 @@ export default function AboutPage() {
                 background: "#fff7ed",
                 color: "#7c2d12",
                 borderRadius: 22,
-                padding: 24,
+                padding: "clamp(18px, 4vw, 24px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.12)",
                 border: "1px solid #fed7aa",
                 display: "grid",
@@ -285,27 +291,28 @@ export default function AboutPage() {
             >
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: 900,
                   letterSpacing: "-0.03em",
+                  overflowWrap: "anywhere",
                 }}
               >
                 Money-Back Guarantee
               </div>
 
-              <div style={{ lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 CrewBids currently offers a risk-free first unlock policy with a
                 refund window of 24 hours from purchase.
               </div>
 
-              <div style={{ lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 If something is clearly not working as expected, or if the paid
                 unlock did not deliver the intended experience, contact us within
                 that 24-hour window and include the email tied to your account plus
                 a short description of the issue.
               </div>
 
-              <div style={{ lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 Refund requests are reviewed manually. We may update this policy as
                 the product evolves, but any future changes should be reflected on
                 this page.
@@ -318,20 +325,20 @@ export default function AboutPage() {
               background: "#ffffff",
               color: "#0f172a",
               borderRadius: 22,
-              padding: 24,
+              padding: "clamp(18px, 4vw, 24px)",
               boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
               border: "1px solid rgba(255,255,255,0.14)",
               display: "grid",
               gap: 16,
-              position: "sticky",
-              top: 20,
+              alignSelf: "start",
             }}
           >
             <div
               style={{
-                fontSize: 26,
+                fontSize: "clamp(22px, 5.5vw, 26px)",
                 fontWeight: 900,
                 letterSpacing: "-0.03em",
+                overflowWrap: "anywhere",
               }}
             >
               Contact us
@@ -340,7 +347,7 @@ export default function AboutPage() {
             <div
               style={{
                 color: "#64748b",
-                fontSize: 14,
+                fontSize: "clamp(14px, 3.8vw, 15px)",
                 lineHeight: 1.6,
               }}
             >
@@ -462,6 +469,7 @@ export default function AboutPage() {
                   cursor: sending ? "wait" : "pointer",
                   opacity: sending ? 0.8 : 1,
                   boxShadow: "0 10px 24px rgba(249,115,22,0.24)",
+                  width: "100%",
                 }}
               >
                 {sending ? "Sending..." : "Send message"}

@@ -49,7 +49,8 @@ export default function HowItWorksPage() {
         style={{
           maxWidth: 1240,
           margin: "0 auto",
-          padding: "28px 24px 48px",
+          padding: "clamp(18px, 4vw, 28px) clamp(16px, 4vw, 24px) clamp(32px, 6vw, 48px)",
+          overflowX: "hidden",
         }}
       >
         <div
@@ -80,6 +81,9 @@ export default function HowItWorksPage() {
               gap: 18,
               flexWrap: "wrap",
               alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              maxWidth: 420,
             }}
           >
             <Link
@@ -108,8 +112,8 @@ export default function HowItWorksPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1.1fr) minmax(320px, 0.9fr)",
-            gap: 28,
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gap: "clamp(20px, 4vw, 28px)",
             alignItems: "start",
           }}
         >
@@ -119,7 +123,7 @@ export default function HowItWorksPage() {
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 borderRadius: 24,
-                padding: 28,
+                padding: "clamp(20px, 5vw, 28px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
               }}
             >
@@ -142,11 +146,12 @@ export default function HowItWorksPage() {
               <h1
                 style={{
                   margin: 0,
-                  fontSize: 56,
+                  fontSize: "clamp(36px, 9vw, 56px)",
                   lineHeight: 1.02,
                   letterSpacing: "-0.04em",
                   fontWeight: 900,
                   maxWidth: 760,
+                  overflowWrap: "anywhere",
                 }}
               >
                 A simpler way to turn a bid package into a real shortlist.
@@ -156,7 +161,7 @@ export default function HowItWorksPage() {
                 style={{
                   marginTop: 20,
                   marginBottom: 0,
-                  fontSize: 20,
+                  fontSize: "clamp(17px, 4.5vw, 20px)",
                   lineHeight: 1.55,
                   color: "rgba(255,255,255,0.92)",
                   maxWidth: 760,
@@ -180,15 +185,15 @@ export default function HowItWorksPage() {
                     background: "#ffffff",
                     color: "#0f172a",
                     borderRadius: 20,
-                    padding: 22,
+                    padding: "clamp(18px, 4vw, 22px)",
                     boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
                     border: "1px solid rgba(255,255,255,0.14)",
-                    display: "grid",
-                    gridTemplateColumns: "84px minmax(0, 1fr)",
-                    gap: 18,
-                    alignItems: "start",
-                  }}
-                >
+                  display: "grid",
+                  gridTemplateColumns: "84px minmax(0, 1fr)",
+                  gap: 18,
+                  alignItems: "start",
+                }}
+              >
                   <div
                     style={{
                       width: 84,
@@ -211,10 +216,11 @@ export default function HowItWorksPage() {
                   <div>
                     <div
                       style={{
-                        fontSize: 24,
+                        fontSize: "clamp(20px, 5vw, 24px)",
                         fontWeight: 900,
                         letterSpacing: "-0.03em",
                         marginBottom: 8,
+                        overflowWrap: "anywhere",
                       }}
                     >
                       {step.title}
@@ -222,7 +228,7 @@ export default function HowItWorksPage() {
                     <div
                       style={{
                         color: "#475569",
-                        fontSize: 15,
+                        fontSize: "clamp(14px, 3.8vw, 15px)",
                         lineHeight: 1.7,
                       }}
                     >
@@ -234,13 +240,19 @@ export default function HowItWorksPage() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gap: 20, position: "sticky", top: 20 }}>
+          <div
+            style={{
+              display: "grid",
+              gap: 20,
+              alignSelf: "start",
+            }}
+          >
             <div
               style={{
                 background: "#ffffff",
                 color: "#0f172a",
                 borderRadius: 22,
-                padding: 24,
+                padding: "clamp(18px, 4vw, 24px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 display: "grid",
@@ -249,20 +261,21 @@ export default function HowItWorksPage() {
             >
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: 900,
                   letterSpacing: "-0.03em",
+                  overflowWrap: "anywhere",
                 }}
               >
                 What is free?
               </div>
 
-              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 You can upload a package, run one preview, and see the top three
                 ranked crews for that package before unlocking the full analysis.
               </div>
 
-              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ color: "#475569", lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 Unlocking gives you the full ranking, excluded crews, explanations,
                 restore-on-return behavior, saved lists, and email delivery from
                 My Bids.
@@ -274,7 +287,7 @@ export default function HowItWorksPage() {
                 background: "#ffffff",
                 color: "#0f172a",
                 borderRadius: 22,
-                padding: 24,
+                padding: "clamp(18px, 4vw, 24px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.16)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 display: "grid",
@@ -283,7 +296,7 @@ export default function HowItWorksPage() {
             >
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: 900,
                   letterSpacing: "-0.03em",
                 }}
@@ -301,9 +314,10 @@ export default function HowItWorksPage() {
                       background: "#f8fafc",
                       border: "1px solid #e2e8f0",
                       color: "#334155",
-                      fontSize: 14,
+                      fontSize: "clamp(13px, 3.6vw, 14px)",
                       lineHeight: 1.55,
                       fontWeight: 600,
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {example}
@@ -317,7 +331,7 @@ export default function HowItWorksPage() {
                 background: "#fff7ed",
                 color: "#7c2d12",
                 borderRadius: 22,
-                padding: 24,
+                padding: "clamp(18px, 4vw, 24px)",
                 boxShadow: "0 18px 44px rgba(0,0,0,0.12)",
                 border: "1px solid #fed7aa",
                 display: "grid",
@@ -326,7 +340,7 @@ export default function HowItWorksPage() {
             >
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: 900,
                   letterSpacing: "-0.03em",
                 }}
@@ -334,7 +348,7 @@ export default function HowItWorksPage() {
                 Before you start
               </div>
 
-              <div style={{ lineHeight: 1.7, fontSize: 15 }}>
+              <div style={{ lineHeight: 1.7, fontSize: "clamp(14px, 3.8vw, 15px)" }}>
                 Use the exact bid package for the cycle you care about, keep your
                 prompt simple and direct, and always review the source PDF before
                 placing final bids.
@@ -344,15 +358,17 @@ export default function HowItWorksPage() {
                 href="/"
                 style={{
                   display: "inline-flex",
-                  width: "fit-content",
+                  width: "100%",
+                  maxWidth: 280,
                   marginTop: 4,
                   textDecoration: "none",
                   background: "#f97316",
                   color: "#fff",
                   borderRadius: 14,
-                  padding: "13px 18px",
+                  padding: "14px 18px",
                   fontWeight: 800,
                   boxShadow: "0 10px 24px rgba(249,115,22,0.24)",
+                  justifyContent: "center",
                 }}
               >
                 Go to CrewBids
