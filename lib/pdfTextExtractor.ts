@@ -18,8 +18,11 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const content = await page.getTextContent();
+    const rawItems = Array.isArray(content.items)
+      ? content.items
+      : Array.from(content.items ?? []);
 
-    const items = content.items
+    const items = rawItems
       .filter((item: any) => "str" in item && item.str?.trim())
       .map((item: any) => {
         const x = item.transform?.[4] ?? 0;
