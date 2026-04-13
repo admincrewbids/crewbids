@@ -8221,6 +8221,63 @@ async function restoreLatestRunForPackage(
 
 async function processPdfFile(file: File) {
   const isTargetDebugFile = file.name.toLowerCase() === "e1644.pdf";
+  const getCyclePageTextContentWithFallback = async (page: any, pageNumber: number) => {
+    try {
+      if (isTargetDebugFile) {
+        appendUploadDiagnostic(`cycle page ${pageNumber}: before getTextContent`);
+      }
+      const content = await page.getTextContent();
+      if (isTargetDebugFile) {
+        appendUploadDiagnostic(`cycle page ${pageNumber}: after getTextContent`);
+      }
+      return content;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (isTargetDebugFile) {
+        appendUploadDiagnostic(
+          `cycle page ${pageNumber}: getTextContent failed -> ${message}`
+        );
+        appendUploadDiagnostic(
+          `cycle page ${pageNumber}: attempting streamTextContent fallback`
+        );
+      }
+
+      const readableStream = page.streamTextContent();
+      const reader = readableStream.getReader();
+      const fallbackContent: {
+        items: any[];
+        styles: Record<string, any>;
+        lang: string | null;
+      } = {
+        items: [],
+        styles: Object.create(null),
+        lang: null,
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        fallbackContent.lang ??= value?.lang ?? null;
+        Object.assign(fallbackContent.styles, value?.styles ?? {});
+
+        const chunkItems = Array.isArray(value?.items)
+          ? value.items
+          : Array.from(value?.items ?? []);
+
+        fallbackContent.items.push(...chunkItems);
+      }
+
+      if (isTargetDebugFile) {
+        appendUploadDiagnostic(
+          `cycle page ${pageNumber}: streamTextContent fallback succeeded -> itemCount=${fallbackContent.items.length}`
+        );
+      }
+
+      return fallbackContent;
+    }
+  };
+
   if (isTargetDebugFile) {
     setUploadDiagnosticStatus("Starting PDF extraction...");
     appendUploadDiagnostic(`entered processPdfFile(${file.name})`);
@@ -8295,17 +8352,28 @@ async function processPdfFile(file: File) {
     for (const pageIndex of detectedCyclePageIndexes) {
       const page = await pdf.getPage(pageIndex + 1);
       const viewport = page.getViewport({ scale: 1 });
-      const textContent = await page.getTextContent();
+      const textContent = await getCyclePageTextContentWithFallback(
+        page,
+        pageIndex + 1
+      );
 
-      const normalizedItems = (textContent.items as any[])
-        .filter((item) => typeof item.str === "string" && item.str.trim())
-        .map((item) => ({
-          str: item.str,
-          x: item.transform?.[5] ?? 0,
-          y: item.transform?.[4] ?? 0,
-          width: item.height ?? 0,
-          height: item.width ?? 0,
-        }));
+      const rawCycleItems = Array.isArray(textContent.items)
+        ? textContent.items
+        : Array.from(textContent.items ?? []);
+
+      const normalizedItems = rawCycleItems
+        .map((item: any) => {
+          const text = String(item?.str ?? "").trim();
+
+          return {
+            str: text,
+            x: item.transform?.[5] ?? 0,
+            y: item.transform?.[4] ?? 0,
+            width: item.height ?? 0,
+            height: item.width ?? 0,
+          };
+        })
+        .filter((item: any) => item.str.length > 0);
 
       extractedCycleTextPages.push({
         pageNumber: pageIndex + 1,
