@@ -4,6 +4,61 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
     if (!isE1644Debug) return;
     console.log(`[pdfTextExtractor:${file.name}] ${message}`);
   };
+  const getTextContentWithFallback = async (page: any, pageNum: number) => {
+    try {
+      logStep(`page ${pageNum}: before getTextContent`);
+      const content = await page.getTextContent();
+      logStep(`page ${pageNum}: after getTextContent`);
+      return content;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logStep(`page ${pageNum}: getTextContent failed -> ${message}`);
+      logStep(`page ${pageNum}: attempting streamTextContent fallback`);
+
+      try {
+        const readableStream = page.streamTextContent();
+        const reader = readableStream.getReader();
+        const fallbackContent: {
+          items: any[];
+          styles: Record<string, any>;
+          lang: string | null;
+        } = {
+          items: [],
+          styles: Object.create(null),
+          lang: null,
+        };
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          fallbackContent.lang ??= value?.lang ?? null;
+          Object.assign(fallbackContent.styles, value?.styles ?? {});
+
+          if (Array.isArray(value?.items)) {
+            fallbackContent.items.push(...value.items);
+          }
+        }
+
+        logStep(
+          `page ${pageNum}: streamTextContent fallback succeeded -> itemCount=${fallbackContent.items.length}`
+        );
+
+        return fallbackContent;
+      } catch (fallbackError) {
+        const fallbackMessage =
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError);
+        logStep(
+          `page ${pageNum}: streamTextContent fallback failed -> ${fallbackMessage}`
+        );
+        throw new Error(
+          `extractPdfPagesFromFile failed at page ${pageNum} during getTextContent fallback: ${fallbackMessage}`
+        );
+      }
+    }
+  };
 
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
@@ -38,12 +93,9 @@ export async function extractPdfPagesFromFile(file: File): Promise<string[]> {
 
     let content: any;
     try {
-      logStep(`page ${pageNum}: before getTextContent`);
-      content = await page.getTextContent();
-      logStep(`page ${pageNum}: after getTextContent`);
+      content = await getTextContentWithFallback(page, pageNum);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logStep(`page ${pageNum}: getTextContent failed -> ${message}`);
       throw new Error(
         `extractPdfPagesFromFile failed at page ${pageNum} during getTextContent: ${message}`
       );
