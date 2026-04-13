@@ -399,12 +399,10 @@ function evaluateHardFilterOnCrew(
   const workedDays = getWorkedDays(crew);
 
   if (filter.field === "terminal") {
-    if (!Array.isArray(filter.value)) {
-      return { supported: false, passes: false, reason: `terminal filter has unsupported value` };
-    }
-
     const normalizedCrewTerminal = normalizeTerminalLabel(crew.terminal);
-    const normalizedValues = filter.value.map((value) => normalizeTerminalLabel(String(value)));
+    const normalizedValues = (Array.isArray(filter.value) ? filter.value : [filter.value]).map(
+      (value) => normalizeTerminalLabel(String(value))
+    );
 
     const matchesSpecialValue = normalizedValues.some((value) => {
       if (value === "standby") return isStandbyCrew(crew);
@@ -417,6 +415,14 @@ function evaluateHardFilterOnCrew(
         supported: true,
         passes: matchesSpecialValue,
         reason: `terminal ${crew.terminal} is outside allowed set`,
+      };
+    }
+
+    if (filter.operator === "=") {
+      return {
+        supported: true,
+        passes: matchesSpecialValue,
+        reason: `terminal ${crew.terminal} does not match required terminal`,
       };
     }
 
@@ -459,6 +465,24 @@ function evaluateHardFilterOnCrew(
       passes: !isUpCrew(crew),
       reason: "crew is UP",
     };
+  }
+
+  if (
+    filter.field === "job_type" &&
+    filter.operator === "not_in" &&
+    Array.isArray(filter.value)
+  ) {
+    const normalizedValues = filter.value.map((value) =>
+      String(value).trim().toLowerCase()
+    );
+
+    if (normalizedValues.includes("up")) {
+      return {
+        supported: true,
+        passes: !isUpCrew(crew),
+        reason: "crew is UP",
+      };
+    }
   }
 
   if (filter.field === "on_duty" && typeof filter.value === "string") {
@@ -718,6 +742,7 @@ function evaluateConditionalTerminalFallbackAssertion(
 
 function evaluateScopedRankOrderRespectsSortAssertion(
   result: PromptDebugResult,
+  parsed: ParsedPreferencesLike,
   terminal: string,
   field:
     | "on_duty"
@@ -741,11 +766,51 @@ function evaluateScopedRankOrderRespectsSortAssertion(
     .map((crew) => toRankedCrewLike(crew))
     .filter((crew) => normalizeTerminalLabel(crew.terminal) === normalizeTerminalLabel(terminal));
 
+  const scopedPreference = getScopedPreference(parsed, terminal);
+  const scopedSortOrder = scopedPreference?.sort_preferences ?? [];
+  const targetSortIndex = scopedSortOrder.findIndex(
+    (sort) => sort.field === field && sort.direction === direction
+  );
+  const earlierScopedSorts =
+    targetSortIndex > 0 ? scopedSortOrder.slice(0, targetSortIndex) : [];
+
   let comparablePairs = 0;
 
   for (let index = 0; index < scopedCrews.length - 1; index += 1) {
     const currentCrew = scopedCrews[index];
     const nextCrew = scopedCrews[index + 1];
+
+    const earlierScopedSortIsDecisive = earlierScopedSorts.some((sort) => {
+      const currentEarlierValue = getSortableFieldValue(
+        currentCrew,
+        sort.field as
+          | "on_duty"
+          | "off_duty"
+          | "operating_hours_daily"
+          | "van_hours_daily"
+          | "overtime_hours_weekly"
+          | "total_paid_hours_weekly"
+      );
+      const nextEarlierValue = getSortableFieldValue(
+        nextCrew,
+        sort.field as
+          | "on_duty"
+          | "off_duty"
+          | "operating_hours_daily"
+          | "van_hours_daily"
+          | "overtime_hours_weekly"
+          | "total_paid_hours_weekly"
+      );
+
+      if (currentEarlierValue == null && nextEarlierValue == null) return false;
+      if (currentEarlierValue == null || nextEarlierValue == null) return true;
+      return currentEarlierValue !== nextEarlierValue;
+    });
+
+    if (earlierScopedSortIsDecisive) {
+      continue;
+    }
+
     const currentValue = getSortableFieldValue(currentCrew, field);
     const nextValue = getSortableFieldValue(nextCrew, field);
 
@@ -1146,6 +1211,7 @@ function evaluateAssertion(
   if (assertion.type === "scoped_rank_order_respects_sort") {
     return evaluateScopedRankOrderRespectsSortAssertion(
       result,
+      parsed,
       assertion.value.terminal,
       assertion.value.field,
       assertion.value.direction,

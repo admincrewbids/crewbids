@@ -103,6 +103,7 @@ export type PromptDebugBatchSummary = {
     priorityViolationsCount: number;
     interpretationIssueCount: number;
     assertionFailureCount: number;
+    assertionFailures?: PromptDebugAssertionFailure[];
   }>;
 };
 
@@ -224,6 +225,7 @@ export function summarizePromptDebugBatch(
       priorityViolationsCount: summary.priorityViolationsCount,
       interpretationIssueCount: summary.interpretationIssueCount,
       assertionFailureCount: summary.assertionFailureCount,
+      assertionFailures: summary.assertionFailures,
     })),
   };
 }

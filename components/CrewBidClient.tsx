@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -170,7 +170,7 @@ const isSpareboardRow =
     duration,
     operating_hours_daily: null,
     van_hours_daily: null,
-    split_time: null, // 👈 ADD THIS LINE
+    split_time: null, // ðŸ‘ˆ ADD THIS LINE
     pdf_page_number: null,
   };
 }
@@ -200,7 +200,7 @@ const isSpareboardRow =
         duration,
         operating_hours_daily: null,
         van_hours_daily: null,
-        split_time: null, // 👈 ADD THIS LINE
+        split_time: null, // ðŸ‘ˆ ADD THIS LINE
         pdf_page_number: null,
       };
     }
@@ -444,25 +444,25 @@ type Crew = {
   daily?: ParsedCycleDay[];
   terminal: string;
 
-  // ✅ WEEKLY numeric (for ranking)
+  // âœ… WEEKLY numeric (for ranking)
   operating_hours_weekly?: number;
   overtime_hours_weekly?: number;
   total_paid_hours_weekly?: number;
 
-  // ✅ DAYS OFF
+  // âœ… DAYS OFF
   days_off?: string[];
   days_off_list?: string[];
   days_off_count?: number;
   works_weekends?: boolean;
 
-  // ✅ WEEKLY display fields
+  // âœ… WEEKLY display fields
   work_time_weekly?: string;
   overtime_weekly_text?: string;
   topup_weekly?: string;
   split_time_weekly?: string;
   operating_time_weekly?: string;
 
-  // ✅ STBY-only 2-week shape
+  // âœ… STBY-only 2-week shape
   is_two_week_stby?: boolean;
   week1?: ParsedCycleWeek;
   week2?: ParsedCycleWeek;
@@ -522,7 +522,7 @@ type ParsedPreferences = {
     }[];
   }[];
   sort_preferences: {
-    field: SortField; // ✅ FIXED (was string)
+    field: SortField; // âœ… FIXED (was string)
     direction: "asc" | "desc";
     strength: PreferenceStrength;
     weight?: number;
@@ -653,7 +653,7 @@ async function unlockPackage(
   const { error } = await supabase.from("bid_unlocks").insert({
     bid_package_id: packageId,
     user_id: userId,
-    amount_paid: 999, // ✅ FIXED (cents)
+    amount_paid: 999, // âœ… FIXED (cents)
   });
 
   if (error) {
@@ -902,7 +902,7 @@ function getPreferenceWeight(text: string, baseWeight = 5) {
 }
 
 function extractTerminalPriorities(prompt: string, crews: Crew[]) {
-  const text = prompt.toLowerCase().replace(/[’]/g, "'");
+  const text = prompt.toLowerCase().replace(/[â€™]/g, "'");
 
   const uniqueCrewTerminals = Array.from(
     new Set(
@@ -952,10 +952,32 @@ function getClauseTerminal(clause: string, crews: Crew[]): string | null {
 }
 
 function getAvoidTerminalFromClause(clause: string, crews: Crew[]): string | null {
-  const normalizedClause = clause.toLowerCase().replace(/[â€™]/g, "'");
+  const normalizedClause = clause.toLowerCase().replace(/[Ã¢â‚¬â„¢]/g, "'");
   if (!/\bavoid\b/i.test(normalizedClause)) return null;
 
   return getClauseTerminal(clause, crews);
+}
+
+function getExcludedTerminalFromClause(clause: string, crews: Crew[]): string | null {
+  const normalizedClause = clause.toLowerCase().replace(/[ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢]/g, "'");
+  if (!/^\s*exclude\s+/.test(normalizedClause)) return null;
+
+  return getClauseTerminal(clause, crews);
+}
+
+function getExplicitExcludedTerminalFromText(text: string): string | null {
+  const normalizedText = text.toLowerCase().replace(/[Ã¢â‚¬â„¢]/g, "'").trim().replace(/\s+/g, " ");
+
+  for (const [canonical, aliases] of Object.entries(CANONICAL_TERMINAL_ALIASES)) {
+    for (const alias of Array.from(new Set([canonical, ...aliases]))) {
+      const normalizedAlias = alias.toLowerCase().trim().replace(/\s+/g, " ");
+      if (normalizedText === `exclude ${normalizedAlias}`) {
+        return canonical;
+      }
+    }
+  }
+
+  return null;
 }
 
 function dedupeSortPreferences(
@@ -1048,8 +1070,58 @@ function dedupeFilters(
   return Array.from(seen.values());
 }
 
+function removeRedundantPlainTerminalPriorityGroups(
+  priorityGroups: ParsedPreferences["priority_groups"]
+): ParsedPreferences["priority_groups"] {
+  const keptGroups: ParsedPreferences["priority_groups"] = [];
+
+  for (const group of priorityGroups) {
+    const terminalConditions = group.conditions.filter(
+      (condition) => condition.field === "terminal"
+    );
+    const terminalValue = terminalConditions[0]?.value;
+    const normalizedTerminal =
+      typeof terminalValue === "string"
+        ? normalizeTerminalName(terminalValue)
+        : null;
+    const isPlainTerminalGroup =
+      normalizedTerminal != null &&
+      group.conditions.length === 1 &&
+      terminalConditions.length === 1;
+
+    const hasEarlierConditionalGroupForSameTerminal =
+      isPlainTerminalGroup &&
+      keptGroups.some((earlierGroup) => {
+        const earlierTerminalConditions = earlierGroup.conditions.filter(
+          (condition) => condition.field === "terminal"
+        );
+        const earlierTerminalValue = earlierTerminalConditions[0]?.value;
+        const earlierNormalizedTerminal =
+          typeof earlierTerminalValue === "string"
+            ? normalizeTerminalName(earlierTerminalValue)
+            : null;
+
+        return (
+          earlierNormalizedTerminal === normalizedTerminal &&
+          earlierGroup.conditions.length > 1
+        );
+      });
+
+    if (hasEarlierConditionalGroupForSameTerminal) {
+      continue;
+    }
+
+    keptGroups.push(group);
+  }
+
+  return keptGroups.map((group, index) => ({
+    ...group,
+    rank: index + 1,
+  }));
+}
+
 function shouldTreatOperatingAsWeekly(prompt: string) {
-  const text = prompt.toLowerCase().replace(/[’]/g, "'");
+  const text = prompt.toLowerCase().replace(/[â€™]/g, "'");
 
   const explicitlyDaily =
     text.includes("daily operating") ||
@@ -1107,6 +1179,50 @@ function areFiltersEquivalent(
     JSON.stringify(a.value) === JSON.stringify(b.value) &&
     a.strength === b.strength
   );
+}
+
+function removeRedundantTerminalAllowlistFilters(
+  filters: ParsedPreferences["filters"]
+): ParsedPreferences["filters"] {
+  return filters.filter((filter, index, allFilters) => {
+    if (
+      filter.field !== "terminal" ||
+      filter.operator !== "in" ||
+      !Array.isArray(filter.value) ||
+      filter.strength !== "hard"
+    ) {
+      return true;
+    }
+
+    const normalizedValues = Array.from(
+      new Set(filter.value.map((value) => normalizeTerminalName(String(value))))
+    ).sort();
+
+    return !allFilters.some((candidate, candidateIndex) => {
+      if (candidateIndex === index) return false;
+
+      if (
+        candidate.field !== "terminal" ||
+        candidate.operator !== "in" ||
+        !Array.isArray(candidate.value) ||
+        candidate.strength !== "hard"
+      ) {
+        return false;
+      }
+
+      const candidateValues = Array.from(
+        new Set(
+          candidate.value.map((value) => normalizeTerminalName(String(value)))
+        )
+      ).sort();
+
+      if (candidateValues.length <= normalizedValues.length) {
+        return false;
+      }
+
+      return normalizedValues.every((value) => candidateValues.includes(value));
+    });
+  });
 }
 
 function areSortPreferencesEquivalent(
@@ -1251,12 +1367,14 @@ function mergeParsedPreferences(
       scope.requires_weekends_off || fallbackScope.requires_weekends_off;
   }
 
-  merged.priority_groups = merged.priority_groups
-    .sort((a, b) => a.rank - b.rank)
-    .map((group, index) => ({
-      ...group,
-      rank: index + 1,
-    }));
+  merged.priority_groups = removeRedundantPlainTerminalPriorityGroups(
+    merged.priority_groups
+      .sort((a, b) => a.rank - b.rank)
+      .map((group, index) => ({
+        ...group,
+        rank: index + 1,
+      }))
+  );
 
   merged.scoped_preferences = (merged.scoped_preferences ?? [])
     .sort((a, b) => a.priority_rank - b.priority_rank)
@@ -1267,6 +1385,10 @@ function mergeParsedPreferences(
 
   merged.unknown_clauses = (merged.unknown_clauses ?? []).filter(
     (clause) => !isClauseDeterministicallyHandled(clause.text)
+  );
+
+  merged.filters = removeRedundantTerminalAllowlistFilters(
+    dedupeFilters(merged.filters ?? [])
   );
 
   return merged;
@@ -2012,7 +2134,7 @@ function detectPhraseIntents(text: string): Set<PhraseIntentKey> {
 }
 
 function isClauseDeterministicallyHandled(clause: string) {
-  const normalized = clause.toLowerCase().replace(/[’]/g, "'");
+  const normalized = clause.toLowerCase().replace(/[â€™]/g, "'");
 
   if (detectPhraseIntents(normalized).size > 0) {
     return true;
@@ -2059,6 +2181,14 @@ function isClauseDeterministicallyHandled(clause: string) {
 
   if (
     /\bavoid\s+(willowbrook|wb|lewis road|lewis|wrmf|whitby|richmond hill|rh|milton|mil|barrie|bar|bradford|kitchener|kit|lincolnville|linc|lcn|spareboard|spare board|spare|standby|stdby)\b/i.test(
+      clause
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    /^\s*exclude\s+(willowbrook|wb|lewis road|lewis|wrmf|whitby|richmond hill|rh|milton|mil|barrie|bar|bradford|kitchener|kit|lincolnville|linc|lcn|spareboard|spare board|spare|standby|stdby)\b/i.test(
       clause
     )
   ) {
@@ -2363,14 +2493,6 @@ function applyConflictResolutionRules(
         nextScopeSorts = removeOnDutySortPreference(nextScopeSorts, "asc");
       }
 
-      if (intents.has("prefer_evenings") || intents.has("evenings_only")) {
-        nextScopeSorts = removeOnDutySortPreference(nextScopeSorts, "asc");
-      }
-
-      if (intents.has("prefer_mornings") || intents.has("mornings_only")) {
-        nextScopeSorts = removeOnDutySortPreference(nextScopeSorts, "desc");
-      }
-
       if (!hasExplicitStartTimeSortIntent) {
         nextScopeSorts = removeSortPreferenceByField(
           nextScopeSorts,
@@ -2484,7 +2606,7 @@ function applyConflictResolutionRules(
 
 
 function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
-  const text = prompt.toLowerCase().replace(/[’]/g, "'");
+  const text = prompt.toLowerCase().replace(/[â€™]/g, "'");
 
   const parsed: ParsedPreferences = {
     filters: [],
@@ -2520,7 +2642,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
   for (const clauseEntry of clauses) {
     const rawClause = clauseEntry.text;
-    const clause = rawClause.toLowerCase().replace(/[’]/g, "'");
+    const clause = rawClause.toLowerCase().replace(/[â€™]/g, "'");
     const terminal = getClauseTerminal(rawClause, crews);
     if (!terminal) continue;
 
@@ -2531,6 +2653,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       clause.includes("no ") ||
       clause.includes("anything but ") ||
       clause.includes("not ") ||
+      Boolean(getExcludedTerminalFromClause(rawClause, crews)) ||
       Boolean(getAvoidTerminalFromClause(rawClause, crews)) ||
       clause.includes("exclude standby") ||
       clause.includes("no standby");
@@ -2545,6 +2668,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
   const matchedTerminals = Array.from(
     new Set(
       clauses.flatMap((clauseEntry) =>
+        getExcludedTerminalFromClause(clauseEntry.text, crews) ||
         getAvoidTerminalFromClause(clauseEntry.text, crews)
           ? []
           : extractTerminalPriorities(clauseEntry.text, crews).map(
@@ -2635,7 +2759,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
   for (const clauseEntry of clauses) {
     const rawClause = clauseEntry.text;
-    const clause = rawClause.toLowerCase().replace(/[’]/g, "'");
+    const clause = rawClause.toLowerCase().replace(/[â€™]/g, "'");
     const clauseTerminal = getClauseTerminal(rawClause, crews);
     const normalizedClauseTerminal = clauseTerminal
       ? normalizeTerminalName(clauseTerminal)
@@ -2705,6 +2829,23 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     }
 
     if (normalizedClauseTerminal) {
+      const excludedTerminal = getExcludedTerminalFromClause(rawClause, crews);
+
+      if (
+        excludedTerminal &&
+        normalizeTerminalName(excludedTerminal) === normalizedClauseTerminal
+      ) {
+        parsed.filters.push({
+          field: "terminal",
+          operator: "not_in",
+          value: [normalizedClauseTerminal],
+          strength: "hard",
+        });
+        activeTerminal = null;
+        activeTerminalSentenceIndex = -1;
+        continue;
+      }
+
       const avoidTerminal = getAvoidTerminalFromClause(rawClause, crews);
 
       if (avoidTerminal && normalizeTerminalName(avoidTerminal) === normalizedClauseTerminal) {
@@ -3357,14 +3498,19 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     detectPhraseIntents(text)
   );
 
-  return cleanedParsed;
+  return {
+    ...cleanedParsed,
+    priority_groups: removeRedundantPlainTerminalPriorityGroups(
+      cleanedParsed.priority_groups
+    ),
+  };
 }
 
 function applyDeterministicPreferenceRules(
   parsed: ParsedPreferences,
   prompt: string
 ): ParsedPreferences {
-  const text = prompt.toLowerCase().replace(/[â€™]/g, "'");
+  const text = prompt.toLowerCase().replace(/[Ã¢â‚¬â„¢]/g, "'");
 
   const nextParsed: ParsedPreferences = {
     ...parsed,
@@ -3477,9 +3623,10 @@ function applyDeterministicPreferenceRulesV2(
   parsed: ParsedPreferences,
   prompt: string
 ): ParsedPreferences {
-  const text = prompt.toLowerCase().replace(/[Ã¢â‚¬â„¢]/g, "'");
+  const text = prompt.toLowerCase().replace(/[ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢]/g, "'");
   const intents = detectPhraseIntents(text);
   const explicitTerminalOnlyLanguage = hasExplicitTerminalOnlyLanguage(text);
+  const explicitlyExcludedTerminal = getExplicitExcludedTerminalFromText(prompt);
 
   const nextParsed: ParsedPreferences = {
     ...parsed,
@@ -3495,6 +3642,33 @@ function applyDeterministicPreferenceRulesV2(
       required_days_off: [...(scope.required_days_off ?? [])],
     })),
   };
+
+  if (explicitlyExcludedTerminal) {
+    const normalizedExcludedTerminal = normalizeTerminalName(explicitlyExcludedTerminal);
+
+    nextParsed.filters.push({
+      field: "terminal",
+      operator: "not_in",
+      value: [normalizedExcludedTerminal],
+      strength: "hard",
+    });
+
+    nextParsed.priority_groups = nextParsed.priority_groups.filter((group) => {
+      const terminalCondition = group.conditions.find(
+        (condition) => condition.field === "terminal"
+      );
+
+      return (
+        !terminalCondition ||
+        normalizeTerminalName(String(terminalCondition.value)) !==
+          normalizedExcludedTerminal
+      );
+    });
+
+    nextParsed.scoped_preferences = (nextParsed.scoped_preferences ?? []).filter(
+      (scope) => scope.normalized_terminal !== normalizedExcludedTerminal
+    );
+  }
 
   if (intents.has("exclude_up")) {
     nextParsed.filters = nextParsed.filters.filter((filter) => {
@@ -3556,10 +3730,14 @@ function applyDeterministicPreferenceRulesV2(
       (filter) =>
         !(
           filter.field === "terminal" &&
-          filter.operator === "not_in" &&
-          Array.isArray(filter.value) &&
-          filter.value.some(
-            (value) => normalizeTerminalName(String(value)) === "standby"
+          (
+            (filter.operator === "not_in" &&
+              Array.isArray(filter.value) &&
+              filter.value.some(
+                (value) => normalizeTerminalName(String(value)) === "standby"
+              )) ||
+            (filter.operator === "=" &&
+              normalizeTerminalName(String(filter.value)) === "standby")
           )
         )
     );
@@ -3713,7 +3891,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
 
       if (terminalCondition) {
         items.push(
-          `📍 ${formatTerminalDisplayName(String(terminalCondition.value))} ${
+          `ðŸ“ ${formatTerminalDisplayName(String(terminalCondition.value))} ${
             index === 0 ? "(Highest Priority)" : `(Priority ${index + 1})`
           }`
         );
@@ -3726,7 +3904,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       typeof filter.value === "string"
     ) {
-      items.push(`⛔ No jobs starting before ${filter.value}`);
+      items.push(`â›” No jobs starting before ${filter.value}`);
     }
 
     if (
@@ -3734,7 +3912,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "<=" &&
       filter.value === TIME_BUCKETS.morning.end
     ) {
-      items.push(`🌅 Morning jobs only`);
+      items.push(`ðŸŒ… Morning jobs only`);
     }
 
     if (
@@ -3742,7 +3920,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       filter.value === TIME_BUCKETS.evening.start
     ) {
-      items.push(`🌆 Evening jobs only`);
+      items.push(`ðŸŒ† Evening jobs only`);
     }
 
     if (
@@ -3750,7 +3928,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "<=" &&
       filter.value === TIME_BUCKETS.afternoon.end
     ) {
-      items.push(`🌙 No night jobs`);
+      items.push(`ðŸŒ™ No night jobs`);
     }
 
     if (
@@ -3762,7 +3940,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       if (visibleValues.length === 0) return;
 
       items.push(
-        `⛔ Only these terminals allowed: ${visibleValues
+        `â›” Only these terminals allowed: ${visibleValues
           .map((t) => formatTerminalDisplayName(String(t)))
           .join(", ")}`
       );
@@ -3777,7 +3955,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       if (visibleValues.length === 0) return;
 
       items.push(
-        `🚫 Excluded terminals: ${visibleValues
+        `ðŸš« Excluded terminals: ${visibleValues
           .map((t) => formatTerminalDisplayName(String(t)))
           .join(", ")}`
       );
@@ -3788,7 +3966,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("🚫 Hide UP crews");
+      items.push("ðŸš« Hide UP crews");
     }
 
     if (
@@ -3804,7 +3982,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       );
 
       if (normalizedValues.includes("up")) {
-        items.push("🚫 Hide UP crews");
+        items.push("ðŸš« Hide UP crews");
       }
     }
 
@@ -3813,7 +3991,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("✅ Spareboard only (4-digit 3xxx)");
+      items.push("âœ… Spareboard only (4-digit 3xxx)");
     }
 
     if (
@@ -3821,7 +3999,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("🚫 Exclude spareboard crews (4-digit 3xxx)");
+      items.push("ðŸš« Exclude spareboard crews (4-digit 3xxx)");
     }
 
     if (
@@ -3829,7 +4007,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("⛔ Only 3 day off jobs");
+      items.push("â›” Only 3 day off jobs");
     }
 
     if (
@@ -3837,7 +4015,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === ">=" &&
       Number(filter.value) === 3
     ) {
-      items.push("⛔ Only 3 day off jobs");
+      items.push("â›” Only 3 day off jobs");
     }
 
     if (
@@ -3845,7 +4023,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("🚫 No 3 day off jobs");
+      items.push("ðŸš« No 3 day off jobs");
     }
 
     if (
@@ -3853,7 +4031,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       (filter.operator === "<" || filter.operator === "<=" || filter.operator === "!=") &&
       Number(filter.value) === 3
     ) {
-      items.push("🚫 No 3 day off jobs");
+      items.push("ðŸš« No 3 day off jobs");
     }
 
     if (
@@ -3861,7 +4039,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === true
     ) {
-      items.push("⛔ Must have weekends off");
+      items.push("â›” Must have weekends off");
     }
 
     if (
@@ -3869,7 +4047,7 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.operator === "=" &&
       filter.value === "none"
     ) {
-      items.push("⛔ No split jobs");
+      items.push("â›” No split jobs");
     }
   });
 
@@ -3879,46 +4057,46 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
         sort.field === "operating_hours_weekly") &&
       sort.direction === "asc"
     ) {
-      items.push(`📊 Sort by lowest operating time`);
+      items.push(`ðŸ“Š Sort by lowest operating time`);
     }
 
     if (sort.field === "van_hours_daily" && sort.direction === "asc") {
-      items.push(`🚐 Sort by lowest van time`);
+      items.push(`ðŸš Sort by lowest van time`);
     }
 
     if (sort.field === "overtime_hours_weekly" && sort.direction === "desc") {
-      items.push(`💰 Prefer highest overtime`);
+      items.push(`ðŸ’° Prefer highest overtime`);
     }
 
     if (sort.field === "on_duty" && sort.direction === "asc") {
-      items.push(`🌅 Prefer morning / earlier start jobs`);
+      items.push(`ðŸŒ… Prefer morning / earlier start jobs`);
     }
 
     if (sort.field === "on_duty" && sort.direction === "desc") {
-      items.push(`🌆 Prefer evening / later start jobs`);
+      items.push(`ðŸŒ† Prefer evening / later start jobs`);
     }
 
     if (sort.field === "weekends_off") {
-      items.push(`👍 Prefer weekends off`);
+      items.push(`ðŸ‘ Prefer weekends off`);
     }
 
     if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
-      items.push(`👍 Prefer 3 day off jobs`);
+      items.push(`ðŸ‘ Prefer 3 day off jobs`);
     }
 
     if (sort.field === "three_day_off_jobs" && sort.direction === "asc") {
-      items.push(`↘ 3 day off jobs last`);
+      items.push(`â†˜ 3 day off jobs last`);
     }
   });
 
   parsed.tradeoffs.forEach((tradeoff) => {
     if (tradeoff.type === "prefer_closeness_over_finish_time") {
-      items.push(`🔁 Will accept later jobs to stay closer to home`);
+      items.push(`ðŸ” Will accept later jobs to stay closer to home`);
     }
 
     if (tradeoff.type === "avoid_terminal" && tradeoff.value) {
       items.push(
-        `⚠️ Prefer to avoid terminal: ${formatTerminalDisplayName(tradeoff.value)}`
+        `âš ï¸ Prefer to avoid terminal: ${formatTerminalDisplayName(tradeoff.value)}`
       );
     }
   });
@@ -4039,8 +4217,6 @@ function evaluateFinishFilterForDay(
     if (isOvernight) {
       comparableFilter += 24 * 60;
     }
-  } else if (isOvernight && comparableFilter < finish) {
-    comparableFilter += 24 * 60;
   }
 
   if (filter.operator === ">=" && finish < comparableFilter) {
@@ -4327,7 +4503,7 @@ function buildCrewExplanation(scoreBreakdown: ScoreBreakdownItem[]): string {
     downside,
   ].filter(Boolean);
 
-  return lines.slice(0, 3).map((l) => `• ${l}`).join("\n");
+  return lines.slice(0, 3).map((l) => `â€¢ ${l}`).join("\n");
 }
 
 function getWeekdayDaysOffCount(crew: Crew): number {
@@ -5076,7 +5252,7 @@ if (startsTooLate && overridden) {
   });
 }
 
-// ✅ Positive start-time match signals
+// âœ… Positive start-time match signals
 if (
   !startsTooEarly &&
   minStartMinutes !== null &&
@@ -5397,7 +5573,7 @@ if (hasHardWeekendsOffRule) {
     continue;
   }
 
-  // ✅ Positive weekends-off match signal
+  // âœ… Positive weekends-off match signal
   if (!crewWithSchedule.works_weekends) {
     scoreBreakdown.push({
       label: "Matches weekends_off preference",
@@ -5424,7 +5600,7 @@ if (scoped?.required_days_off?.length) {
     continue;
   }
 
-  // ✅ Positive required-days-off match signal
+  // âœ… Positive required-days-off match signal
   if (hasAllRequiredDays) {
     scoreBreakdown.push({
       label: `Matches required days off (${scoped.required_days_off.join(", ")})`,
@@ -5534,7 +5710,7 @@ if (finishesTooLate && overridden) {
   });
 }
 
-// ✅ Positive finish-time match signal
+// âœ… Positive finish-time match signal
 if (
   !finishesTooLate &&
   maxFinishMinutes !== null &&
@@ -5651,7 +5827,16 @@ const explanation = buildCrewExplanation(scoreBreakdown);
     (sort) => sort.field === "three_day_off_jobs"
   );
 
-  if (globalThreeDayOffSort) {
+  const sharedScopedSorts =
+    aTerminal === bTerminal
+      ? parsed.scoped_preferences?.find(
+          (scope) =>
+            scope.normalized_terminal === aTerminal &&
+            (scope.sort_preferences?.length ?? 0) > 0
+        )?.sort_preferences ?? []
+      : [];
+
+  if (globalThreeDayOffSort && sharedScopedSorts.length === 0) {
     const aThreeDayOff = a.days_off_count === 3 ? 1 : 0;
     const bThreeDayOff = b.days_off_count === 3 ? 1 : 0;
 
@@ -6104,51 +6289,51 @@ function buildMatchBadges(scoreBreakdown: ScoreBreakdownItem[]): string[] {
       const rankMatch = item.label.match(/#(\d+)/);
       const rank = rankMatch?.[1] ?? "1";
 
-      push(`✅ Priority #${rank} terminal (${terminal})`);
+      push(`âœ… Priority #${rank} terminal (${terminal})`);
       continue;
     }
 
     if (label.includes("starts after preferred minimum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`✅ Starts after ${match?.[1] ?? "minimum"}`);
+      push(`âœ… Starts after ${match?.[1] ?? "minimum"}`);
       continue;
     }
 
     if (label.includes("starts before preferred maximum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`✅ Starts before ${match?.[1] ?? "maximum"}`);
+      push(`âœ… Starts before ${match?.[1] ?? "maximum"}`);
       continue;
     }
 
     if (label.includes("finishes before preferred maximum")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`✅ Finishes before ${match?.[1] ?? "maximum"}`);
+      push(`âœ… Finishes before ${match?.[1] ?? "maximum"}`);
       continue;
     }
 
     if (label.includes("matches weekends_off preference")) {
-      push(`✅ Weekends off`);
+      push(`âœ… Weekends off`);
       continue;
     }
 
     if (label.includes("matches required days off")) {
       const match = item.label.match(/\((.*?)\)/);
-      push(`✅ Days off: ${match?.[1] ?? "matched"}`);
+      push(`âœ… Days off: ${match?.[1] ?? "matched"}`);
       continue;
     }
 
     if (label.includes("on_duty preference (asc)")) {
-      push(`✅ Earlier starts preferred`);
+      push(`âœ… Earlier starts preferred`);
       continue;
     }
 
     if (label.includes("on_duty preference (desc)")) {
-      push(`✅ Later starts preferred`);
+      push(`âœ… Later starts preferred`);
       continue;
     }
 
     if (label.includes("overtime_hours_weekly preference (desc)")) {
-      push(`✅ Higher overtime`);
+      push(`âœ… Higher overtime`);
       continue;
     }
 
@@ -6156,12 +6341,12 @@ function buildMatchBadges(scoreBreakdown: ScoreBreakdownItem[]): string[] {
       label.includes("operating_hours_daily preference (asc)") ||
       label.includes("operating_hours_weekly preference (asc)")
     ) {
-      push(`✅ Lower operating time`);
+      push(`âœ… Lower operating time`);
       continue;
     }
 
     if (label.includes("van_hours_daily preference (asc)")) {
-      push(`✅ Lower van time`);
+      push(`âœ… Lower van time`);
       continue;
     }
   }
@@ -6948,9 +7133,9 @@ const resultsSummary = useMemo(() => {
 useEffect(() => {
   if (!parsedPreferences) return;
 
-  // 🔒 BLOCK if preview already used
+  // ðŸ”’ BLOCK if preview already used
   if (!hasFullAccess && hasUsedFreePreview) {
-    console.log("Preview already used — blocking ranking");
+    console.log("Preview already used â€” blocking ranking");
     return;
   }
 
@@ -6983,7 +7168,7 @@ setExcludedCrews(visibleExcluded);
 setFullIncludedCount(fullIncludedCount);
 setFullExcludedCount(fullExcludedCount);
 
-    // 🔒 Mark preview used AFTER first run
+    // ðŸ”’ Mark preview used AFTER first run
  if (!hasFullAccess && !hasUsedFreePreview) {
   await markPreviewUsed(authUser?.id, currentPackageId);
   setHasUsedFreePreview(true);
@@ -7221,7 +7406,7 @@ function buildRealCrews() {
   let parsedRows = parseCrewCycleFromTextPages(cycleTextPages);
 
 if (!parsedRows.some((row: any) => String(row.crew_code || "").trim() === "BD_D")) {
-  console.log("⚠️ BD_D NOT FOUND — USING BRADFORD FALLBACK");
+  console.log("âš ï¸ BD_D NOT FOUND â€” USING BRADFORD FALLBACK");
 
   const bradfordFallbackRows =
     parseBradfordFallbackRowsFromCycleTextPages(cycleTextPages);
@@ -7259,7 +7444,7 @@ const enriched = parsedRows.map((row: any) =>
     JSON.stringify(enriched.slice(0, 5), null, 2)
   );
 
-  // 🔥 THIS IS THE FIX — map to Crew shape
+  // ðŸ”¥ THIS IS THE FIX â€” map to Crew shape
 const crews = enriched.map((row: any, index: number) => {
 const summedWeeklyOperating =
   (row.daily || []).reduce((sum: number, day: any) => {
@@ -7305,7 +7490,10 @@ const summedWeeklyOperating =
     id: row.crew_id || `${row.crew_code}-${index}`,
 
     crew_number: row.crew_id,
-    terminal: row.terminal || "Unknown",
+    terminal:
+      row.is_two_week_stby === true || row.crew_code === "STBY"
+        ? "Standby"
+        : row.terminal || "Unknown",
 
     daily: row.daily || [],
     jobs: row.jobs || [],
@@ -7315,12 +7503,12 @@ const summedWeeklyOperating =
     days_off_count: row.days_off_count ?? 0,
     works_weekends: row.works_weekends ?? false,
 
-    // ✅ STBY 2-week structure
+    // âœ… STBY 2-week structure
     is_two_week_stby: row.is_two_week_stby ?? false,
     week1: row.week1,
     week2: row.week2,
 
-    // ✅ WEEKLY numeric (used by ranking engine)
+    // âœ… WEEKLY numeric (used by ranking engine)
     operating_hours_weekly: hhmmToHours(
       row.raw_cells?.operating_time_weekly
     ),
@@ -7328,7 +7516,7 @@ const summedWeeklyOperating =
       row.raw_cells?.overtime_weekly
     ),
 
-            // ✅ WEEKLY display values (used by UI)
+            // âœ… WEEKLY display values (used by UI)
     work_time_weekly: row.raw_cells?.work_time_weekly || "-",
     overtime_weekly_text: row.raw_cells?.overtime_weekly || "-",
     topup_weekly: row.raw_cells?.topup_weekly || "-",
@@ -7346,7 +7534,7 @@ const summedWeeklyOperating =
           })()
         : row.raw_cells?.operating_time_weekly || "-",
 
-    // ✅ fallback text
+    // âœ… fallback text
     notes: [
       `Days Off: ${(row.days_off_list || []).join(", ") || "-"}`,
       `Work Time: ${row.raw_cells?.work_time_weekly || "-"}`,
@@ -7416,7 +7604,7 @@ const spareboardCrews = parsedSpareboardJobs
         duration: is_day_off ? null : duration,
         operating_hours_daily: null,
         van_hours_daily: null,
-        split_time: null, // 👈 ADD THIS LINE
+        split_time: null, // ðŸ‘ˆ ADD THIS LINE
         pdf_page_number: null,
         job_detail: is_day_off
           ? null
@@ -7880,7 +8068,7 @@ function detectCyclePageIndexesFromExtractedPages(pages: string[]): number[] {
         text.includes("LR_D") ||
         text.includes("ML_D") ||
         text.includes("AE_D") ||
-        text.includes("BD_D") || // 👈 IMPORTANT
+        text.includes("BD_D") || // ðŸ‘ˆ IMPORTANT
         text.includes("SH_D") ||
         text.includes("RH_D") ||
         text.includes("LI_D") ||
@@ -7888,7 +8076,7 @@ function detectCyclePageIndexesFromExtractedPages(pages: string[]): number[] {
         text.includes("WB_D") ||
         text.includes("WB_UP");
 
-      // 🔥 Bradford fallback (this is key)
+      // ðŸ”¥ Bradford fallback (this is key)
       const isExplicitBradfordCyclePage =
         text.includes("CYCLE") &&
         text.includes("BD_D");
@@ -8046,7 +8234,7 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
     let restoredPdfUrl: string | null = null;
     let resolvedStoragePath: string | null = existingStoragePath ?? null;
 
-    // ✅ Only upload if this package does NOT already have a stored PDF path
+    // âœ… Only upload if this package does NOT already have a stored PDF path
     if (!resolvedStoragePath && user?.id && packageId) {
       const { storagePath } = await uploadBidPackagePdf(
         file,
@@ -8060,7 +8248,7 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
       }
     }
 
-    // ✅ Reuse existing stored PDF if we already have it
+    // âœ… Reuse existing stored PDF if we already have it
     if (resolvedStoragePath) {
       restoredPdfUrl = await getSignedBidPackageUrl(resolvedStoragePath);
     }
@@ -8071,7 +8259,7 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
 
     setPdfUrl(restoredPdfUrl);
 
-    // ✅ THIS is the ONLY parsing call now
+    // âœ… THIS is the ONLY parsing call now
     await processPdfFile(file);
 
     setUploadProgress(100);
@@ -8472,7 +8660,7 @@ function PreferenceSection({
   setOverriddenCrewIds(nextOverrides);
 
   const results = rankCrews(
-    getRealCrews(), // ✅ switched from crews → real parsed crews
+    getRealCrews(), // âœ… switched from crews â†’ real parsed crews
     parsedPreferences,
     crewScheduleMap,
     jobLookupMap,
@@ -8691,7 +8879,7 @@ async function handleGenerateList() {
     return;
   }
 
-  alert("✅ Saved to My Bids");
+  alert("âœ… Saved to My Bids");
 }
 
 function handleResetOrder() {
@@ -9223,7 +9411,7 @@ letterSpacing: "-0.04em",
 maxWidth: 780,
 }}
 >
-Your Best Crew Picks —
+Your Best Crew Picks â€”
 <br />
 <span style={{ color: "#f97316", fontStyle: "italic" }}>
 Ranked for You
@@ -9271,7 +9459,7 @@ gap: 14,
 padding: "22px 24px",
 }}
 >
-<div style={{ fontSize: 20 }}>✨</div>
+<div style={{ fontSize: 20 }}>âœ¨</div>
 <input
 value={prompt}
 onChange={(e) => setPrompt(e.target.value)}
@@ -9331,7 +9519,7 @@ fontSize: 16,
 fontWeight: 500,
 }}
 >
-e.g. “Weekends off, no early starts, prefer Lewis Rd”
+e.g. â€œWeekends off, no early starts, prefer Lewis Rdâ€
 </div>
 
 <div
@@ -9357,7 +9545,7 @@ fontWeight: 800,
 color: "#0f172a",
 }}
 >
-📄 Upload Your Bid Package
+ðŸ“„ Upload Your Bid Package
 </div>
 
 <div
@@ -9414,7 +9602,7 @@ fontWeight: 800,
 color: "#0f172a",
 }}
 >
-Uploading your bid package…
+Uploading your bid packageâ€¦
 </div>
 
 <div
@@ -9458,7 +9646,7 @@ fontWeight: 900,
 color: "#166534",
 }}
 >
-✅ Upload Complete
+âœ… Upload Complete
 </div>
 
 <div
@@ -9656,7 +9844,7 @@ border: "1px solid #e5e7eb",
 >
 <div style={{ marginBottom: 10 }}>
 <h2 style={{ margin: 0, fontSize: 22 }}>
-🧠 Your Preferences (AI Interpreted)
+ðŸ§  Your Preferences (AI Interpreted)
 </h2>
 <div style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
 Grouped by terminal and prioritized in the order you requested
@@ -9890,7 +10078,7 @@ Must include:{" "}
               flexShrink: 0,
             }}
           >
-            {manualCrewOrder.length > 0 ? "↕" : "⭐"}
+            {manualCrewOrder.length > 0 ? "â†•" : "â­"}
           </div>
 
           <div style={{ minWidth: 0 }}>
@@ -9941,7 +10129,7 @@ Must include:{" "}
               }}
             >
               {manualCrewOrder.length > 0
-                ? "Custom order active — this list has been manually rearranged and no longer reflects the default ranking."
+                ? "Custom order active â€” this list has been manually rearranged and no longer reflects the default ranking."
                 : "Drag crew cards to reorder your list and build your final bid order."}
             </div>
           </div>
@@ -9971,7 +10159,7 @@ Must include:{" "}
         whiteSpace: "nowrap",
       }}
     >
-      ↕ Custom Order Active
+      â†• Custom Order Active
     </div>
   )}
 
@@ -10745,7 +10933,7 @@ onDrop={() => {
 
               {crew.included_override && (
                 <p style={{ marginTop: 10, color: "#9c6b00" }}>
-                  🟡 Included (Override) — {crew.override_reason}
+                  ðŸŸ¡ Included (Override) â€” {crew.override_reason}
                 </p>
               )}
             </div>
@@ -10899,7 +11087,7 @@ onDrop={() => {
                             textAlign: "center",
                           }}
                         >
-                          {isExpanded ? "−" : "+"}
+                          {isExpanded ? "âˆ’" : "+"}
                         </div>
                       </div>
                     </button>
@@ -11424,7 +11612,7 @@ fontSize: 14,
 color: "#64748b",
 }}
 >
-{formatTerminalDisplayName(crew.terminal)} — manually excluded
+{formatTerminalDisplayName(crew.terminal)} â€” manually excluded
 </div>
 </div>
 
@@ -11454,7 +11642,7 @@ rankedCrews.length > 0 &&
 fullIncludedCount > rankedCrews.length && (
 <div style={{ marginTop: 30 }}>
 <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12 }}>
-🔒 Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
+ðŸ”’ Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
 </div>
 
 <div style={{ display: "grid", gap: 12 }}>
@@ -11520,7 +11708,7 @@ fullIncludedCount > rankedCrews.length && (
   }}
 >
   <div style={{ fontWeight: 800, fontSize: 18 }}>
-    🔒 See your full ranking, excluded crews, and WHY
+    ðŸ”’ See your full ranking, excluded crews, and WHY
   </div>
 
   <div style={{ marginTop: 6, color: "#555" }}>
@@ -11541,11 +11729,11 @@ fullIncludedCount > rankedCrews.length && (
     }}
     onClick={handleUnlockCheckout}
   >
-    Unlock Full Analysis — $9.99
+    Unlock Full Analysis â€” $9.99
   </button>
 
   <div style={{ marginTop: 10, fontSize: 12, color: "#777" }}>
-    Risk-Free First Unlock — refund within 24 hours
+    Risk-Free First Unlock â€” refund within 24 hours
   </div>
 </div>
 </div>
@@ -11556,3 +11744,4 @@ fullIncludedCount > rankedCrews.length && (
 
 );
 }
+

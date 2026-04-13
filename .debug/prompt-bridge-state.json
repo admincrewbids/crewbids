@@ -1,0 +1,166 @@
+{
+  "command": {
+    "id": "f758ef81-299d-4a81-9571-76fd050282f0",
+    "action": "runRegressionSuite",
+    "createdAt": "2026-04-13T01:26:37.9350034-04:00"
+  },
+  "latestResult": {
+    "commandId": "f758ef81-299d-4a81-9571-76fd050282f0",
+    "action": "runRegressionSuite",
+    "status": "completed",
+    "completedAt": "2026-04-13T05:27:00.808Z",
+    "payload": {
+      "totalPrompts": 16,
+      "promptsWithViolations": 0,
+      "promptsWithNoResults": 0,
+      "promptsWithInterpretationErrors": 0,
+      "promptsWithAssertionFailures": 0,
+      "results": [
+        {
+          "prompt": "Lewis Road only: Lewis Road only",
+          "normalizedPrompt": "Lewis Road only",
+          "rankedCount": 17,
+          "excludedCount": 172,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Lewis Road only, no starts before 05:00: Lewis Road only, no starts before 05:00",
+          "normalizedPrompt": "Lewis Road only, no starts before 05:00",
+          "rankedCount": 11,
+          "excludedCount": 178,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "No UP jobs: No UP jobs",
+          "normalizedPrompt": "No UP jobs",
+          "rankedCount": 165,
+          "excludedCount": 24,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Willowbrook only. No jobs finishing after 02:00.: Willowbrook only. No jobs finishing after 02:00.",
+          "normalizedPrompt": "Willowbrook only. No jobs finishing after 02:00.",
+          "rankedCount": 66,
+          "excludedCount": 123,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Lewis Road first, then Willowbrook, then Barrie. No other terminals.: Lewis Road first, then Willowbrook, then Barrie. No other terminals.",
+          "normalizedPrompt": "Lewis Road first, then Willowbrook, then Barrie. No other terminals.",
+          "rankedCount": 120,
+          "excludedCount": 69,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Avoid Willowbrook, but do not exclude it.: Avoid Willowbrook, but do not exclude it.",
+          "normalizedPrompt": "Avoid Willowbrook, but do not exclude it.",
+          "rankedCount": 189,
+          "excludedCount": 0,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "No splits: No splits",
+          "normalizedPrompt": "No splits",
+          "rankedCount": 140,
+          "excludedCount": 49,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Standby only: Standby only",
+          "normalizedPrompt": "Standby only",
+          "rankedCount": 4,
+          "excludedCount": 185,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "No shuttle bus: No shuttle bus",
+          "normalizedPrompt": "No shuttle bus",
+          "rankedCount": 122,
+          "excludedCount": 67,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Lewis Road mornings first, Willowbrook evenings first: Lewis Road mornings first, Willowbrook evenings first",
+          "normalizedPrompt": "Lewis Road mornings first, Willowbrook evenings first",
+          "rankedCount": 189,
+          "excludedCount": 0,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Barrie only if it finishes by 18:00: Barrie only if it finishes by 18:00",
+          "normalizedPrompt": "Barrie only if it finishes by 18:00",
+          "rankedCount": 6,
+          "excludedCount": 183,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Exclude Willowbrook: Exclude Willowbrook",
+          "normalizedPrompt": "Exclude Willowbrook",
+          "rankedCount": 99,
+          "excludedCount": 90,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Lewis Road and Willowbrook only, exclude UP jobs: Lewis Road and Willowbrook only, exclude UP jobs",
+          "normalizedPrompt": "Lewis Road and Willowbrook only, exclude UP jobs",
+          "rankedCount": 83,
+          "excludedCount": 106,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "3 day off jobs first, no splits: 3 day off jobs first, no splits",
+          "normalizedPrompt": "3 day off jobs first, no splits",
+          "rankedCount": 140,
+          "excludedCount": 49,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.: 3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.",
+          "normalizedPrompt": "3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.",
+          "rankedCount": 189,
+          "excludedCount": 0,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        },
+        {
+          "prompt": "Barrie if it finishes by 18:00, otherwise Willowbrook: Barrie if it finishes by 18:00, otherwise Willowbrook",
+          "normalizedPrompt": "Barrie if it finishes by 18:00, otherwise Willowbrook",
+          "rankedCount": 182,
+          "excludedCount": 7,
+          "priorityViolationsCount": 0,
+          "interpretationIssueCount": 0,
+          "assertionFailureCount": 0
+        }
+      ]
+    }
+  }
+}
