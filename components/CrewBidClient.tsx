@@ -6398,10 +6398,42 @@ const [currentFileHash, setCurrentFileHash] = useState<string | null>(null);
 const [savedRuns, setSavedRuns] = useState<any[]>([]);
 const [parsedPreferences, setParsedPreferences] =
   useState<ParsedPreferences | null>(null);
+const [viewportWidth, setViewportWidth] = useState(1280);
 
 const preferenceSummary = parsedPreferences
   ? summarizePreferencesForDisplay(parsedPreferences)
   : null;
+
+const isMobile = viewportWidth < 768;
+const isTablet = viewportWidth < 1100;
+const isCompact = viewportWidth < 480;
+const pageHorizontalPadding = isMobile ? 16 : 32;
+const heroBottomPadding = isMobile ? 56 : 120;
+const contentTopPull = isMobile ? -28 : -72;
+const primaryCardColumns = isMobile
+  ? "1fr"
+  : isTablet
+    ? "180px minmax(0, 1fr)"
+    : "220px minmax(0, 1fr) 150px";
+const excludedCardColumns = isMobile
+  ? "1fr"
+  : isTablet
+    ? "180px minmax(0, 1fr)"
+    : "220px minmax(0, 1fr) 180px";
+const expandedDayColumns = isMobile
+  ? "1fr"
+  : isTablet
+    ? "140px minmax(0, 1fr)"
+    : "160px minmax(0, 1fr) auto";
+const mobileActionRowStyle = isMobile
+  ? {
+      width: "100%",
+      flexDirection: "row" as const,
+      alignItems: "stretch" as const,
+      justifyContent: "stretch",
+      flexWrap: "wrap" as const,
+    }
+  : {};
 
 
 const labelStyle = {
@@ -6412,6 +6444,21 @@ const labelStyle = {
   color: "#6b7280",
   marginBottom: 4,
 };
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const updateViewportWidth = () => {
+    setViewportWidth(window.innerWidth);
+  };
+
+  updateViewportWidth();
+  window.addEventListener("resize", updateViewportWidth);
+
+  return () => {
+    window.removeEventListener("resize", updateViewportWidth);
+  };
+}, []);
 
 // disabled old bulk saved-runs loader
 useEffect(() => {
@@ -9016,6 +9063,7 @@ minHeight: "100vh",
 background: "#f3f5f9",
 color: "#0f172a",
 fontFamily: "Inter, Arial, sans-serif",
+overflowX: "hidden",
 }}
 >
 <div
@@ -9023,7 +9071,7 @@ style={{
 background:
 "linear-gradient(135deg, #0b1f4d 0%, #0d2d6c 55%, #0a2357 100%)",
 color: "#fff",
-padding: "24px 32px 120px",
+padding: `24px ${pageHorizontalPadding}px ${heroBottomPadding}px`,
 }}
 >
 <div
@@ -9035,10 +9083,11 @@ margin: "0 auto",
 <div
 style={{
 display: "flex",
-alignItems: "center",
+alignItems: isMobile ? "stretch" : "center",
 justifyContent: "space-between",
 gap: 24,
 marginBottom: 48,
+flexDirection: isMobile ? "column" : "row",
 }}
 >
 <div
@@ -9046,6 +9095,8 @@ style={{
 display: "flex",
 alignItems: "center",
 gap: 10,
+width: isMobile ? "100%" : undefined,
+justifyContent: isMobile ? "center" : undefined,
 }}
 >
 <a
@@ -9060,10 +9111,11 @@ textDecoration: "none",
 src="/crewbids-logo.png"
 alt="CrewBids Logo"
 style={{
-width: 420,
+width: isMobile ? 240 : isTablet ? 320 : 420,
 height: "auto",
 display: "block",
 marginTop: 6,
+maxWidth: "100%",
 }}
 />
 
@@ -9089,8 +9141,11 @@ style={{
 display: "flex",
 alignItems: "center",
 gap: 28,
-fontSize: 18,
+fontSize: isMobile ? 15 : 18,
 fontWeight: 600,
+flexWrap: "wrap",
+width: isMobile ? "100%" : undefined,
+justifyContent: isMobile ? "center" : "flex-end",
 }}
 >
 <button
@@ -9101,8 +9156,9 @@ background: "transparent",
 border: "none",
 color: "#fff",
 cursor: "pointer",
-fontSize: 18,
+fontSize: isMobile ? 15 : 18,
 fontWeight: 600,
+padding: isMobile ? "6px 0" : 0,
 }}
 >
 How It Works
@@ -9116,8 +9172,9 @@ background: "transparent",
 border: "none",
 color: "#fff",
 cursor: "pointer",
-fontSize: 18,
+fontSize: isMobile ? 15 : 18,
 fontWeight: 600,
+padding: isMobile ? "6px 0" : 0,
 }}
 >
 About & Contact
@@ -9132,8 +9189,9 @@ About & Contact
       border: "none",
       color: "#fff",
       cursor: "pointer",
-      fontSize: 18,
+      fontSize: isMobile ? 15 : 18,
       fontWeight: 600,
+      padding: isMobile ? "6px 0" : 0,
     }}
   >
     My Bids
@@ -9151,8 +9209,8 @@ background: "rgba(255,255,255,0.12)",
 color: "#fff",
 border: "1px solid rgba(255,255,255,0.16)",
 borderRadius: 14,
-padding: "14px 22px",
-fontSize: 18,
+padding: isMobile ? "12px 18px" : "14px 22px",
+fontSize: isMobile ? 16 : 18,
 fontWeight: 700,
 cursor: "pointer",
 }}
@@ -9165,8 +9223,10 @@ Sign In
 style={{
 position: "absolute",
 top: "calc(100% + 14px)",
-right: 0,
-width: 380,
+right: isMobile ? "auto" : 0,
+left: isMobile ? "50%" : "auto",
+transform: isMobile ? "translateX(-50%)" : "none",
+width: isMobile ? "min(92vw, 380px)" : 380,
 background: "#ffffff",
 color: "#0f172a",
 borderRadius: 20,
@@ -9333,6 +9393,7 @@ padding: "12px 16px",
 fontSize: 16,
 fontWeight: 700,
 cursor: "pointer",
+flex: isMobile ? 1 : undefined,
 }}
 >
 Cancel
@@ -9361,7 +9422,7 @@ paddingTop: 2,
 style={{
 fontSize: 14,
 color: "rgba(255,255,255,0.8)",
-maxWidth: 260,
+maxWidth: isMobile ? 160 : 260,
 whiteSpace: "nowrap",
 overflow: "hidden",
 textOverflow: "ellipsis",
@@ -9378,8 +9439,8 @@ background: "rgba(255,255,255,0.12)",
 color: "#fff",
 border: "1px solid rgba(255,255,255,0.16)",
 borderRadius: 14,
-padding: "14px 22px",
-fontSize: 18,
+padding: isMobile ? "12px 18px" : "14px 22px",
+fontSize: isMobile ? 16 : 18,
 fontWeight: 700,
 cursor: "pointer",
 }}
@@ -9395,8 +9456,8 @@ Sign Out
 <div
 style={{
 display: "grid",
-gridTemplateColumns: "minmax(0, 1.5fr) minmax(320px, 420px)",
-gap: 40,
+gridTemplateColumns: isTablet ? "1fr" : "minmax(0, 1.5fr) minmax(320px, 420px)",
+gap: isMobile ? 24 : 40,
 alignItems: "start",
 }}
 >
@@ -9404,7 +9465,7 @@ alignItems: "start",
 <h1
 style={{
 margin: 0,
-fontSize: 64,
+fontSize: isMobile ? 40 : isTablet ? 52 : 64,
 lineHeight: 1.05,
 fontWeight: 800,
 letterSpacing: "-0.04em",
@@ -9422,7 +9483,7 @@ Ranked for You
 style={{
 marginTop: 24,
 marginBottom: 28,
-fontSize: 28,
+fontSize: isMobile ? 18 : isTablet ? 22 : 28,
 lineHeight: 1.35,
 color: "rgba(255,255,255,0.9)",
 maxWidth: 760,
@@ -9446,7 +9507,8 @@ maxWidth: 920,
 style={{
 display: "flex",
 alignItems: "stretch",
-gap: 0,
+gap: isMobile ? 12 : 0,
+flexDirection: isMobile ? "column" : "row",
 borderBottom: "1px solid #e5e7eb",
 }}
 >
@@ -9456,7 +9518,8 @@ flex: 1,
 display: "flex",
 alignItems: "center",
 gap: 14,
-padding: "22px 24px",
+padding: isMobile ? "18px 16px" : "22px 24px",
+flexDirection: isMobile ? "column" : "row",
 }}
 >
 <div style={{ fontSize: 16, fontWeight: 800 }}>AI</div>
@@ -9468,9 +9531,11 @@ style={{
 flex: 1,
 border: "none",
 outline: "none",
-fontSize: 28,
+fontSize: isMobile ? 18 : isTablet ? 22 : 28,
 color: "#0f172a",
 background: "transparent",
+width: "100%",
+minWidth: 0,
 }}
 />
 
@@ -9488,14 +9553,15 @@ background: "transparent",
     color: hasLoadedBidPackage ? "#fff" : "#64748b",
     border: "none",
     borderRadius: 14,
-    padding: "18px 28px",
-    fontSize: 26,
+    padding: isMobile ? "14px 18px" : "18px 28px",
+    fontSize: isMobile ? 18 : isTablet ? 22 : 26,
     fontWeight: 800,
     cursor: hasLoadedBidPackage ? "pointer" : "not-allowed",
     boxShadow: hasLoadedBidPackage
       ? "0 8px 20px rgba(249,115,22,0.3)"
       : "none",
     opacity: hasLoadedBidPackage ? 1 : 0.9,
+    width: isMobile ? "100%" : "auto",
   }}
 >
   Analyze
@@ -9506,7 +9572,7 @@ background: "transparent",
 
 <div
 style={{
-padding: "20px 24px 24px",
+padding: isMobile ? "18px 16px 20px" : "20px 24px 24px",
 background: "#f8fafc",
 display: "grid",
 gap: 16,
@@ -9529,11 +9595,12 @@ borderRadius: 16,
 background: "#ffffff",
 padding: "18px 18px",
 display: "flex",
-alignItems: "center",
+alignItems: isMobile ? "flex-start" : "center",
 justifyContent: "space-between",
 flexWrap: "wrap",
 gap: 14,
 transition: "all 0.2s ease",
+flexDirection: isMobile ? "column" : "row",
 }}
 >
 {uploadState === "idle" && (
@@ -9695,7 +9762,7 @@ style={{
 background: "rgba(14, 35, 89, 0.78)",
 border: "1px solid rgba(255,255,255,0.14)",
 borderRadius: 24,
-padding: 28,
+padding: isMobile ? 20 : 28,
 boxShadow: "0 16px 40px rgba(0,0,0,0.2)",
 backdropFilter: "blur(8px)",
 }}
@@ -9707,6 +9774,7 @@ alignItems: "center",
 justifyContent: "space-between",
 gap: 12,
 marginBottom: 24,
+flexWrap: "wrap",
 }}
 >
 <div
@@ -9738,14 +9806,14 @@ Active
 style={{
 display: "grid",
 gridTemplateColumns: "1fr 1fr",
-gap: 20,
+gap: isMobile ? 14 : 20,
 marginBottom: 24,
 }}
 >
 <div>
 <div
 style={{
-fontSize: 42,
+fontSize: isMobile ? 34 : 42,
 fontWeight: 800,
 color: "#fff",
 lineHeight: 1,
@@ -9827,8 +9895,8 @@ Signed in as {authUser.email}
 <div
 style={{
 maxWidth: 1320,
-margin: "-72px auto 0",
-padding: "0 32px 40px",
+margin: `${contentTopPull}px auto 0`,
+padding: `0 ${pageHorizontalPadding}px 40px`,
 }}
 >
 {parsedPreferences && (
@@ -9915,6 +9983,7 @@ gap: 14,
 overflowX: "auto",
 paddingBottom: 6,
 alignItems: "stretch",
+scrollbarWidth: "thin",
 }}
 >
 {parsedPreferences.scoped_preferences?.map((scope: any) => (
@@ -9925,9 +9994,9 @@ padding: 16,
 borderRadius: 14,
 border: "1px solid #e5e7eb",
 background: "#f9fafb",
-minWidth: 290,
-maxWidth: 340,
-flex: "0 0 310px",
+minWidth: isMobile ? 240 : 290,
+maxWidth: isMobile ? 280 : 340,
+flex: isMobile ? "0 0 82vw" : "0 0 310px",
 display: "flex",
 flexDirection: "column",
 boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
@@ -10041,7 +10110,7 @@ Must include:{" "}
       }}
     >
       <div
-        style={{
+style={{
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
@@ -10057,6 +10126,7 @@ Must include:{" "}
             gap: 14,
             minWidth: 0,
             flex: "1 1 420px",
+            width: isMobile ? "100%" : undefined,
           }}
         >
           <div
@@ -10072,8 +10142,10 @@ Must include:{" "}
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 18,
+              fontSize: isMobile ? 13 : 18,
               flexShrink: 0,
+              padding: isMobile ? 4 : 0,
+              textAlign: "center",
             }}
           >
             {manualCrewOrder.length > 0 ? "Reorder" : "Top"}
@@ -10097,7 +10169,7 @@ Must include:{" "}
 
             <div
               style={{
-                fontSize: 26,
+                fontSize: isMobile ? 22 : 26,
                 fontWeight: 850,
                 color: "#0f172a",
                 letterSpacing: "-0.03em",
@@ -10140,8 +10212,9 @@ Must include:{" "}
     gap: 12,
     flexWrap: "wrap",
     alignItems: "flex-start",
-    justifyContent: "flex-end",
+    justifyContent: isMobile ? "flex-start" : "flex-end",
     flex: "1 1 360px",
+    width: isMobile ? "100%" : undefined,
   }}
 >
   {manualCrewOrder.length > 0 && (
@@ -10206,8 +10279,9 @@ Must include:{" "}
         manualCrewOrder.length > 0
           ? "1px solid #fed7aa"
           : "1px solid #bfdbfe",
-      minWidth: 280,
-      maxWidth: 340,
+      minWidth: isMobile ? 0 : 280,
+      maxWidth: isMobile ? "100%" : 340,
+      width: isMobile ? "100%" : undefined,
       boxShadow: "0 8px 20px rgba(15, 23, 42, 0.06)",
     }}
   >
@@ -10323,7 +10397,7 @@ onDrop={() => {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "220px minmax(0, 1fr) 150px",
+                  gridTemplateColumns: primaryCardColumns,
                   gap: 16,
                   alignItems: "start",
                 }}
@@ -10350,7 +10424,7 @@ onDrop={() => {
                       background: "#fff7ed",
                       border: "1px solid #fed7aa",
                       color: "#ea580c",
-                      fontSize: 22,
+                      fontSize: isMobile ? 18 : 22,
                       fontWeight: 900,
                       lineHeight: 1,
                     }}
@@ -10590,8 +10664,9 @@ onDrop={() => {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "flex-end",
+                    alignItems: isMobile ? "stretch" : "flex-end",
                     gap: 10,
+                    ...mobileActionRowStyle,
                   }}
                 >
                   <div
@@ -10619,6 +10694,7 @@ onDrop={() => {
                       fontWeight: 700,
                       cursor: "pointer",
                       minWidth: 110,
+                      width: isMobile ? "calc(50% - 5px)" : undefined,
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -10639,6 +10715,7 @@ onDrop={() => {
                       fontWeight: 700,
                       cursor: "pointer",
                       minWidth: 110,
+                      width: isMobile ? "calc(50% - 5px)" : undefined,
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -10684,7 +10761,7 @@ onDrop={() => {
                         <div
                           style={{
                             display: "grid",
-                            gridTemplateColumns: "160px minmax(0, 1fr) auto",
+                            gridTemplateColumns: expandedDayColumns,
                             gap: 12,
                             alignItems: "center",
                           }}
@@ -10897,7 +10974,13 @@ onDrop={() => {
                             </div>
                           )}
 
-                          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: isMobile ? "stretch" : "flex-end",
+                              width: isMobile ? "100%" : undefined,
+                            }}
+                          >
                             {!dayEntry.is_day_off && job?.pdf_page_number != null ? (
                               <button
                                 type="button"
@@ -10910,6 +10993,7 @@ onDrop={() => {
                                   fontWeight: 700,
                                   cursor: "pointer",
                                   whiteSpace: "nowrap",
+                                  width: isMobile ? "100%" : undefined,
                                 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -11109,7 +11193,7 @@ onDrop={() => {
                               <div
                                 style={{
                                   display: "grid",
-                                  gridTemplateColumns: "220px minmax(0, 1fr) 180px",
+                                  gridTemplateColumns: excludedCardColumns,
                                   gap: 16,
                                   alignItems: "start",
                                 }}
@@ -11136,7 +11220,7 @@ onDrop={() => {
                                       background: "#fff7ed",
                                       border: "1px solid #fed7aa",
                                       color: "#ea580c",
-                                      fontSize: 22,
+                                      fontSize: isMobile ? 18 : 22,
                                       fontWeight: 900,
                                       lineHeight: 1,
                                     }}
@@ -11274,8 +11358,9 @@ onDrop={() => {
                                   style={{
                                     display: "flex",
                                     flexDirection: "column",
-                                    alignItems: "flex-end",
+                                    alignItems: isMobile ? "stretch" : "flex-end",
                                     gap: 10,
+                                    ...mobileActionRowStyle,
                                   }}
                                 >
                                   <button
@@ -11294,6 +11379,7 @@ onDrop={() => {
                                       fontWeight: 700,
                                       cursor: "pointer",
                                       minWidth: 130,
+                                      width: isMobile ? "calc(50% - 5px)" : undefined,
                                     }}
                                   >
                                     {isCrewExpanded ? "Hide Jobs" : "View Jobs"}
@@ -11312,6 +11398,7 @@ onDrop={() => {
                                       cursor: "pointer",
                                       whiteSpace: "nowrap",
                                       minWidth: 130,
+                                      width: isMobile ? "calc(50% - 5px)" : undefined,
                                     }}
                                   >
                                     Include Anyway
@@ -11352,7 +11439,7 @@ onDrop={() => {
                                         <div
                                           style={{
                                             display: "grid",
-                                            gridTemplateColumns: "160px minmax(0, 1fr) auto",
+                                            gridTemplateColumns: expandedDayColumns,
                                             gap: 12,
                                             alignItems: "center",
                                           }}
@@ -11515,7 +11602,13 @@ onDrop={() => {
                                             </div>
                                           )}
 
-                                          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: isMobile ? "stretch" : "flex-end",
+                                              width: isMobile ? "100%" : undefined,
+                                            }}
+                                          >
                                             {!dayEntry.is_day_off && job?.pdf_page_number != null ? (
                                               <button
                                                 type="button"
@@ -11528,6 +11621,7 @@ onDrop={() => {
                                                   fontWeight: 700,
                                                   cursor: "pointer",
                                                   whiteSpace: "nowrap",
+                                                  width: isMobile ? "100%" : undefined,
                                                 }}
                                                 onClick={(e) => {
                                                   e.stopPropagation();
@@ -11639,7 +11733,7 @@ Restore
 rankedCrews.length > 0 &&
 fullIncludedCount > rankedCrews.length && (
 <div style={{ marginTop: 30 }}>
-<div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12 }}>
+<div style={{ fontWeight: 800, fontSize: isMobile ? 16 : 18, marginBottom: 12 }}>
 Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
 </div>
 
@@ -11698,14 +11792,14 @@ Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
 <div
   style={{
     marginTop: 20,
-    padding: 20,
+    padding: isMobile ? 16 : 20,
     borderRadius: 16,
     border: "1px solid #e5e7eb",
     background: "#fff",
     textAlign: "center",
   }}
 >
-  <div style={{ fontWeight: 800, fontSize: 18 }}>
+  <div style={{ fontWeight: 800, fontSize: isMobile ? 16 : 18 }}>
     See your full ranking, excluded crews, and why
   </div>
 
@@ -11724,6 +11818,7 @@ Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
       padding: "12px 20px",
       fontWeight: 800,
       cursor: "pointer",
+      width: isMobile ? "100%" : undefined,
     }}
     onClick={handleUnlockCheckout}
   >
