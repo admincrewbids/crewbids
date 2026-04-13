@@ -6390,6 +6390,7 @@ const [uploadProgress, setUploadProgress] = useState(0);
 const [pdfPages, setPdfPages] = useState<string[]>([]);
 const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 const [authUser, setAuthUser] = useState<any>(null);
+const bidPackageInputRef = useRef<HTMLInputElement | null>(null);
 const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 const [userProfile, setUserProfile] = useState<any>(null);
 const [hasFullAccess, setHasFullAccess] = useState(false);
@@ -8315,7 +8316,16 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
     console.error("Error processing PDF", err);
     setUploadState("idle");
     setUploadProgress(0);
+  } finally {
+    e.target.value = "";
   }
+}
+
+function openBidPackagePicker() {
+  const input = bidPackageInputRef.current;
+  if (!input) return;
+  input.value = "";
+  input.click();
 }
 function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
   const terminals = parsed.priority_groups
@@ -9220,20 +9230,42 @@ Sign In
 
 {showSignInPanel && (
 <div
+onClick={() => setShowSignInPanel(false)}
 style={{
-position: "absolute",
-top: "calc(100% + 14px)",
-right: isMobile ? "auto" : 0,
-left: isMobile ? "50%" : "auto",
-transform: isMobile ? "translateX(-50%)" : "none",
-width: isMobile ? "min(92vw, 380px)" : 380,
-background: "#ffffff",
+position: isMobile ? "fixed" : "absolute",
+top: isMobile ? 0 : "calc(100% + 14px)",
+right: isMobile ? 0 : 0,
+bottom: isMobile ? 0 : "auto",
+left: isMobile ? 0 : "auto",
+transform: "none",
+display: isMobile ? "flex" : "block",
+alignItems: isMobile ? "flex-start" : undefined,
+justifyContent: isMobile ? "center" : undefined,
+padding: isMobile
+  ? "max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom))"
+  : 20,
+background: isMobile ? "rgba(15, 23, 42, 0.45)" : "#ffffff",
 color: "#0f172a",
+borderRadius: isMobile ? 0 : 20,
+border: isMobile ? "none" : "1px solid #e5e7eb",
+boxShadow: isMobile ? "none" : "0 20px 50px rgba(0,0,0,0.18)",
+zIndex: isMobile ? 1000 : 50,
+width: isMobile ? "100vw" : 380,
+overflowY: isMobile ? "auto" : "visible",
+}}
+>
+<div
+onClick={(e) => e.stopPropagation()}
+style={{
+width: isMobile ? "min(92vw, 380px)" : "100%",
+maxHeight: isMobile ? "calc(100vh - 32px)" : undefined,
+overflowY: isMobile ? "auto" : "visible",
+background: "#ffffff",
 borderRadius: 20,
 border: "1px solid #e5e7eb",
 boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
-padding: 20,
-zIndex: 50,
+padding: isMobile ? 18 : 0,
+margin: isMobile ? "auto" : 0,
 }}
 >
 <div
@@ -9355,7 +9387,13 @@ Forgot password?
 </button>
 )}
 
-<div style={{ display: "flex", gap: 10 }}>
+<div
+style={{
+display: "flex",
+gap: 10,
+flexDirection: isMobile ? "column" : "row",
+}}
+>
 <button
 type="button"
 onClick={async () => {
@@ -9376,6 +9414,7 @@ padding: "12px 16px",
 fontSize: 16,
 fontWeight: 700,
 cursor: "pointer",
+width: isMobile ? "100%" : undefined,
 }}
 >
 {authMode === "signin" ? "Sign In" : "Create Account"}
@@ -9394,6 +9433,7 @@ fontSize: 16,
 fontWeight: 700,
 cursor: "pointer",
 flex: isMobile ? 1 : undefined,
+width: isMobile ? "100%" : undefined,
 }}
 >
 Cancel
@@ -9411,6 +9451,7 @@ paddingTop: 2,
 {authMode === "signin"
   ? "Your account email will be used for saved bid lists and email delivery."
   : "After you create your account, your email will be tied to My Bids and delivery."}
+</div>
 </div>
 </div>
 </div>
@@ -9603,6 +9644,14 @@ transition: "all 0.2s ease",
 flexDirection: isMobile ? "column" : "row",
 }}
 >
+<input
+ref={bidPackageInputRef}
+id="bid-package-upload"
+type="file"
+accept="application/pdf"
+onChange={handlePdfUpload}
+style={{ display: "none" }}
+/>
 {uploadState === "idle" && (
 <>
 <div
@@ -9624,8 +9673,9 @@ fontSize: 14,
 Select your bid package PDF to begin analysis
 </div>
 
-<label
-htmlFor="bid-package-upload"
+<button
+type="button"
+onClick={openBidPackagePicker}
 style={{
 display: "inline-flex",
 alignItems: "center",
@@ -9634,6 +9684,7 @@ padding: "13px 20px",
 background: "#f97316",
 color: "#fff",
 borderRadius: 12,
+border: "none",
 fontSize: 15,
 fontWeight: 800,
 cursor: "pointer",
@@ -9641,14 +9692,7 @@ boxShadow: "0 8px 22px rgba(249, 115, 22, 0.28)",
 }}
 >
 Choose PDF
-<input
-id="bid-package-upload"
-type="file"
-accept="application/pdf"
-onChange={handlePdfUpload}
-style={{ display: "none" }}
-/>
-</label>
+</button>
 
 <div
 style={{
@@ -9728,8 +9772,9 @@ fontWeight: 500,
 {pdfFileName}
 </div>
 
-<label
-htmlFor="bid-package-upload"
+<button
+type="button"
+onClick={openBidPackagePicker}
 style={{
 marginTop: 6,
 display: "inline-flex",
@@ -9746,14 +9791,7 @@ border: "1px solid #e2e8f0",
 }}
 >
 Upload a different file
-<input
-id="bid-package-upload"
-type="file"
-accept="application/pdf"
-onChange={handlePdfUpload}
-style={{ display: "none" }}
-/>
-</label>
+</button>
 </>
 )}
 </div>
