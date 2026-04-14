@@ -1044,9 +1044,23 @@ function ensureScopedPreference(
   return existing;
 }
 
-function normalizeTimeToken(hourRaw?: string, minuteRaw?: string) {
+function normalizeTimeToken(
+  hourRaw?: string,
+  minuteRaw?: string,
+  meridiemRaw?: string
+) {
   if (!hourRaw) return null;
-  const hour = hourRaw.padStart(2, "0");
+  let hourNumber = Number(hourRaw);
+  if (Number.isNaN(hourNumber)) return null;
+
+  const meridiem = meridiemRaw?.toLowerCase();
+  if (meridiem === "am") {
+    if (hourNumber === 12) hourNumber = 0;
+  } else if (meridiem === "pm") {
+    if (hourNumber < 12) hourNumber += 12;
+  }
+
+  const hour = String(hourNumber).padStart(2, "0");
   const minute = (minuteRaw ?? "00").padStart(2, "0");
   return `${hour}:${minute}`;
 }
@@ -2206,7 +2220,7 @@ function isClauseDeterministicallyHandled(clause: string) {
   }
 
   if (
-    /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,2}:?\d{0,2}/i.test(
+    /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,2}(?::\d{1,2})?\s*(am|pm)?/i.test(
       clause
     )
   ) {
@@ -2214,7 +2228,7 @@ function isClauseDeterministicallyHandled(clause: string) {
   }
 
   if (
-    /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*\d{1,2}:?\d{0,2}/i.test(
+    /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*\d{1,2}(?::\d{1,2})?\s*(am|pm)?/i.test(
       clause
     )
   ) {
@@ -3033,11 +3047,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       }
 
       const notBeforeMatch = clause.match(
-        /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2}):?(\d{2})?/i
+        /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
       );
 
       if (notBeforeMatch) {
-        const value = normalizeTimeToken(notBeforeMatch[2], notBeforeMatch[3]);
+        const value = normalizeTimeToken(
+          notBeforeMatch[2],
+          notBeforeMatch[3],
+          notBeforeMatch[4]
+        );
         if (value) {
           parsed.filters.push({
             field: "on_duty",
@@ -3132,19 +3150,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       } else {
         const finishBeforeMatch = clause.match(
-          /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+          /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
         );
 
         if (finishBeforeMatch) {
-          const hour = finishBeforeMatch[3].padStart(2, "0");
-          const minute = finishBeforeMatch[4] ?? "00";
+          const value = normalizeTimeToken(
+            finishBeforeMatch[3],
+            finishBeforeMatch[4],
+            finishBeforeMatch[5]
+          );
 
-          parsed.filters.push({
-            field: "off_duty",
-            operator: "<=",
-            value: `${hour}:${minute}`,
-            strength: "hard",
-          });
+          if (value) {
+            parsed.filters.push({
+              field: "off_duty",
+              operator: "<=",
+              value,
+              strength: "hard",
+            });
+          }
         }
       }
 
@@ -3333,11 +3356,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     // ---- scoped hard time filters ----
     const notBeforeMatch = clause.match(
-      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2}):?(\d{2})?/i
+      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
     );
 
     if (notBeforeMatch) {
-      const value = normalizeTimeToken(notBeforeMatch[2], notBeforeMatch[3]);
+      const value = normalizeTimeToken(
+        notBeforeMatch[2],
+        notBeforeMatch[3],
+        notBeforeMatch[4]
+      );
       if (value) {
         scoped.filters.push({
           field: "on_duty",
@@ -3457,19 +3484,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       });
     } else {
       const finishBeforeMatch = clause.match(
-        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
       );
 
       if (finishBeforeMatch) {
-        const hour = finishBeforeMatch[3].padStart(2, "0");
-        const minute = finishBeforeMatch[4] ?? "00";
+        const value = normalizeTimeToken(
+          finishBeforeMatch[3],
+          finishBeforeMatch[4],
+          finishBeforeMatch[5]
+        );
 
-        scoped.filters.push({
-          field: "off_duty",
-          operator: "<=",
-          value: `${hour}:${minute}`,
-          strength: "hard",
-        });
+        if (value) {
+          scoped.filters.push({
+            field: "off_duty",
+            operator: "<=",
+            value,
+            strength: "hard",
+          });
+        }
       }
     }
 
@@ -9805,40 +9837,74 @@ maxWidth: 920,
 >
 <div
 style={{
-display: "flex",
-alignItems: "stretch",
-gap: isMobile ? 12 : 0,
-flexDirection: isMobile ? "column" : "row",
+padding: isMobile ? "18px 16px" : "22px 24px",
 borderBottom: "1px solid #e5e7eb",
+background:
+  "linear-gradient(180deg, rgba(249,115,22,0.06) 0%, rgba(255,255,255,1) 100%)",
 }}
 >
 <div
 style={{
-flex: 1,
-display: "flex",
-alignItems: "center",
+border: "1px solid rgba(249,115,22,0.18)",
+borderRadius: 18,
+background: "#fff7ed",
+boxShadow: "0 10px 30px rgba(249,115,22,0.08)",
+padding: isMobile ? "16px" : "20px",
+display: "grid",
 gap: 14,
-padding: isMobile ? "18px 16px" : "22px 24px",
-flexDirection: isMobile ? "column" : "row",
 }}
 >
-<div style={{ fontSize: 16, fontWeight: 800 }}>AI</div>
-<input
+<div style={{ display: "grid", gap: 6 }}>
+<div
+style={{
+fontSize: isMobile ? 22 : 26,
+fontWeight: 900,
+color: "#0f172a",
+lineHeight: 1.1,
+}}
+>
+Describe the crew you want
+</div>
+
+<div
+style={{
+fontSize: isMobile ? 14 : 15,
+color: "#475569",
+lineHeight: 1.5,
+maxWidth: 760,
+}}
+>
+Type your preferences in plain language — terminals, start times, days
+off, overtime, no splits, and more.
+</div>
+</div>
+
+<textarea
 value={prompt}
 onChange={(e) => setPrompt(e.target.value)}
-placeholder="Ask CrewBids anything about your bids..."
+placeholder="Example: Willowbrook first, no starts before 9:00, weekends off preferred, no split jobs, highest OT first."
 style={{
-flex: 1,
-border: "none",
-outline: "none",
-fontSize: isMobile ? 18 : isTablet ? 22 : 28,
-color: "#0f172a",
-background: "transparent",
 width: "100%",
-minWidth: 0,
+minHeight: isMobile ? 140 : 160,
+resize: "vertical",
+border: "1px solid #fdba74",
+outline: "none",
+borderRadius: 16,
+padding: isMobile ? "16px" : "18px 20px",
+fontSize: isMobile ? 16 : 18,
+lineHeight: 1.5,
+color: "#0f172a",
+background: "#ffffff",
+boxShadow: "inset 0 1px 2px rgba(15,23,42,0.04)",
 }}
 />
 
+<div
+style={{
+display: "flex",
+justifyContent: isMobile ? "stretch" : "flex-end",
+}}
+>
 <button
   type="button"
   disabled={!hasLoadedBidPackage}
@@ -9853,19 +9919,20 @@ minWidth: 0,
     color: hasLoadedBidPackage ? "#fff" : "#64748b",
     border: "none",
     borderRadius: 14,
-    padding: isMobile ? "14px 18px" : "18px 28px",
-    fontSize: isMobile ? 18 : isTablet ? 22 : 26,
+    padding: isMobile ? "14px 18px" : "16px 24px",
+    fontSize: isMobile ? 18 : 20,
     fontWeight: 800,
     cursor: hasLoadedBidPackage ? "pointer" : "not-allowed",
     boxShadow: hasLoadedBidPackage
-      ? "0 8px 20px rgba(249,115,22,0.3)"
+      ? "0 10px 24px rgba(249,115,22,0.24)"
       : "none",
     opacity: hasLoadedBidPackage ? 1 : 0.9,
     width: isMobile ? "100%" : "auto",
   }}
 >
-  Analyze
+  Analyze Preferences
 </button>
+</div>
 
 </div>
 </div>
