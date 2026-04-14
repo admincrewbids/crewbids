@@ -1051,6 +1051,48 @@ function normalizeTimeToken(hourRaw?: string, minuteRaw?: string) {
   return `${hour}:${minute}`;
 }
 
+const DAY_NAME_TO_SHORT: Record<string, string> = {
+  sunday: "sun",
+  monday: "mon",
+  tuesday: "tue",
+  wednesday: "wed",
+  thursday: "thu",
+  friday: "fri",
+  saturday: "sat",
+};
+
+function extractNamedDayMentions(clause: string): string[] {
+  return Array.from(
+    new Set(
+      Array.from(
+        clause.matchAll(
+          /\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi
+        )
+      )
+        .map((match) => DAY_NAME_TO_SHORT[match[1].toLowerCase()] ?? null)
+        .filter(Boolean) as string[]
+    )
+  );
+}
+
+function extractNamedDaysOffRequirement(clause: string): string[] {
+  const hasDaysOffLanguage =
+    clause.includes(" off") ||
+    clause.includes("days off") ||
+    clause.includes("day off") ||
+    clause.includes("must have") ||
+    clause.includes("prefer ") ||
+    clause.includes("want ") ||
+    clause.includes("need ") ||
+    clause.includes("free");
+
+  if (!hasDaysOffLanguage) {
+    return [];
+  }
+
+  return extractNamedDayMentions(clause);
+}
+
 function containsAny(text: string, phrases: readonly string[]) {
   return phrases.some((p) => text.includes(p));
 }
@@ -1819,6 +1861,10 @@ const PHRASES = {
   ],
 
   three_day_off_prefer: [
+    "3 day off jobs",
+    "three day off jobs",
+    "3 day off crews",
+    "three day off crews",
     "prefer 3 day off jobs",
     "prefer three day off jobs",
     "prefer 3 day off crews",
@@ -1900,6 +1946,8 @@ const PHRASES = {
     "most overtime",
     "highest overtime",
     "highest ot",
+    "most ot first",
+    "highest ot first",
     "rank highest overtime to lowest",
     "rank highest ot to lowest",
     "rank them most ot to least",
@@ -1911,7 +1959,6 @@ const PHRASES = {
     "sort by most overtime",
     "from most ot to least",
     "from highest overtime to lowest",
-    "ot first",
     "biggest overtime first",
   ],
 
@@ -1920,6 +1967,8 @@ const PHRASES = {
     "lowest overtime",
     "least overtime",
     "lowest ot",
+    "rank lowest ot first",
+    "rank lowest overtime first",
     "minimal overtime",
     "min overtime",
     "want the least overtime",
@@ -2688,7 +2737,11 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     new Set(
       clauses.flatMap((clauseEntry) =>
         getExcludedTerminalFromClause(clauseEntry.text, crews) ||
-        getAvoidTerminalFromClause(clauseEntry.text, crews)
+        getAvoidTerminalFromClause(clauseEntry.text, crews) ||
+        containsAny(
+          clauseEntry.text.toLowerCase().replace(/[â€™]/g, "'"),
+          PHRASES.exclude_standby
+        )
           ? []
           : extractTerminalPriorities(clauseEntry.text, crews).map(
               normalizeTerminalName
@@ -2775,15 +2828,20 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
   let activeTerminal: string | null = null;
   let activeTerminalSentenceIndex = -1;
+  let pendingNamedDaysOff: string[] = [];
 
   for (const clauseEntry of clauses) {
     const rawClause = clauseEntry.text;
     const clause = rawClause.toLowerCase().replace(/[â€™]/g, "'");
-    const clauseTerminal = getClauseTerminal(rawClause, crews);
+    const clauseExcludesStandby = containsAny(clause, PHRASES.exclude_standby);
+    const clauseTerminal = clauseExcludesStandby
+      ? null
+      : getClauseTerminal(rawClause, crews);
     const normalizedClauseTerminal = clauseTerminal
       ? normalizeTerminalName(clauseTerminal)
       : null;
     const isGlobalClause = isClearlyGlobalClause(clause);
+    const directNamedDaysOffRequirement = extractNamedDaysOffRequirement(clause);
 
     if (normalizedClauseTerminal) {
       activeTerminal = normalizedClauseTerminal;
@@ -2798,6 +2856,27 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     ) {
       activeTerminal = null;
       activeTerminalSentenceIndex = -1;
+    }
+
+    const clauseNamedDayMentions = extractNamedDayMentions(clause);
+    const namedDaysOffRequirement =
+      directNamedDaysOffRequirement.length > 0
+        ? Array.from(
+            new Set([
+              ...pendingNamedDaysOff,
+              ...directNamedDaysOffRequirement,
+            ])
+          )
+        : [];
+
+    if (namedDaysOffRequirement.length > 0) {
+      pendingNamedDaysOff = [];
+    } else if (clauseNamedDayMentions.length > 0) {
+      pendingNamedDaysOff = Array.from(
+        new Set([...pendingNamedDaysOff, ...clauseNamedDayMentions])
+      );
+    } else {
+      pendingNamedDaysOff = [];
     }
 
     const terminalForScope =
@@ -2885,6 +2964,10 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       const exactWeekdayDaysOffMatch = clause.match(
         /\bexactly\s+(\d+)\s+weekdays?\s+off\b/i
       );
+      const wantsWeekdaysOffPrefer =
+        !exactWeekdayDaysOffMatch &&
+        !clauseIntents.has("weekdays_off_only") &&
+        /\bweekdays?\s+off\b/i.test(clause);
 
       if (exactWeekdayDaysOffMatch) {
         parsed.filters.push({
@@ -2910,6 +2993,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
           operator: "=",
           value: false,
           strength: "hard",
+        });
+      }
+
+      if (wantsWeekdaysOffPrefer) {
+        parsed.sort_preferences.push({
+          field: "weekends_off",
+          direction: "asc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 7),
         });
       }
 
@@ -3027,20 +3119,33 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       }
 
-      const finishBeforeMatch = clause.match(
-        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+      const finishBeforeMidnightMatch = clause.match(
+        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by)?\s*midnight/i
       );
 
-      if (finishBeforeMatch) {
-        const hour = finishBeforeMatch[3].padStart(2, "0");
-        const minute = finishBeforeMatch[4] ?? "00";
-
+      if (finishBeforeMidnightMatch) {
         parsed.filters.push({
           field: "off_duty",
           operator: "<=",
-          value: `${hour}:${minute}`,
+          value: "23:59",
           strength: "hard",
         });
+      } else {
+        const finishBeforeMatch = clause.match(
+          /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+        );
+
+        if (finishBeforeMatch) {
+          const hour = finishBeforeMatch[3].padStart(2, "0");
+          const minute = finishBeforeMatch[4] ?? "00";
+
+          parsed.filters.push({
+            field: "off_duty",
+            operator: "<=",
+            value: `${hour}:${minute}`,
+            strength: "hard",
+          });
+        }
       }
 
       if (clauseIntents.has("weekends_off_hard")) {
@@ -3166,6 +3271,18 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
           weight: getPreferenceWeight(clause, 8),
         });
       }
+
+      if (namedDaysOffRequirement.length > 0) {
+        for (const terminal of allKnownTerminals) {
+          const globalScope = ensureScope(terminal);
+          globalScope.required_days_off = Array.from(
+            new Set([
+              ...(globalScope.required_days_off ?? []),
+              ...namedDaysOffRequirement,
+            ])
+          );
+        }
+      }
     }
 
     if (!scoped) continue;
@@ -3173,6 +3290,10 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     const exactWeekdayDaysOffMatch = clause.match(
       /\bexactly\s+(\d+)\s+weekdays?\s+off\b/i
     );
+    const wantsWeekdaysOffPrefer =
+      !exactWeekdayDaysOffMatch &&
+      !clauseIntents.has("weekdays_off_only") &&
+      /\bweekdays?\s+off\b/i.test(clause);
 
     if (exactWeekdayDaysOffMatch) {
       scoped.filters.push({
@@ -3198,6 +3319,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         operator: "=",
         value: false,
         strength: "hard",
+      });
+    }
+
+    if (wantsWeekdaysOffPrefer) {
+      scoped.sort_preferences.push({
+        field: "weekends_off",
+        direction: "asc",
+        strength: "strong",
+        weight: getPreferenceWeight(clause, 7),
       });
     }
 
@@ -3314,20 +3444,33 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       });
     }
 
-    const finishBeforeMatch = clause.match(
-      /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+    const finishBeforeMidnightMatch = clause.match(
+      /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by)?\s*midnight/i
     );
 
-    if (finishBeforeMatch) {
-      const hour = finishBeforeMatch[3].padStart(2, "0");
-      const minute = finishBeforeMatch[4] ?? "00";
-
+    if (finishBeforeMidnightMatch) {
       scoped.filters.push({
         field: "off_duty",
         operator: "<=",
-        value: `${hour}:${minute}`,
+        value: "23:59",
         strength: "hard",
       });
+    } else {
+      const finishBeforeMatch = clause.match(
+        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2}):?(\d{2})?/i
+      );
+
+      if (finishBeforeMatch) {
+        const hour = finishBeforeMatch[3].padStart(2, "0");
+        const minute = finishBeforeMatch[4] ?? "00";
+
+        scoped.filters.push({
+          field: "off_duty",
+          operator: "<=",
+          value: `${hour}:${minute}`,
+          strength: "hard",
+        });
+      }
     }
 
     // ---- weekends off / specific days off ----
@@ -3431,21 +3574,10 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       });
     }
 
-    const dayMatches = Array.from(
-      clause.matchAll(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi)
-    ).map((m) => m[1].toLowerCase());
-
-    const hasDaysOffLanguage =
-      clause.includes(" off") ||
-      clause.includes("days off") ||
-      clause.includes("must have") ||
-      clause.includes("prefer ") ||
-      clause.includes("want ") ||
-      clause.includes("need ") ||
-      clause.includes("free");
-
-    if (dayMatches.length > 0 && hasDaysOffLanguage) {
-      scoped.required_days_off = Array.from(new Set(dayMatches));
+    if (namedDaysOffRequirement.length > 0) {
+      scoped.required_days_off = Array.from(
+        new Set([...(scoped.required_days_off ?? []), ...namedDaysOffRequirement])
+      );
     }
 
     // ---- scoped ordered sorts ----
