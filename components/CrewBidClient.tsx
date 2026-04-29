@@ -1073,6 +1073,32 @@ function getExplicitExcludedTerminalFromText(text: string): string | null {
   return null;
 }
 
+function getExplicitlyExcludedTerminalsFromText(text: string) {
+  const normalizedText = text
+    .toLowerCase()
+    .replace(/[Ã¢â¬â¢]/g, "'")
+    .trim()
+    .replace(/\s+/g, " ");
+  const escaped = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const excluded = new Set<string>();
+
+  for (const [canonical, aliases] of Object.entries(CANONICAL_TERMINAL_ALIASES)) {
+    for (const alias of Array.from(new Set([canonical, ...aliases]))) {
+      const normalizedAlias = alias.toLowerCase().trim().replace(/\s+/g, " ");
+      const pattern = new RegExp(
+        `\\b(?:no|avoid|exclude)\\s+${escaped(normalizedAlias)}\\b`,
+        "i"
+      );
+
+      if (pattern.test(normalizedText)) {
+        excluded.add(canonical);
+      }
+    }
+  }
+
+  return excluded;
+}
 function dedupeSortPreferences(
   sortPreferences: ParsedPreferences["sort_preferences"]
 ): ParsedPreferences["sort_preferences"] {
@@ -4043,6 +4069,7 @@ function applyDeterministicPreferenceRulesV2(
   const intents = detectPhraseIntents(text);
   const explicitTerminalOnlyLanguage = hasExplicitTerminalOnlyLanguage(text);
   const explicitlyExcludedTerminal = getExplicitExcludedTerminalFromText(prompt);
+  const explicitlyExcludedTerminals = getExplicitlyExcludedTerminalsFromText(prompt);
 
   const nextParsed: ParsedPreferences = {
     ...parsed,
@@ -4103,16 +4130,15 @@ function applyDeterministicPreferenceRulesV2(
         filter.operator === "not_in" &&
         Array.isArray(filter.value)
       ) {
-        const normalizedValues = filter.value.map((value) =>
-          normalizeTerminalName(String(value))
-        );
+        const explicitlyRequestedValues = filter.value
+          .map((value) => normalizeTerminalName(String(value)))
+          .filter((value) => explicitlyExcludedTerminals.has(value));
 
-        if (
-          normalizedValues.length === 1 &&
-          normalizedValues[0] === "willowbrook"
-        ) {
+        if (explicitlyRequestedValues.length === 0) {
           return false;
         }
+
+        filter.value = explicitlyRequestedValues;
       }
 
       return true;

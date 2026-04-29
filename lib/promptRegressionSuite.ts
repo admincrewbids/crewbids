@@ -733,6 +733,46 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           strength: "hard",
         },
       },
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-no-up-no-wrmf-willowbrook",
+    label: "No UP, no WRMF, prefer Willowbrook",
+    prompt: "No UP, no WRMF, prefer Willowbrook",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["wrmf"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
     ],
   },
   {
