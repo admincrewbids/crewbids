@@ -265,7 +265,15 @@ function formatFilterRuleLabel(
     filter.operator === "=" &&
     filter.value === true
   ) {
-    return "Hide UP crews";
+    return "Excluding UP Express crews/jobs";
+  }
+
+  if (
+    filter.field === "include_only_up_crews" &&
+    filter.operator === "=" &&
+    filter.value === true
+  ) {
+    return "Only UP Express crews/jobs";
   }
 
   if (

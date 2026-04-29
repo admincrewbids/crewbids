@@ -719,4 +719,149 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
       },
     ],
   },
+  {
+    id: "up-language-no-up-weekends-willowbrook",
+    label: "No UP, weekends off, prefer Willowbrook",
+    prompt: "No UP, weekends off, prefer Willowbrook",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-no-upx-airport-jobs",
+    label: "No UPX or airport jobs",
+    prompt: "No UPX or airport jobs",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-only-up-express-jobs",
+    label: "Only UP Express jobs",
+    prompt: "Only UP Express jobs",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-prefer-up-no-splits",
+    label: "Prefer UP but no splits",
+    prompt: "Prefer UP but no splits",
+    assertions: [
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "prefer_up",
+          value: "up",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "split_time",
+          operator: "=",
+          value: "none",
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-no-5-series-jobs",
+    label: "No 5-series jobs",
+    prompt: "No 5-series jobs",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-5-days-off-not-up",
+    label: "I want 5 days off if possible",
+    prompt: "I want 5 days off if possible",
+    assertions: [
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-no-jobs-starting-with-5",
+    label: "No jobs starting with 5",
+    prompt: "No jobs starting with 5",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-only-crews-starting-with-5",
+    label: "Only crews starting with 5",
+    prompt: "Only crews starting with 5",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+
 ];
