@@ -592,6 +592,30 @@ function evaluateHardFilterOnCrew(
     };
   }
 
+  if (
+    (filter.field === "days_off_count" || filter.field === "days_off") &&
+    filter.operator === ">=" &&
+    typeof filter.value === "number"
+  ) {
+    return {
+      supported: true,
+      passes: getDaysOffCount(crew) >= filter.value,
+      reason: `crew has ${getDaysOffCount(crew)} days off instead of at least ${filter.value}`,
+    };
+  }
+
+  if (
+    (filter.field === "days_off_count" || filter.field === "days_off") &&
+    filter.operator === "=" &&
+    typeof filter.value === "number"
+  ) {
+    return {
+      supported: true,
+      passes: getDaysOffCount(crew) === filter.value,
+      reason: `crew has ${getDaysOffCount(crew)} days off instead of exactly ${filter.value}`,
+    };
+  }
+
   if (filter.field === "exclude_three_day_off_jobs" && filter.operator === "=" && filter.value === true) {
     return {
       supported: true,

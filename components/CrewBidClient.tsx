@@ -576,6 +576,8 @@ type SortField =
   | "overtime_hours_weekly"
   | "total_paid_hours_weekly"
   | "weekends_off"
+  | "days_off"
+  | "days_off_count"
   | "three_day_off_jobs";
 
 type ScopedPreference = {
@@ -1224,6 +1226,41 @@ function extractNamedDaysOffRequirement(clause: string): string[] {
   }
 
   return extractNamedDayMentions(clause);
+}
+
+type GeneralDaysOffIntent =
+  | { mode: "exact"; count: number }
+  | { mode: "minimum"; count: number }
+  | { mode: "prefer_minimum"; count: number }
+  | { mode: "maximize" };
+
+function parseGeneralDaysOffIntent(clause: string): GeneralDaysOffIntent | null {
+  const normalized = clause.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+
+  const exactlyMatch = normalized.match(/\bexactly\s+(\d+)\s+days?\s+off\b/i);
+  if (exactlyMatch) {
+    return { mode: "exact", count: Number(exactlyMatch[1]) };
+  }
+
+  const minimumMatch = normalized.match(
+    /\b(?:at\s+least|need|must\s+have|require)\s+(\d+)\s+days?\s+off\b/i
+  );
+  if (minimumMatch) {
+    return { mode: "minimum", count: Number(minimumMatch[1]) };
+  }
+
+  if (/\b(?:more|most|max|maximize)\s+days?\s+off\b/i.test(normalized)) {
+    return { mode: "maximize" };
+  }
+
+  const preferMatch = normalized.match(
+    /\b(?:(?:prefer|want|like)\s+)?(\d+)\s+days?\s+off\b/i
+  );
+  if (preferMatch) {
+    return { mode: "prefer_minimum", count: Number(preferMatch[1]) };
+  }
+
+  return null;
 }
 
 function containsAny(text: string, phrases: readonly string[]) {
@@ -2474,6 +2511,10 @@ function isClauseDeterministicallyHandled(clause: string) {
     return true;
   }
 
+  if (parseGeneralDaysOffIntent(clause)) {
+    return true;
+  }
+
   if (/\bno\s+weekend\s+days?\s+off\b/i.test(clause)) {
     return true;
   }
@@ -3091,6 +3132,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       : null;
     const isGlobalClause = isClearlyGlobalClause(clause);
     const directNamedDaysOffRequirement = extractNamedDaysOffRequirement(clause);
+    const generalDaysOffIntent = parseGeneralDaysOffIntent(clause);
 
     if (normalizedClauseTerminal) {
       activeTerminal = normalizedClauseTerminal;
@@ -3251,6 +3293,47 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
           direction: "asc",
           strength: "strong",
           weight: getPreferenceWeight(clause, 7),
+        });
+      }
+
+      if (generalDaysOffIntent?.mode === "exact") {
+        parsed.filters.push({
+          field: "days_off_count",
+          operator: "=",
+          value: generalDaysOffIntent.count,
+          strength: "hard",
+        });
+      }
+
+      if (generalDaysOffIntent?.mode === "minimum") {
+        parsed.filters.push({
+          field: "days_off_count",
+          operator: ">=",
+          value: generalDaysOffIntent.count,
+          strength: "hard",
+        });
+      }
+
+      if (generalDaysOffIntent?.mode === "prefer_minimum") {
+        parsed.sort_preferences.push({
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 8),
+        });
+        parsed.tradeoffs.push({
+          type: "prefer_min_days_off",
+          value: String(generalDaysOffIntent.count),
+          weight: getPreferenceWeight(clause, 8),
+        });
+      }
+
+      if (generalDaysOffIntent?.mode === "maximize") {
+        parsed.sort_preferences.push({
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 8),
         });
       }
 
@@ -3763,6 +3846,36 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         direction: "desc",
         strength: "strong",
         weight: getPreferenceWeight(clause, 7),
+      });
+    }
+
+    if (generalDaysOffIntent?.mode === "exact") {
+      scoped.filters.push({
+        field: "days_off_count",
+        operator: "=",
+        value: generalDaysOffIntent.count,
+        strength: "hard",
+      });
+    }
+
+    if (generalDaysOffIntent?.mode === "minimum") {
+      scoped.filters.push({
+        field: "days_off_count",
+        operator: ">=",
+        value: generalDaysOffIntent.count,
+        strength: "hard",
+      });
+    }
+
+    if (
+      generalDaysOffIntent?.mode === "prefer_minimum" ||
+      generalDaysOffIntent?.mode === "maximize"
+    ) {
+      scoped.sort_preferences.push({
+        field: "days_off_count",
+        direction: "desc",
+        strength: "strong",
+        weight: getPreferenceWeight(clause, 8),
       });
     }
 
@@ -4492,9 +4605,17 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
     if (
       (filter.field === "days_off_count" || filter.field === "days_off") &&
       filter.operator === ">=" &&
-      Number(filter.value) === 3
+      typeof filter.value === "number"
     ) {
-      items.push("Only 3 day off jobs");
+      items.push(`Requiring at least ${filter.value} days off`);
+    }
+
+    if (
+      (filter.field === "days_off_count" || filter.field === "days_off") &&
+      filter.operator === "=" &&
+      typeof filter.value === "number"
+    ) {
+      items.push(`Requiring exactly ${filter.value} days off`);
     }
 
     if (
@@ -4559,6 +4680,10 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       items.push(`Prefer weekends off`);
     }
 
+    if (sort.field === "days_off_count" || sort.field === "days_off") {
+      items.push(`Preferring more days off`);
+    }
+
     if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
       items.push(`Prefer 3 day off jobs`);
     }
@@ -4569,6 +4694,10 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
   });
 
   parsed.tradeoffs.forEach((tradeoff) => {
+    if (tradeoff.type === "prefer_min_days_off" && tradeoff.value) {
+      items.push(`Preferring at least ${tradeoff.value} days off`);
+    }
+
     if (tradeoff.type === "prefer_closeness_over_finish_time") {
       items.push(`Will accept later jobs to stay closer to home`);
     }
@@ -5005,6 +5134,19 @@ function hasWeekendDaysOff(crew: Crew): boolean {
   );
 }
 
+function getDaysOffCount(crew: Crew): number {
+  if (typeof crew.days_off_count === "number") return crew.days_off_count;
+
+  if (crew.is_two_week_stby) {
+    return [
+      ...(crew.week1?.days_off_list ?? []),
+      ...(crew.week2?.days_off_list ?? []),
+    ].length;
+  }
+
+  return (crew.days_off ?? crew.days_off_list ?? []).length;
+}
+
 function getCrewComparableTimes(
   crew: Crew,
   field: "on_duty" | "off_duty"
@@ -5090,6 +5232,10 @@ function getNumericSortValue(crew: RankedCrew, field: SortField): number | null 
 
   if (field === "three_day_off_jobs") {
     return crew.days_off_count === 3 ? 1 : 0;
+  }
+
+  if (field === "days_off_count" || field === "days_off") {
+    return getDaysOffCount(crew);
   }
 
   const firstWorkedDay = crew.daily?.find((d: any) => !d.is_day_off);
@@ -5805,6 +5951,22 @@ const excludeThreeDayOffJobsFilter = effectiveFilters.find(
     f.value === true
 );
 
+const minDaysOffCountFilter = effectiveFilters.find(
+  (f) =>
+    (f.field === "days_off_count" || f.field === "days_off") &&
+    f.operator === ">=" &&
+    typeof f.value === "number" &&
+    f.strength === "hard"
+);
+
+const exactDaysOffCountFilter = effectiveFilters.find(
+  (f) =>
+    (f.field === "days_off_count" || f.field === "days_off") &&
+    f.operator === "=" &&
+    typeof f.value === "number" &&
+    f.strength === "hard"
+);
+
 const hardWeekendsOffFilter = effectiveFilters.find(
   (f) =>
     f.field === "weekends_off_hard" &&
@@ -6003,6 +6165,32 @@ if (
     id: crew.id,
     terminal: formatTerminalDisplayName(crew.terminal),
     reason: "Excluded because 3 day off jobs were excluded by your preferences",
+});
+  continue;
+}
+
+if (
+  minDaysOffCountFilter &&
+  getDaysOffCount(crewWithSchedule) < Number(minDaysOffCountFilter.value) &&
+  !overridden
+) {
+  excluded.push({
+    id: crew.id,
+    terminal: formatTerminalDisplayName(crew.terminal),
+    reason: `Excluded because this crew has fewer than ${minDaysOffCountFilter.value} days off`,
+  });
+  continue;
+}
+
+if (
+  exactDaysOffCountFilter &&
+  getDaysOffCount(crewWithSchedule) !== Number(exactDaysOffCountFilter.value) &&
+  !overridden
+) {
+  excluded.push({
+    id: crew.id,
+    terminal: formatTerminalDisplayName(crew.terminal),
+    reason: `Excluded because this crew does not have exactly ${exactDaysOffCountFilter.value} days off`,
   });
   continue;
 }
@@ -6226,6 +6414,23 @@ if (
 }
 
 for (const tradeoff of parsed.tradeoffs) {
+  if (tradeoff.type === "prefer_min_days_off") {
+    const targetDaysOff = Number(tradeoff.value);
+
+    if (
+      Number.isFinite(targetDaysOff) &&
+      getDaysOffCount(crewWithSchedule) >= targetDaysOff
+    ) {
+      const bonus = tradeoff.weight ?? 8;
+
+      score += bonus;
+      scoreBreakdown.push({
+        label: `Prefers at least ${targetDaysOff} days off`,
+        points: bonus,
+      });
+    }
+  }
+
   if (tradeoff.type === "prefer_up" && hasUpExpressWork) {
     const bonus = tradeoff.weight ?? 12;
 
@@ -6598,9 +6803,17 @@ function formatFilterLabel(
   if (
     (f.field === "days_off_count" || f.field === "days_off") &&
     f.operator === ">=" &&
-    Number(f.value) === 3
+    typeof f.value === "number"
   ) {
-    return "Only show 3-day-off jobs";
+    return `Requiring at least ${f.value} days off`;
+  }
+
+  if (
+    (f.field === "days_off_count" || f.field === "days_off") &&
+    f.operator === "=" &&
+    typeof f.value === "number"
+  ) {
+    return `Requiring exactly ${f.value} days off`;
   }
 
   if (
@@ -6767,6 +6980,10 @@ function formatSortLabel(s: any): string {
 
   if (s.field === "weekends_off") {
     return "Weekends off first";
+  }
+
+  if (s.field === "days_off_count" || s.field === "days_off") {
+    return "Preferring more days off";
   }
 
   if (s.field === "three_day_off_jobs" && s.direction === "desc") {
@@ -9086,9 +9303,17 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
     if (
       (filter.field === "days_off_count" || filter.field === "days_off") &&
       filter.operator === ">=" &&
-      Number(filter.value) === 3
+      typeof filter.value === "number"
     ) {
-      hardRules.push("Only 3 day off jobs");
+      hardRules.push(`Requiring at least ${filter.value} days off`);
+    }
+
+    if (
+      (filter.field === "days_off_count" || filter.field === "days_off") &&
+      filter.operator === "=" &&
+      typeof filter.value === "number"
+    ) {
+      hardRules.push(`Requiring exactly ${filter.value} days off`);
     }
 
     if (
@@ -9217,6 +9442,10 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
       preferences.push("Prefer weekends off");
     }
 
+    if (sort.field === "days_off_count" || sort.field === "days_off") {
+      preferences.push("Preferring more days off");
+    }
+
     if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
       preferences.push("Prefer 3 day off jobs");
     }
@@ -9227,6 +9456,10 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
   });
 
   parsed.tradeoffs.forEach((tradeoff) => {
+    if (tradeoff.type === "prefer_min_days_off" && tradeoff.value) {
+      tradeoffs.push(`Preferring at least ${tradeoff.value} days off`);
+    }
+
     if (tradeoff.type === "prefer_closeness_over_finish_time") {
       tradeoffs.push("Will accept later jobs to stay closer to home");
     }

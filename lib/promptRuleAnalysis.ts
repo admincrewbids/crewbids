@@ -233,6 +233,22 @@ function formatFilterRuleLabel(
   }
 
   if (
+    (filter.field === "days_off_count" || filter.field === "days_off") &&
+    filter.operator === ">=" &&
+    typeof filter.value === "number"
+  ) {
+    return `Requiring at least ${filter.value} days off`;
+  }
+
+  if (
+    (filter.field === "days_off_count" || filter.field === "days_off") &&
+    filter.operator === "=" &&
+    typeof filter.value === "number"
+  ) {
+    return `Requiring exactly ${filter.value} days off`;
+  }
+
+  if (
     filter.field === "exclude_three_day_off_jobs" &&
     filter.operator === "=" &&
     filter.value === true
@@ -340,6 +356,13 @@ function formatSortRuleLabel(sort: ParsedPreferenceSortLike) {
 
   if (sort.field === "weekends_off" && sort.direction === "desc") {
     return "Weekends off first";
+  }
+
+  if (
+    (sort.field === "days_off_count" || sort.field === "days_off") &&
+    sort.direction === "desc"
+  ) {
+    return "Preferring more days off";
   }
 
   if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
@@ -639,9 +662,12 @@ export function analyzeParsedPreferences(
     rules.push({
       category: "tradeoff",
       scope: "global",
-      label: tradeoff.value
-        ? `${tradeoff.type}: ${tradeoff.value}`
-        : tradeoff.type,
+      label:
+        tradeoff.type === "prefer_min_days_off" && tradeoff.value
+          ? `Preferring at least ${tradeoff.value} days off`
+          : tradeoff.value
+            ? `${tradeoff.type}: ${tradeoff.value}`
+            : tradeoff.type,
     });
   }
 

@@ -597,6 +597,224 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "general-days-off-prefer-3",
+    label: "3 days off",
+    prompt: "3 days off",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "prefer_min_days_off",
+          value: "3",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-prefer-wording",
+    label: "prefer 3 days off",
+    prompt: "prefer 3 days off",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "prefer_min_days_off",
+          value: "3",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-at-least-3",
+    label: "at least 3 days off",
+    prompt: "at least 3 days off",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "days_off_count",
+          operator: ">=",
+          value: 3,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-need-3",
+    label: "need 3 days off",
+    prompt: "need 3 days off",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "days_off_count",
+          operator: ">=",
+          value: 3,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-must-have-3",
+    label: "must have 3 days off",
+    prompt: "must have 3 days off",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "days_off_count",
+          operator: ">=",
+          value: 3,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-exactly-3",
+    label: "exactly 3 days off",
+    prompt: "exactly 3 days off",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "days_off_count",
+          operator: "=",
+          value: 3,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-more",
+    label: "more days off",
+    prompt: "more days off",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-most",
+    label: "most days off",
+    prompt: "most days off",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-5-not-up",
+    label: "I want 5 days off if possible",
+    prompt: "I want 5 days off if possible",
+    assertions: [
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "prefer_min_days_off",
+          value: "5",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "general-days-off-no-up-plus-5-days-off",
+    label: "No UP, I want 5 days off if possible",
+    prompt: "No UP, I want 5 days off if possible",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "days_off_count",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "tradeoff_present",
+        value: {
+          type: "prefer_min_days_off",
+          value: "5",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+    ],
+  },
+  {
     id: "canonical-three-day-off-first-except-not-at-willowbrook",
     label:
       "3 day off jobs first, except not at Willowbrook. Willowbrook should instead rank by highest overtime to lowest and later starts first.",
