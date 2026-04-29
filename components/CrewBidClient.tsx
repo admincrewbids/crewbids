@@ -64,20 +64,113 @@ function calculateDurationFromTimes(
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+const CREW_DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function normalizeAssignmentDay(day: any) {
+  if (typeof day?.day === "string") {
+    const key = day.day.trim().slice(0, 3).toLowerCase();
+    const match = CREW_DAY_LABELS.find(
+      (label) => label.toLowerCase() === key
+    );
+
+    if (match) return match;
+  }
+
+  if (typeof day?.day_index === "number") {
+    return CREW_DAY_LABELS[day.day_index] || null;
+  }
+
+  return null;
+}
+
+function getJobDetailCandidates(
+  jobLookupMap: Record<string, any> | Map<string, any[]>,
+  jobNo: string
+) {
+  const raw =
+    jobLookupMap instanceof Map
+      ? jobLookupMap.get(jobNo)
+      : jobLookupMap[jobNo];
+
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
+function getFirstJobDetail(
+  jobLookupMap: Record<string, any> | Map<string, any[]>,
+  jobNo: string
+) {
+  return getJobDetailCandidates(jobLookupMap, jobNo)[0] || null;
+}
+
+function chooseJobDetailForDay(
+  jobLookupMap: Record<string, any> | Map<string, any[]>,
+  jobNo: string,
+  day: any
+) {
+  const candidates = getJobDetailCandidates(jobLookupMap, jobNo);
+
+  if (candidates.length <= 1) {
+    return candidates[0] || null;
+  }
+
+  const assignmentDay = normalizeAssignmentDay(day);
+
+  if (assignmentDay) {
+    const matching = candidates.filter(
+      (job) =>
+        Array.isArray(job?.applicable_days) &&
+        job.applicable_days.includes(assignmentDay)
+    );
+
+    if (matching.length === 1) {
+      return matching[0];
+    }
+
+    if (matching.length > 1) {
+      console.warn(
+        "Ambiguous duplicate job number matched multiple day-scoped job sheets.",
+        {
+          jobNo,
+          assignmentDay,
+          matches: matching.map((job) => ({
+            job_no: job?.job_no,
+            applicable_days: job?.applicable_days ?? null,
+            pdf_page_number: job?.pdf_page_number ?? null,
+          })),
+        }
+      );
+
+      return matching[0];
+    }
+  }
+
+  console.warn(
+    "Ambiguous duplicate job number could not be resolved by assignment day; preserving fallback.",
+    {
+      jobNo,
+      assignmentDay,
+      candidates: candidates.map((job) => ({
+        job_no: job?.job_no,
+        applicable_days: job?.applicable_days ?? null,
+        pdf_page_number: job?.pdf_page_number ?? null,
+      })),
+    }
+  );
+
+  return candidates[0] || null;
+}
+
 function attachJobDetailsToRow(
   row: any,
-  jobLookupMap: Record<string, any> | Map<string, any>,
+  jobLookupMap: Record<string, any> | Map<string, any[]>,
   standbyJobLookupMap: Record<string, any> | Map<string, any>,
   spareboardLookupMap: Record<string, any> | Map<string, any>
 ){
   if (!row || !row.daily) return row;
 
-  const getJobDetail = (jobNo: string) => {
-    if (jobLookupMap instanceof Map) {
-      return jobLookupMap.get(jobNo) || null;
-    }
-    return jobLookupMap[jobNo] || null;
-  };
+  const getJobDetail = (jobNo: string, day: any) =>
+    chooseJobDetailForDay(jobLookupMap, jobNo, day);
 
   const getStandbyJobDetail = (jobNo: string) => {
     if (standbyJobLookupMap instanceof Map) {
@@ -205,7 +298,7 @@ const isSpareboardRow =
       };
     }
 
-    const jobDetail = getJobDetail(normalizedJobNo);
+    const jobDetail = getJobDetail(normalizedJobNo, day);
 
             return {
       ...day,
@@ -5242,7 +5335,7 @@ function rankCrews(
   crews: Crew[],
   parsed: ParsedPreferences,
   crewScheduleMap: Map<string, any>,
-  jobLookupMap: Map<string, any>,
+  jobLookupMap: Map<string, any[]>,
   overrides: string[] = []
 ) {
   const ranked: RankedCrew[] = [];
@@ -5280,7 +5373,7 @@ function rankCrews(
   const scheduleJobs = (schedule?.jobs || []) as string[];
 
   const jobDetails = scheduleJobs
-    .map((jobNo: string) => jobLookupMap.get(String(jobNo)))
+    .map((jobNo: string) => getFirstJobDetail(jobLookupMap, String(jobNo)))
     .filter(Boolean) as any[];
 
 
@@ -7241,7 +7334,15 @@ debugLog("SPAREBOARD PAGES", spareboardPages.length);
 debugLog("PARSED SPAREBOARD JOBS", parsedSpareboardJobs);
 
 const jobLookupMap = useMemo(() => {
-  return new Map(parsedJobs.map((j: any) => [String(j.job_no), j]));
+  const grouped = new Map<string, any[]>();
+
+  for (const job of parsedJobs) {
+    const key = String(job.job_no);
+    const existing = grouped.get(key) || [];
+    grouped.set(key, [...existing, job]);
+  }
+
+  return grouped;
 }, [parsedJobs]);
 
 const standbyJobLookupMap = useMemo(() => {
@@ -12206,4 +12307,6 @@ Locked Results ({fullIncludedCount - rankedCrews.length} more crews)
 
 );
 }
+
+
 
