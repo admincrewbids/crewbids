@@ -1230,7 +1230,7 @@ function crewHasUpExpressWork(
     jobDetails.some((job) =>
       isUpExpressJobNumber(job?.job_no ?? job?.jobNumber ?? job?.job_no_text ?? job)
     ) ||
-    dailyRows.some((day) =>
+    dailyRows.some((day: any) =>
       isUpExpressJobNumber(
         day?.job_no ??
           day?.jobNo ??
