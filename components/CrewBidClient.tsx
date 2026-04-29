@@ -11589,7 +11589,13 @@ onDrop={() => {
                       fontWeight: 800,
                     }}
                   >
-                    Score {Math.round(crew.score || 0)}
+                    {index === 0
+                      ? "Best match"
+                      : index <= 2
+                        ? "Strong match"
+                        : index <= 4
+                          ? "Good match"
+                          : "Matches your preferences"}
                   </div>
 
                   <button
