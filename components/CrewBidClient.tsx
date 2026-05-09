@@ -10693,7 +10693,7 @@ fontWeight: 800,
 color: "#fff",
 }}
 >
-Spring 2026 Bid Cycle
+FIFA World Cup 2026 Package
 </div>
 
 <div
