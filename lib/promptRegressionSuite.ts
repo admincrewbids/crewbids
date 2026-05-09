@@ -653,6 +653,70 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-multiple-terminal-scopes-exclude-unmentioned",
+    label: "RH, Lincolnville, Willowbrook terminal-scoped criteria",
+    prompt:
+      "RH weekends off , mornings only.  Lincolnville jobs next, weekends off not before 0500. Willowbrook jobs weekends off , no late starts",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Richmond Hill", "Lincolnville", "Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["richmond hill", "lincolnville", "willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Richmond Hill",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lincolnville",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Richmond Hill", "Lincolnville", "Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-barrie-only-finish-by-1800",
     label: "Barrie only if it finishes by 18:00",
     prompt: "Barrie only if it finishes by 18:00",

@@ -1712,7 +1712,7 @@ function getIncludedTerminalMentionsFromPrompt(prompt: string) {
 }
 
 function hasTerminalPriorityOrderingLanguage(prompt: string) {
-  const text = prompt.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+  const text = prompt.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
   const terminalMentionCount = getIncludedTerminalMentionsFromPrompt(prompt).length;
 
   if (
@@ -1723,13 +1723,47 @@ function hasTerminalPriorityOrderingLanguage(prompt: string) {
   }
 
   return splitIntoPreferenceClauses(prompt).some((clauseEntry) => {
-    const clause = clauseEntry.text.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+    const clause = clauseEntry.text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
     const clauseTerminals = extractKnownTerminalMentions(clauseEntry.text);
 
     if (clauseTerminals.length === 0) return false;
 
     return /\b(first|last|prefer|preferred|priority|prioritize|rank|ranking)\b/i.test(
       clause
+    );
+  });
+}
+
+function hasTerminalScopedConstraintLanguage(prompt: string) {
+  return splitIntoPreferenceClauses(prompt).some((clauseEntry) => {
+    const clause = clauseEntry.text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+    const clauseTerminals = extractKnownTerminalMentions(clauseEntry.text);
+
+    if (clauseTerminals.length === 0) return false;
+
+    const clauseIntents = detectPhraseIntents(clause);
+    const generalDaysOffIntent = parseGeneralDaysOffIntent(clause);
+    const namedDaysOffRequirement = extractNamedDaysOffRequirement(clause);
+
+    return (
+      clauseIntents.has("weekends_off_hard") ||
+      clauseIntents.has("mornings_only") ||
+      clauseIntents.has("evenings_only") ||
+      clauseIntents.has("no_mornings") ||
+      clauseIntents.has("no_nights") ||
+      clauseIntents.has("weekdays_off_only") ||
+      clauseIntents.has("three_day_off_only") ||
+      clauseIntents.has("no_splits") ||
+      clauseIntents.has("exclude_shuttle_bus") ||
+      clauseIntents.has("only_shuttle_bus") ||
+      Boolean(generalDaysOffIntent) ||
+      namedDaysOffRequirement.length > 0 ||
+      /\b(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\b/i.test(
+        clause
+      ) ||
+      /\b(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\b/i.test(
+        clause
+      )
     );
   });
 }
@@ -1742,7 +1776,7 @@ function shouldImplicitlyRestrictToMentionedTerminals(prompt: string) {
   if (hasExplicitTerminalOnlyLanguage(text)) return true;
   if (containsAny(text, PHRASES.exclude_all_others)) return true;
 
-  return !hasTerminalPriorityOrderingLanguage(text);
+  return !hasTerminalPriorityOrderingLanguage(prompt) || hasTerminalScopedConstraintLanguage(prompt);
 }
 
 function isClearlyGlobalClause(clause: string) {
