@@ -1711,10 +1711,27 @@ function getIncludedTerminalMentionsFromPrompt(prompt: string) {
   return terminals;
 }
 
-function hasTerminalPriorityOrderingLanguage(text: string) {
-  return /\b(first|last|then|next|followed by|prefer|preferred|priority|prioritize|rank|ranking)\b/i.test(
-    text
-  );
+function hasTerminalPriorityOrderingLanguage(prompt: string) {
+  const text = prompt.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+  const terminalMentionCount = getIncludedTerminalMentionsFromPrompt(prompt).length;
+
+  if (
+    terminalMentionCount > 1 &&
+    /\b(?:then|next|followed by|after that|and then)\b/i.test(text)
+  ) {
+    return true;
+  }
+
+  return splitIntoPreferenceClauses(prompt).some((clauseEntry) => {
+    const clause = clauseEntry.text.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+    const clauseTerminals = extractKnownTerminalMentions(clauseEntry.text);
+
+    if (clauseTerminals.length === 0) return false;
+
+    return /\b(first|last|prefer|preferred|priority|prioritize|rank|ranking)\b/i.test(
+      clause
+    );
+  });
 }
 
 function shouldImplicitlyRestrictToMentionedTerminals(prompt: string) {

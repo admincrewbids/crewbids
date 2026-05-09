@@ -626,6 +626,33 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-lewis-road-with-sorts-is-terminal-scope",
+    label: "Lewis Road, mornings only, weekends off, most OT first",
+    prompt: "Lewis road , Mornings only. Weekends off. most OT first",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lewis Road"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lewis road"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lewis Road"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-barrie-only-finish-by-1800",
     label: "Barrie only if it finishes by 18:00",
     prompt: "Barrie only if it finishes by 18:00",
