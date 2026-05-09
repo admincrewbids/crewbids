@@ -4227,6 +4227,37 @@ function applyDeterministicPreferenceRulesV2(
     );
   }
 
+  if (explicitlyExcludedTerminals.size > 0) {
+    const excludedTerminals = Array.from(explicitlyExcludedTerminals);
+
+    nextParsed.filters.push({
+      field: "terminal",
+      operator: "not_in",
+      value: excludedTerminals,
+      strength: "hard",
+    });
+
+    nextParsed.priority_groups = nextParsed.priority_groups.filter((group) => {
+      const terminalCondition = group.conditions.find(
+        (condition) => condition.field === "terminal"
+      );
+
+      return (
+        !terminalCondition ||
+        !explicitlyExcludedTerminals.has(
+          normalizeTerminalName(String(terminalCondition.value))
+        )
+      );
+    });
+
+    nextParsed.scoped_preferences = (nextParsed.scoped_preferences ?? []).filter(
+      (scope) =>
+        !explicitlyExcludedTerminals.has(
+          normalizeTerminalName(scope.normalized_terminal || scope.terminal)
+        )
+    );
+  }
+
   if (intents.has("exclude_up")) {
     nextParsed.filters = nextParsed.filters.filter((filter) => {
       if (

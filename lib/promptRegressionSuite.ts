@@ -1002,6 +1002,40 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "terminal-exclusion-no-barrie-not-priority",
+    label: "weekends off, No UP, No barrie",
+    prompt: "weekends off, No UP, No barrie",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_priority_terminal_absent",
+        value: {
+          terminal: "Barrie",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "up-language-no-up-no-wrmf-willowbrook",
     label: "No UP, no WRMF, prefer Willowbrook",
     prompt: "No UP, no WRMF, prefer Willowbrook",
