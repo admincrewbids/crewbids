@@ -513,6 +513,32 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-willowbrook-weekends-off-only",
+    label: "Willowbrook weekends off only",
+    prompt: "Willowbrook weekends off only",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-barrie-only-finish-by-1800",
     label: "Barrie only if it finishes by 18:00",
     prompt: "Barrie only if it finishes by 18:00",

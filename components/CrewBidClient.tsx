@@ -2077,6 +2077,7 @@ const PHRASES = {
     "must have weekends off",
     "need weekends off",
     "with weekends off",
+    "weekends off only",
     "weekends only",
     "only weekends off",
     "only weekends",
@@ -5488,6 +5489,16 @@ function passesScopedFilters(crew: Crew, scoped: ScopedPreference): boolean {
       filter.value === false
     ) {
       if (hasWeekendDaysOff(crew)) {
+        return false;
+      }
+    }
+
+    if (
+      filter.field === "weekends_off_hard" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      if (crew.works_weekends) {
         return false;
       }
     }
