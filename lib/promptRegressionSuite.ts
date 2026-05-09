@@ -476,6 +476,43 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-morning-only-weekends-off-willowbrook-lewis",
+    label:
+      "I want Morning Jobs only, with weekends off. Starting out of Willowbrook and then lewis",
+    prompt:
+      "I want Morning Jobs only , with weekends off. Starting out of Willowbrook and then lewis",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook", "Lewis Road"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "on_duty",
+          operator: "<=",
+          value: "11:59",
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "weekends_off_hard",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_priority_violations",
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-barrie-only-finish-by-1800",
     label: "Barrie only if it finishes by 18:00",
     prompt: "Barrie only if it finishes by 18:00",

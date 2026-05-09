@@ -2076,6 +2076,7 @@ const PHRASES = {
   weekends_off_hard: [
     "must have weekends off",
     "need weekends off",
+    "with weekends off",
     "weekends only",
     "only weekends off",
     "only weekends",
