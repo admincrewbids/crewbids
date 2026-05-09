@@ -522,6 +522,15 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
         value: ["Willowbrook"],
       },
       {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
         type: "parsed_scoped_filter_present",
         value: {
           terminal: "Willowbrook",
@@ -531,6 +540,84 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
             value: true,
             strength: "hard",
           },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-willowbrook-barrie-weekends-off-only",
+    label: "Willowbrook and Barrie weekends off only",
+    prompt: "Willowbrook and Barrie weekends off only",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook", "Barrie"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook", "barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Barrie",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Willowbrook", "Barrie"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-willowbrook-first-is-priority-not-only",
+    label: "Willowbrook first",
+    prompt: "Willowbrook first",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook"],
+          strength: "hard",
         },
       },
       {

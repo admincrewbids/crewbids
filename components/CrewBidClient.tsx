@@ -1661,6 +1661,73 @@ function splitIntoPreferenceClauses(prompt: string): PreferenceClause[] {
     );
 }
 
+function extractKnownTerminalMentions(text: string) {
+  const normalizedText = text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+  const matches: { terminal: string; index: number }[] = [];
+
+  for (const [canonical, aliases] of Object.entries(CANONICAL_TERMINAL_ALIASES)) {
+    let bestIndex = -1;
+
+    for (const alias of Array.from(new Set([canonical, ...aliases]))) {
+      const pattern = new RegExp(`\\b${escapeRegex(alias.toLowerCase())}\\b`, "i");
+      const match = pattern.exec(normalizedText);
+
+      if (match && (bestIndex === -1 || match.index < bestIndex)) {
+        bestIndex = match.index;
+      }
+    }
+
+    if (bestIndex !== -1) {
+      matches.push({ terminal: canonical, index: bestIndex });
+    }
+  }
+
+  return matches
+    .sort((a, b) => a.index - b.index)
+    .map((match) => match.terminal);
+}
+
+function getIncludedTerminalMentionsFromPrompt(prompt: string) {
+  const terminals: string[] = [];
+
+  for (const clauseEntry of splitIntoPreferenceClauses(prompt)) {
+    const clause = clauseEntry.text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+    const clauseTerminals = extractKnownTerminalMentions(clauseEntry.text);
+
+    if (clauseTerminals.length === 0) continue;
+
+    const isExclusionClause =
+      /\b(no|avoid|exclude|without|anything but|not)\b/i.test(clause);
+
+    if (isExclusionClause) continue;
+
+    for (const terminal of clauseTerminals) {
+      if (!terminals.includes(terminal)) {
+        terminals.push(terminal);
+      }
+    }
+  }
+
+  return terminals;
+}
+
+function hasTerminalPriorityOrderingLanguage(text: string) {
+  return /\b(first|last|then|next|followed by|prefer|preferred|priority|prioritize|rank|ranking)\b/i.test(
+    text
+  );
+}
+
+function shouldImplicitlyRestrictToMentionedTerminals(prompt: string) {
+  const text = prompt.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+  const includedTerminals = getIncludedTerminalMentionsFromPrompt(prompt);
+
+  if (includedTerminals.length === 0) return false;
+  if (hasExplicitTerminalOnlyLanguage(text)) return true;
+  if (containsAny(text, PHRASES.exclude_all_others)) return true;
+
+  return !hasTerminalPriorityOrderingLanguage(text);
+}
+
 function isClearlyGlobalClause(clause: string) {
   return (
     containsAny(clause, PHRASES.exclude_all_others) ||
@@ -3052,8 +3119,13 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     containsAny(text, PHRASES.exclude_all_others);
 
   const explicitOnlyLanguage = hasExplicitTerminalOnlyLanguage(text);
+  const implicitTerminalAllowlist =
+    shouldImplicitlyRestrictToMentionedTerminals(prompt);
 
-  if ((explicitExcludeAllOthers || explicitOnlyLanguage) && orderedTerminals.length > 0) {
+  if (
+    (explicitExcludeAllOthers || explicitOnlyLanguage || implicitTerminalAllowlist) &&
+    orderedTerminals.length > 0
+  ) {
     const allowedTerminalSet = new Set<string>(orderedTerminals);
 
     if (explicitIncludeSpareboard) {
@@ -3126,9 +3198,12 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     const rawClause = clauseEntry.text;
     const clause = rawClause.toLowerCase().replace(/[â]/g, "'");
     const clauseExcludesStandby = containsAny(clause, PHRASES.exclude_standby);
-    const clauseTerminal = clauseExcludesStandby
-      ? null
-      : getClauseTerminal(rawClause, crews);
+    const clauseTerminals = clauseExcludesStandby
+      ? []
+      : extractTerminalPriorities(rawClause, crews)
+          .map(normalizeTerminalName)
+          .filter(Boolean);
+    const clauseTerminal = clauseTerminals[0] ?? null;
     const normalizedClauseTerminal = clauseTerminal
       ? normalizeTerminalName(clauseTerminal)
       : null;
@@ -3831,23 +3906,33 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       wantsWeekendsOffHard ||
       clauseIntents.has("weekends_off_prefer") ||
       clauseIntents.has("weekends_off_first");
+    const weekendTargetScopes =
+      clauseTerminals.length > 1
+        ? Array.from(new Set(clauseTerminals)).map((terminal) =>
+            ensureScope(terminal)
+          )
+        : [scoped];
 
     if (wantsWeekendsOffHard) {
-      scoped.requires_weekends_off = true;
-      scoped.filters.push({
-        field: "weekends_off_hard",
-        operator: "=",
-        value: true,
-        strength: "hard",
+      weekendTargetScopes.forEach((targetScope) => {
+        targetScope.requires_weekends_off = true;
+        targetScope.filters.push({
+          field: "weekends_off_hard",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        });
       });
     }
 
     if (wantsWeekendsOffPrefer) {
-      scoped.sort_preferences.push({
-        field: "weekends_off",
-        direction: "desc",
-        strength: "strong",
-        weight: getPreferenceWeight(clause, 7),
+      weekendTargetScopes.forEach((targetScope) => {
+        targetScope.sort_preferences.push({
+          field: "weekends_off",
+          direction: "desc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 7),
+        });
       });
     }
 
@@ -4183,6 +4268,11 @@ function applyDeterministicPreferenceRulesV2(
   const text = prompt.toLowerCase().replace(/[ÃÂ¢Ã¢âÂ¬Ã¢âÂ¢]/g, "'");
   const intents = detectPhraseIntents(text);
   const explicitTerminalOnlyLanguage = hasExplicitTerminalOnlyLanguage(text);
+  const implicitTerminalAllowlist =
+    shouldImplicitlyRestrictToMentionedTerminals(prompt);
+  const implicitlyAllowedTerminals = implicitTerminalAllowlist
+    ? getIncludedTerminalMentionsFromPrompt(prompt)
+    : [];
   const explicitlyExcludedTerminal = getExplicitExcludedTerminalFromText(prompt);
   const explicitlyExcludedTerminals = getExplicitlyExcludedTerminalsFromText(prompt);
 
@@ -4257,6 +4347,15 @@ function applyDeterministicPreferenceRulesV2(
           normalizeTerminalName(scope.normalized_terminal || scope.terminal)
         )
     );
+  }
+
+  if (implicitlyAllowedTerminals.length > 0) {
+    nextParsed.filters.push({
+      field: "terminal",
+      operator: "in",
+      value: implicitlyAllowedTerminals,
+      strength: "hard",
+    });
   }
 
   if (intents.has("exclude_up")) {
@@ -4395,7 +4494,7 @@ function applyDeterministicPreferenceRulesV2(
     });
   }
 
-  if (!explicitTerminalOnlyLanguage) {
+  if (!explicitTerminalOnlyLanguage && !implicitTerminalAllowlist) {
     nextParsed.filters = nextParsed.filters.filter(
       (filter) =>
         !(
