@@ -670,7 +670,7 @@ declare global {
 
 const CANONICAL_TERMINAL_ALIASES: Record<string, string[]> = {
   wrmf: ["wrmf", "whitby"],
-  willowbrook: ["willowbrook", "wb"],
+  willowbrook: ["willowbrook", "wb", "w/b", "w.b", "wb_d", "wb_up"],
   "lewis road": ["lewis road", "lewis"],
   "richmond hill": ["richmond hill", "rh"],
   milton: ["milton", "mil"],

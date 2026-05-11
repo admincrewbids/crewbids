@@ -173,7 +173,7 @@ IMPORTANT RULES
 
 Recognize these aliases:
 - "wrmf" => "wrmf"
-- "wb", "wb_d", "wb_up", "willowbrook" => "willowbrook"
+- "wb", "w/b", "w.b", "wb_d", "wb_up", "willowbrook" => "willowbrook"
 - "lr", "lr_d", "lewis rd", "lewis road" => "lewis road"
 - "rh", "rh_d", "richmond hill" => "richmond hill"
 - "ml", "ml_d", "milton" => "milton"

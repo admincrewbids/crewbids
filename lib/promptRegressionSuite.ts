@@ -552,6 +552,45 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-wb-alias-weekends-off-only",
+    label: "WB weekends off only",
+    prompt: "WB weekends off only",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-willowbrook-barrie-weekends-off-only",
     label: "Willowbrook and Barrie weekends off only",
     prompt: "Willowbrook and Barrie weekends off only",
