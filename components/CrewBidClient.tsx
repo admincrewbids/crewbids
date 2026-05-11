@@ -1267,6 +1267,19 @@ function containsAny(text: string, phrases: readonly string[]) {
   return phrases.some((p) => text.includes(p));
 }
 
+function hasExplicitSoftWeekendsOffLanguage(text: string) {
+  const normalized = text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+
+  return (
+    /\b(prefer|preferred|want|would like|like|if possible|nice to have)\b[^.]*\bweekends?\s+off\b/i.test(
+      normalized
+    ) ||
+    /\bweekends?\s+off\b[^.]*\b(prefer|preferred|first|if possible|nice to have)\b/i.test(
+      normalized
+    )
+  );
+}
+
 function normalizeNumericIdentifier(value: any) {
   return String(value ?? "").trim().replace(/[^0-9]/g, "");
 }
@@ -2701,6 +2714,28 @@ function removeOnDutySortPreference(
   );
 }
 
+function isWeakerOnDutyMinimumFilter(
+  filter: ParsedPreferences["filters"][number] | ScopedPreference["filters"][number],
+  minimumValue: string
+) {
+  if (
+    filter.field !== "on_duty" ||
+    (filter.operator !== ">=" && filter.operator !== ">") ||
+    typeof filter.value !== "string"
+  ) {
+    return false;
+  }
+
+  const filterMinutes = timeToMinutes(filter.value);
+  const minimumMinutes = timeToMinutes(minimumValue);
+
+  return (
+    filterMinutes != null &&
+    minimumMinutes != null &&
+    filterMinutes < minimumMinutes
+  );
+}
+
 function removeSortPreferenceByField(
   sortPreferences:
     | ParsedPreferences["sort_preferences"]
@@ -2734,7 +2769,8 @@ function prioritizeSortPreference(
 
 function applyConflictResolutionRules(
   parsed: ParsedPreferences,
-  intents: Set<PhraseIntentKey>
+  intents: Set<PhraseIntentKey>,
+  promptText = ""
 ): ParsedPreferences {
   const nextParsed: ParsedPreferences = {
     ...parsed,
@@ -2762,6 +2798,10 @@ function applyConflictResolutionRules(
   if (hasGlobalNoMorningsFilter) {
     nextParsed.filters = nextParsed.filters.filter(
       (filter) =>
+        !isWeakerOnDutyMinimumFilter(
+          filter,
+          TIME_BUCKETS.afternoon.start
+        ) &&
         !(
           filter.field === "on_duty" &&
           filter.operator === "<=" &&
@@ -2887,7 +2927,8 @@ function applyConflictResolutionRules(
   }
 
   const preferWeekendsOnly =
-    intents.has("weekends_off_prefer") && !intents.has("weekends_off_hard");
+    hasExplicitSoftWeekendsOffLanguage(promptText) &&
+    !intents.has("weekends_off_hard");
 
   const preferThreeDayOffOnly =
     (intents.has("three_day_off_prefer") || intents.has("three_day_off_first")) &&
@@ -2920,15 +2961,26 @@ function applyConflictResolutionRules(
     (scope) => {
       const nextScopeFilters = (scope.filters ?? []).filter(
         (filter) =>
-          !(
-            filtersContainOnDutyRule(
-              scope.filters,
-              ">=",
-              TIME_BUCKETS.afternoon.start
-            ) &&
-            filter.field === "on_duty" &&
-            filter.operator === "<=" &&
-            filter.value === TIME_BUCKETS.morning.end
+        !(
+          filtersContainOnDutyRule(
+            scope.filters,
+            ">=",
+            TIME_BUCKETS.afternoon.start
+          ) &&
+          isWeakerOnDutyMinimumFilter(
+            filter,
+            TIME_BUCKETS.afternoon.start
+          )
+        ) &&
+        !(
+          filtersContainOnDutyRule(
+            scope.filters,
+            ">=",
+            TIME_BUCKETS.afternoon.start
+          ) &&
+          filter.field === "on_duty" &&
+          filter.operator === "<=" &&
+          filter.value === TIME_BUCKETS.morning.end
           ) &&
           !(
             preferWeekendsOnly &&
@@ -3952,7 +4004,11 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     }
 
     // ---- weekends off / specific days off ----
-    const wantsWeekendsOffHard = clauseIntents.has("weekends_off_hard");
+    const wantsWeekendsOffHard =
+      clauseIntents.has("weekends_off_hard") ||
+      (clauseIntents.has("weekends_off_prefer") &&
+        !clauseIntents.has("weekends_off_first") &&
+        !hasExplicitSoftWeekendsOffLanguage(clause));
     const wantsWeekendsOffPrefer =
       wantsWeekendsOffHard ||
       clauseIntents.has("weekends_off_prefer") ||
@@ -4167,7 +4223,8 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         }))
         .sort((a, b) => a.priority_rank - b.priority_rank),
     },
-    detectPhraseIntents(text)
+    detectPhraseIntents(text),
+    prompt
   );
 
   return {
@@ -4602,7 +4659,7 @@ function applyDeterministicPreferenceRulesV2(
       });
   }
 
-  return applyConflictResolutionRules(nextParsed, intents);
+  return applyConflictResolutionRules(nextParsed, intents, prompt);
 }
 
 function buildReviewItems(parsed: ParsedPreferences): string[] {

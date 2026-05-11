@@ -194,6 +194,18 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
         },
       },
       {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
         type: "ranked_terminals_only",
         value: ["Lewis Road"],
       },
@@ -749,6 +761,111 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
       {
         type: "ranked_terminals_only",
         value: ["Richmond Hill", "Lincolnville", "Willowbrook"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-terminal-scoped-weekends-off-is-hard",
+    label: "Lewis Road start time and weekends off",
+    prompt: "Lewis road jobs that start after 1230, weekends off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lewis Road"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lewis road"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:30",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lewis Road"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-no-mornings-drops-weaker-start-filter",
+    label: "Willowbrook no mornings removes weaker starts",
+    prompt: "Willowbrook jobs, no mornings with weekends off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook"],
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_absent",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "07:30",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Willowbrook"],
       },
       {
         type: "no_visible_contradictions",
