@@ -11273,6 +11273,17 @@ Priority {scope.priority_rank}
 </div>
 )}
 
+{scope.filters?.some((f: any) => f.field === "split_time") && (
+<div style={{ marginBottom: 8 }}>
+<div style={labelStyle}>Work</div>
+{scope.filters
+.filter((f: any) => f.field === "split_time")
+.map((f: any, i: number) => (
+<div key={i}>{formatFilterLabel(f)}</div>
+))}
+</div>
+)}
+
 {(scope.filters?.some(
   (f: any) =>
     f.field === "weekends_off_hard" &&
