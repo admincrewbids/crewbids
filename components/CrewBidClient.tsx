@@ -677,7 +677,7 @@ const CANONICAL_TERMINAL_ALIASES: Record<string, string[]> = {
   barrie: ["barrie", "bar"],
   bradford: ["bradford"],
   kitchener: ["kitchener", "kit"],
-  lincolnville: ["lincolnville", "linc", "lcn"],
+  lincolnville: ["lincolnville", "stouffville", "stouff", "linc", "lcn"],
   spareboard: ["spareboard", "spare board", "spare"],
   standby: ["stdby", "standby", "stand by"],
 };
@@ -1002,7 +1002,7 @@ function extractTerminalPriorities(prompt: string, crews: Crew[]) {
   const uniqueCrewTerminals = Array.from(
     new Set(
       crews
-        .map((crew) => normalizeTerminalName(crew.terminal))
+        .map((crew) => getCrewPreferenceTerminal(crew))
         .filter(Boolean)
     )
   );
@@ -1195,6 +1195,38 @@ const DAY_NAME_TO_SHORT: Record<string, string> = {
   friday: "fri",
   saturday: "sat",
 };
+
+const DAY_SHORT_TO_SHORT: Record<string, string> = {
+  sun: "sun",
+  mon: "mon",
+  tue: "tue",
+  tues: "tue",
+  wed: "wed",
+  thu: "thu",
+  thur: "thu",
+  thurs: "thu",
+  fri: "fri",
+  sat: "sat",
+};
+
+function normalizeDayName(day: unknown) {
+  const normalized = String(day ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+
+  return DAY_NAME_TO_SHORT[normalized] ?? DAY_SHORT_TO_SHORT[normalized] ?? normalized;
+}
+
+function normalizeRequiredDaysOff(days: unknown[]) {
+  return Array.from(
+    new Set(
+      days
+        .map(normalizeDayName)
+        .filter((day) => Object.values(DAY_SHORT_TO_SHORT).includes(day))
+    )
+  );
+}
 
 function extractNamedDayMentions(clause: string): string[] {
   return Array.from(
@@ -1586,7 +1618,7 @@ function mergeParsedPreferences(
         ...scope,
         filters: [...(scope.filters ?? [])],
         sort_preferences: [...(scope.sort_preferences ?? [])],
-        required_days_off: [...(scope.required_days_off ?? [])],
+        required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
       })) as ScopedPreference[]),
     ],
   };
@@ -1620,11 +1652,11 @@ function mergeParsedPreferences(
       ...(scope.sort_preferences ?? []),
       ...(fallbackScope.sort_preferences ?? []),
     ]);
-    scope.required_days_off = Array.from(
-      new Set([
+    scope.required_days_off = normalizeRequiredDaysOff(
+      [
         ...(scope.required_days_off ?? []),
         ...(fallbackScope.required_days_off ?? []),
-      ])
+      ]
     );
     scope.requires_weekends_off =
       scope.requires_weekends_off || fallbackScope.requires_weekends_off;
@@ -1820,9 +1852,29 @@ function isStandbyTerminal(value: string) {
   return normalizeTerminalName(value) === "standby";
 }
 
+function getCrewNumberValue(crew: Partial<Crew> & { id?: unknown }) {
+  return String(crew.crew_number ?? crew.id ?? "").trim();
+}
+
+function isSpareboardCrewNumber(crewNumber: string) {
+  return /^3[0-9]{3}$/.test(crewNumber);
+}
+
+function getCrewPreferenceTerminal(crew: Partial<Crew>) {
+  if (isSpareboardCrewNumber(getCrewNumberValue(crew))) {
+    return "spareboard";
+  }
+
+  if (normalizeTerminalName(crew.terminal) === "standby" || crew.is_two_week_stby === true) {
+    return "standby";
+  }
+
+  return normalizeTerminalName(crew.terminal);
+}
+
 function getAllKnownTerminals(crews: Crew[]) {
   return Array.from(
-    new Set(crews.map((c) => normalizeTerminalName(c.terminal)).filter(Boolean))
+    new Set(crews.map((c) => getCrewPreferenceTerminal(c)).filter(Boolean))
   );
 }
 
@@ -2783,7 +2835,7 @@ function applyConflictResolutionRules(
       ...scope,
       filters: [...(scope.filters ?? [])],
       sort_preferences: [...(scope.sort_preferences ?? [])],
-      required_days_off: [...(scope.required_days_off ?? [])],
+      required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
     })),
   };
 
@@ -3796,11 +3848,11 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       if (namedDaysOffRequirement.length > 0) {
         for (const terminal of allKnownTerminals) {
           const globalScope = ensureScope(terminal);
-          globalScope.required_days_off = Array.from(
-            new Set([
+          globalScope.required_days_off = normalizeRequiredDaysOff(
+            [
               ...(globalScope.required_days_off ?? []),
               ...namedDaysOffRequirement,
-            ])
+            ]
           );
         }
       }
@@ -4149,8 +4201,8 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     }
 
     if (namedDaysOffRequirement.length > 0) {
-      scoped.required_days_off = Array.from(
-        new Set([...(scoped.required_days_off ?? []), ...namedDaysOffRequirement])
+      scoped.required_days_off = normalizeRequiredDaysOff(
+        [...(scoped.required_days_off ?? []), ...namedDaysOffRequirement]
       );
     }
 
@@ -4252,7 +4304,7 @@ function applyDeterministicPreferenceRules(
       ...scope,
       filters: [...(scope.filters ?? [])],
       sort_preferences: [...(scope.sort_preferences ?? [])],
-      required_days_off: [...(scope.required_days_off ?? [])],
+      required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
     })),
   };
 
@@ -4395,7 +4447,7 @@ function applyDeterministicPreferenceRulesV2(
       ...scope,
       filters: [...(scope.filters ?? [])],
       sort_preferences: [...(scope.sort_preferences ?? [])],
-      required_days_off: [...(scope.required_days_off ?? [])],
+      required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
     })),
   };
 
@@ -5435,7 +5487,7 @@ function getScopedPreferencesForCrew(
   crew: Crew,
   parsed: ParsedPreferences
 ): ScopedPreference | undefined {
-  const normalized = normalizeTerminalName(crew.terminal);
+  const normalized = getCrewPreferenceTerminal(crew);
 
   return parsed.scoped_preferences?.find(
     (s) => s.normalized_terminal === normalized
@@ -5445,7 +5497,7 @@ function getCrewPriorityRank(
   crew: Crew,
   priorityGroups: ParsedPreferences["priority_groups"]
 ): number {
-  const crewTerminal = normalizeTerminalName(crew.terminal);
+  const crewTerminal = getCrewPreferenceTerminal(crew);
 
   for (const group of priorityGroups) {
     const terminalCondition = group.conditions.find(
@@ -5570,8 +5622,8 @@ function compareCrewsBySharedScopedAndGlobalSorts(
   b: RankedCrew,
   parsed: ParsedPreferences
 ) {
-  const aTerminal = normalizeTerminalName(a.terminal);
-  const bTerminal = normalizeTerminalName(b.terminal);
+  const aTerminal = getCrewPreferenceTerminal(a);
+  const bTerminal = getCrewPreferenceTerminal(b);
 
   if (aTerminal !== bTerminal) {
     return b.score - a.score;
@@ -5922,7 +5974,8 @@ function rankCrews(
   const priorityGroups = [...parsed.priority_groups].sort((a, b) => a.rank - b.rank);
 
  for (const crew of crews) {
-  const crewTerminal = normalizeTerminalName(crew.terminal);
+  const rawCrewTerminal = normalizeTerminalName(crew.terminal);
+  const crewTerminal = getCrewPreferenceTerminal(crew);
 
   const scoped = parsed.scoped_preferences?.find(
     (s) =>
@@ -5936,11 +5989,11 @@ function rankCrews(
   let schedule =
     Array.from(crewScheduleMap.values()).find(
       (s: any) =>
-        normalizeTerminalName(s.terminal) === normalizeTerminalName(crew.terminal)
+        normalizeTerminalName(s.terminal) === rawCrewTerminal
     ) || undefined;
 
   // Temporary fallback for WRMF proof-of-pipeline
-  if (!schedule && normalizeTerminalName(crew.terminal) === "wrmf") {
+  if (!schedule && rawCrewTerminal === "wrmf") {
     schedule = Array.from(crewScheduleMap.values())[0];
   }
 
@@ -6259,8 +6312,8 @@ const shuttleBusExcludedFilter = effectiveFilters.find(
     f.value === false
 );
 
-  const crewNumber = String(crew.crew_number ?? crew.id ?? "").trim();
-  const isSpareboardCrew = /^3[0-9]{3}$/.test(crewNumber);
+  const crewNumber = getCrewNumberValue(crew);
+  const isSpareboardCrew = isSpareboardCrewNumber(crewNumber);
   const isUpCrew = isUpExpressCrewNumber(crewNumber);
   const hasUpExpressWork = crewHasUpExpressWork(
     crewWithSchedule,
@@ -6524,11 +6577,12 @@ if (hasHardWeekendsOffRule) {
 }
 
 if (scoped?.required_days_off?.length) {
-  const crewDaysOff = (crewWithSchedule.days_off ?? []).map((d: any) =>
-    d.toLowerCase()
+  const crewDaysOff = (crewWithSchedule.days_off ?? crewWithSchedule.days_off_list ?? []).map(
+    normalizeDayName
   );
+  const requiredDaysOff = normalizeRequiredDaysOff(scoped.required_days_off);
 
-  const hasAllRequiredDays = scoped.required_days_off.every((day) =>
+  const hasAllRequiredDays = requiredDaysOff.every((day) =>
     crewDaysOff.includes(day)
   );
 
@@ -6536,7 +6590,7 @@ if (scoped?.required_days_off?.length) {
     excluded.push({
       id: crew.id,
       terminal: formatTerminalDisplayName(crew.terminal),
-      reason: `Excluded because it does not include required days off (${scoped.required_days_off.join(", ")})`,
+      reason: `Excluded because it does not include required days off (${requiredDaysOff.join(", ")})`,
     });
     continue;
   }
@@ -6544,7 +6598,7 @@ if (scoped?.required_days_off?.length) {
   // â Positive required-days-off match signal
   if (hasAllRequiredDays) {
     scoreBreakdown.push({
-      label: `Matches required days off (${scoped.required_days_off.join(", ")})`,
+      label: `Matches required days off (${requiredDaysOff.join(", ")})`,
       points: 0,
     });
   }
@@ -6781,8 +6835,8 @@ const explanation = buildCrewExplanation(scoreBreakdown);
   }
 
   ranked.sort((a, b) => {
-  const aTerminal = normalizeTerminalName(a.terminal);
-  const bTerminal = normalizeTerminalName(b.terminal);
+  const aTerminal = getCrewPreferenceTerminal(a);
+  const bTerminal = getCrewPreferenceTerminal(b);
 
   const aPriority = getCrewPriorityRank(a, priorityGroups);
   const bPriority = getCrewPriorityRank(b, priorityGroups);
@@ -8663,7 +8717,7 @@ const spareboardCrews = parsedSpareboardJobs
     return {
       id: `SPARE-${crewId}`,
       crew_number: crewId,
-      terminal: "Willowbrook",
+      terminal: "Spareboard",
 
       daily,
       jobs: daily

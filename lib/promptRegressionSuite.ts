@@ -819,6 +819,147 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-stouffville-alias-is-lincolnville",
+    label: "Stouffville jobs weekends off",
+    prompt: "Stouffville jobs weekends off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lincolnville"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lincolnville"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lincolnville",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lincolnville"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-barrie-saturday-sunday-off-normalized",
+    label: "Barrie jobs with Saturday and Sunday off",
+    prompt: "Barrie jobs with saturday and sunday off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Barrie"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Barrie",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "ranked_count_at_least",
+        value: 1,
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Barrie"],
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-spareboard-does-not-inherit-willowbrook-scope",
+    label: "Spareboard does not inherit Willowbrook start-time scope",
+    prompt: "Willowbrook, weekends off, starts after 1300. add spareboard with weekends off last.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook", "Spareboard"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["willowbrook", "spareboard"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "13:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Spareboard",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_absent",
+        value: {
+          terminal: "Spareboard",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "13:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-no-mornings-drops-weaker-start-filter",
     label: "Willowbrook no mornings removes weaker starts",
     prompt: "Willowbrook jobs, no mornings with weekends off",

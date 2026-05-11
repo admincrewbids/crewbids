@@ -180,7 +180,7 @@ Recognize these aliases:
 - "ae", "ae_d", "allandale", "barrie" => "barrie"
 - "bd", "bd_d", "bradford" => "bradford"
 - "sh", "sh_d", "shirley", "kitchener" => "kitchener"
-- "li", "li_d", "lincolnville" => "lincolnville"
+- "li", "li_d", "lincolnville", "stouffville", "stouff" => "lincolnville"
 - "spareboard" => "spareboard"
 - "stby", "standby" => "standby"
 
