@@ -23,6 +23,7 @@ export type PromptRegressionAssertionFailure = {
 type JobDetailLike = {
   on_duty?: string | null;
   off_duty?: string | null;
+  split_time?: string | null;
   operating_hours_daily?: unknown;
   van_hours_daily?: unknown;
   has_shuttle_bus?: unknown;
@@ -34,6 +35,7 @@ type DayLike = {
   is_day_off?: boolean;
   on_duty?: string | null;
   off_duty?: string | null;
+  split_time?: string | null;
   job_detail?: JobDetailLike | null;
 };
 
@@ -308,6 +310,26 @@ function hasSplitTimeValue(value: unknown) {
   return cleaned !== "0:00";
 }
 
+function crewHasSplitTime(crew: RankedCrewLike) {
+  if (hasSplitTimeValue(crew.split_time_weekly)) {
+    return true;
+  }
+
+  if (
+    (crew.daily ?? []).some(
+      (day) =>
+        hasSplitTimeValue(day?.split_time) ||
+        hasSplitTimeValue(day?.job_detail?.split_time)
+    )
+  ) {
+    return true;
+  }
+
+  return (crew.job_details ?? []).some((job) =>
+    hasSplitTimeValue(job?.split_time)
+  );
+}
+
 function hasShuttleBusValue(value: unknown) {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
@@ -536,7 +558,7 @@ function evaluateHardFilterOnCrew(
   if (filter.field === "split_time" && filter.operator === "=" && filter.value === "none") {
     return {
       supported: true,
-      passes: !hasSplitTimeValue(crew.split_time_weekly),
+      passes: !crewHasSplitTime(crew),
       reason: "crew has split time",
     };
   }

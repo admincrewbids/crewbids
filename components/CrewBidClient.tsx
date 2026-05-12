@@ -3199,7 +3199,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
   const allKnownTerminals = getAllKnownTerminals(crews);
 
   const clauses = splitIntoPreferenceClauses(prompt);
-  const sentenceTerminalCounts = new Map<number, number>();
+  const sentenceTerminalsByIndex = new Map<number, Set<string>>();
 
   for (const clauseEntry of clauses) {
     const sentenceTerminals = extractTerminalPriorities(clauseEntry.text, crews)
@@ -3208,14 +3208,18 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     if (sentenceTerminals.length === 0) continue;
 
-    sentenceTerminalCounts.set(
-      clauseEntry.sentenceIndex,
-      Math.max(
-        sentenceTerminalCounts.get(clauseEntry.sentenceIndex) ?? 0,
-        new Set(sentenceTerminals).size
-      )
-    );
+    const terminalsForSentence =
+      sentenceTerminalsByIndex.get(clauseEntry.sentenceIndex) ?? new Set<string>();
+
+    sentenceTerminals.forEach((terminal) => terminalsForSentence.add(terminal));
+    sentenceTerminalsByIndex.set(clauseEntry.sentenceIndex, terminalsForSentence);
   }
+
+  const sentenceTerminalCounts = new Map<number, number>(
+    Array.from(sentenceTerminalsByIndex.entries()).map(
+      ([sentenceIndex, terminals]) => [sentenceIndex, terminals.size]
+    )
+  );
 
   const clauseOrderedTerminals: string[] = [];
 
@@ -5197,6 +5201,26 @@ function hasSplitTimeValue(value?: string | null) {
   return typeof hours === "number" && hours > 0;
 }
 
+function crewHasSplitTimeComponent(crew: Partial<Crew>) {
+  if (hasSplitTimeValue(crew.split_time_weekly)) {
+    return true;
+  }
+
+  if (
+    (crew.daily ?? []).some(
+      (day: any) =>
+        hasSplitTimeValue(day?.split_time) ||
+        hasSplitTimeValue(day?.job_detail?.split_time)
+    )
+  ) {
+    return true;
+  }
+
+  return (crew.job_details ?? []).some((job: any) =>
+    hasSplitTimeValue(job?.split_time)
+  );
+}
+
 function hasShuttleBusValue(value: unknown) {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
@@ -5870,7 +5894,7 @@ function getScopedFilterFailureReason(
       filter.field === "split_time" &&
       filter.operator === "=" &&
       filter.value === "none" &&
-      hasSplitTimeValue(crew.split_time_weekly)
+      crewHasSplitTimeComponent(crew)
     ) {
       return "This crew has split time";
     }
@@ -6323,7 +6347,7 @@ const shuttleBusExcludedFilter = effectiveFilters.find(
   );
   const isStandbyCrew =
     crewTerminal === "standby" || crewWithSchedule.is_two_week_stby === true;
-  const crewHasSplitTime = hasSplitTimeValue(crewWithSchedule.split_time_weekly);
+  const crewHasSplitTime = crewHasSplitTimeComponent(crewWithSchedule);
   const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
   const isThreeDayOffCrew = crewWithSchedule.days_off_count === 3;
 
@@ -8560,7 +8584,7 @@ const summedWeeklyOperating =
       if (!day) return sum;
 
       const rawValue = hhmmToHours(
-        day?.job_detail?.split_time ?? null
+        day?.job_detail?.split_time ?? day?.split_time ?? null
       );
 
       const value =

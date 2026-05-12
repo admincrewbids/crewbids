@@ -394,6 +394,57 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-no-up-no-barrie-no-splits-terminal-priority",
+    label: "No UP, no Barrie, no split jobs with terminal priorities and weekends off",
+    prompt:
+      "No UP, no Barrie, no split jobs. Willowbrook first, Lewis Road second, Milton third. Weekends off only, highest overtime first, lowest operating time as tiebreaker.",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "split_time",
+          operator: "=",
+          value: "none",
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook", "Lewis Road", "Milton"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "weekends_off_hard",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-standby-only",
     label: "Standby only",
     prompt: "Standby only",
