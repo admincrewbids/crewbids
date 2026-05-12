@@ -1392,6 +1392,102 @@ function hasExplicitSoftWeekendsOffLanguage(text: string) {
   );
 }
 
+function clauseMentionsWeekendsOff(text: string): boolean {
+  const normalized = text.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+  const intents = detectPhraseIntents(normalized);
+
+  return (
+    intents.has("weekends_off_hard") ||
+    intents.has("weekends_off_prefer") ||
+    intents.has("weekends_off_first")
+  );
+}
+
+function shouldHardenScopedWeekendsOffClause(text: string): boolean {
+  return (
+    clauseMentionsWeekendsOff(text) &&
+    !hasExplicitSoftWeekendsOffLanguage(text)
+  );
+}
+
+function addHardWeekendRequirementToScope(scope: ScopedPreference) {
+  scope.requires_weekends_off = true;
+  scope.required_days_off = normalizeRequiredDaysOff([
+    ...(scope.required_days_off ?? []),
+    "sat",
+    "sun",
+  ]);
+
+  const hasHardFilter = (scope.filters ?? []).some(
+    (filter) =>
+      filter.field === "weekends_off_hard" &&
+      filter.operator === "=" &&
+      filter.value === true
+  );
+
+  if (!hasHardFilter) {
+    scope.filters.push({
+      field: "weekends_off_hard",
+      operator: "=",
+      value: true,
+      strength: "hard",
+    });
+  }
+}
+
+function hardenScopedWeekendsOffRequirements(
+  parsed: ParsedPreferences,
+  prompt: string
+): ParsedPreferences {
+  const nextParsed: ParsedPreferences = {
+    ...parsed,
+    filters: [...(parsed.filters ?? [])],
+    priority_groups: [...(parsed.priority_groups ?? [])],
+    sort_preferences: [...(parsed.sort_preferences ?? [])],
+    tradeoffs: [...(parsed.tradeoffs ?? [])],
+    unknown_clauses: [...(parsed.unknown_clauses ?? [])],
+    scoped_preferences: (parsed.scoped_preferences ?? []).map((scope) => ({
+      ...scope,
+      filters: [...(scope.filters ?? [])],
+      sort_preferences: [...(scope.sort_preferences ?? [])],
+      required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
+    })),
+  };
+
+  for (const clauseEntry of splitIntoPreferenceClauses(prompt)) {
+    if (!shouldHardenScopedWeekendsOffClause(clauseEntry.text)) continue;
+
+    const clauseTerminals = extractKnownTerminalMentions(clauseEntry.text);
+    if (clauseTerminals.length === 0) continue;
+
+    for (const terminal of Array.from(new Set(clauseTerminals))) {
+      const normalizedTerminal = normalizeTerminalName(terminal);
+      const scope = ensureScopedPreference(
+        nextParsed,
+        getTerminalDisplayNameForPrompt(normalizedTerminal, prompt),
+        normalizedTerminal
+      );
+
+      addHardWeekendRequirementToScope(scope);
+    }
+  }
+
+  return nextParsed;
+}
+
+function finalizeParsedPreferences(
+  parsed: ParsedPreferences,
+  prompt: string
+): ParsedPreferences {
+  return normalizeParsedTerminalAliases(
+    normalizeOperatingSortFields(
+      hardenScopedWeekendsOffRequirements(parsed, prompt),
+      prompt
+    ),
+    prompt
+  );
+}
+
 function normalizeNumericIdentifier(value: any) {
   return String(value ?? "").trim().replace(/[^0-9]/g, "");
 }
@@ -3567,10 +3663,7 @@ function applyConflictResolutionRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return normalizeParsedTerminalAliases(
-    normalizeOperatingSortFields(nextParsed, promptText),
-    promptText
-  );
+  return finalizeParsedPreferences(nextParsed, promptText);
 }
 
 
@@ -4848,10 +4941,7 @@ function applyDeterministicPreferenceRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return normalizeParsedTerminalAliases(
-    normalizeOperatingSortFields(nextParsed, prompt),
-    prompt
-  );
+  return finalizeParsedPreferences(nextParsed, prompt);
 }
 
 function applyDeterministicPreferenceRulesV2(
