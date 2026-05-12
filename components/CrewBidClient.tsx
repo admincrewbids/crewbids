@@ -3848,7 +3848,17 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         }
       }
 
-      if (clauseIntents.has("weekends_off_hard")) {
+      const wantsWeekendsOffHard =
+        clauseIntents.has("weekends_off_hard") ||
+        (clauseIntents.has("weekends_off_prefer") &&
+          !clauseIntents.has("weekends_off_first") &&
+          !hasExplicitSoftWeekendsOffLanguage(clause));
+      const wantsWeekendsOffPrefer =
+        wantsWeekendsOffHard ||
+        clauseIntents.has("weekends_off_prefer") ||
+        clauseIntents.has("weekends_off_first");
+
+      if (wantsWeekendsOffHard) {
         parsed.filters.push({
           field: "weekends_off_hard",
           operator: "=",
@@ -3857,11 +3867,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       }
 
-      if (
-        clauseIntents.has("weekends_off_hard") ||
-        clauseIntents.has("weekends_off_prefer") ||
-        clauseIntents.has("weekends_off_first")
-      ) {
+      if (wantsWeekendsOffPrefer) {
         parsed.sort_preferences.push({
           field: "weekends_off",
           direction: "desc",

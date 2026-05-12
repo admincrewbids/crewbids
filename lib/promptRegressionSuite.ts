@@ -202,9 +202,80 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
         },
       },
       {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "weekends_off_hard",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
         type: "parsed_global_filter_absent",
         value: {
           field: "include_only_standby_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-prefer-weekends-off-stays-soft",
+    label: "Prefer weekends off stays soft",
+    prompt: "prefer weekends off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "weekends_off",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "weekends_off_hard",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-weekends-off-first-stays-soft",
+    label: "Weekends off first stays soft",
+    prompt: "weekends off first",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "weekends_off",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "weekends_off_hard",
           operator: "=",
           value: true,
           strength: "hard",
