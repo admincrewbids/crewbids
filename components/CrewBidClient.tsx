@@ -5651,8 +5651,14 @@ function hasShuttleBusValue(value: unknown) {
 }
 
 function crewHasShuttleBusComponent(crew: Crew) {
+  let sawWorkedDailyRow = false;
+
   for (const day of crew.daily ?? []) {
     if (day?.is_day_off) continue;
+    if (!day?.job_no && !day?.job_detail) continue;
+
+    sawWorkedDailyRow = true;
+
     if (
       hasShuttleBusValue(day?.job_detail?.has_shuttle_bus) ||
       hasShuttleBusValue(day?.job_detail?.raw_text)
@@ -5660,6 +5666,8 @@ function crewHasShuttleBusComponent(crew: Crew) {
       return true;
     }
   }
+
+  if (sawWorkedDailyRow) return false;
 
   for (const detail of crew.job_details ?? []) {
     if (
@@ -5679,8 +5687,14 @@ function hasVanTimeValue(value: unknown) {
 }
 
 function crewHasVanComponent(crew: Crew) {
+  let sawWorkedDailyRow = false;
+
   for (const day of crew.daily ?? []) {
     if (day?.is_day_off) continue;
+    if (!day?.job_no && !day?.job_detail) continue;
+
+    sawWorkedDailyRow = true;
+
     if (
       hasVanTimeValue(day?.van_hours_daily) ||
       hasVanTimeValue(day?.job_detail?.van_hours_daily)
@@ -5688,6 +5702,8 @@ function crewHasVanComponent(crew: Crew) {
       return true;
     }
   }
+
+  if (sawWorkedDailyRow) return false;
 
   return (crew.job_details ?? []).some((job: any) =>
     hasVanTimeValue(job?.van_hours_daily)

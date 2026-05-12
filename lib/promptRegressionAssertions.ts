@@ -32,6 +32,7 @@ type JobDetailLike = {
 
 type DayLike = {
   day?: string;
+  job_no?: unknown;
   is_day_off?: boolean;
   on_duty?: string | null;
   off_duty?: string | null;
@@ -354,8 +355,14 @@ function hasShuttleBusValue(value: unknown) {
 }
 
 function crewHasShuttleBus(crew: RankedCrewLike) {
+  let sawWorkedDailyRow = false;
+
   for (const day of crew.daily ?? []) {
     if (day?.is_day_off) continue;
+    if (!day?.job_no && !day?.job_detail) continue;
+
+    sawWorkedDailyRow = true;
+
     if (
       hasShuttleBusValue(day?.job_detail?.has_shuttle_bus) ||
       hasShuttleBusValue(day?.job_detail?.raw_text)
@@ -363,6 +370,8 @@ function crewHasShuttleBus(crew: RankedCrewLike) {
       return true;
     }
   }
+
+  if (sawWorkedDailyRow) return false;
 
   for (const detail of crew.job_details ?? []) {
     if (
@@ -382,8 +391,14 @@ function hasVanTimeValue(value: unknown) {
 }
 
 function crewHasVan(crew: RankedCrewLike) {
+  let sawWorkedDailyRow = false;
+
   for (const day of crew.daily ?? []) {
     if (day?.is_day_off) continue;
+    if (!day?.job_no && !day?.job_detail) continue;
+
+    sawWorkedDailyRow = true;
+
     if (
       hasVanTimeValue(day?.van_hours_daily) ||
       hasVanTimeValue(day?.job_detail?.van_hours_daily)
@@ -391,6 +406,8 @@ function crewHasVan(crew: RankedCrewLike) {
       return true;
     }
   }
+
+  if (sawWorkedDailyRow) return false;
 
   return (crew.job_details ?? []).some((job) =>
     hasVanTimeValue(job?.van_hours_daily)
