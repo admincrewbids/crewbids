@@ -1099,6 +1099,33 @@ function getExplicitlyExcludedTerminalsFromText(text: string) {
     }
   }
 
+  const exclusionClauses = normalizedText
+    .split(/[.;]/)
+    .map((clause) => clause.trim())
+    .filter(Boolean);
+
+  for (const clause of exclusionClauses) {
+    if (!/^\s*(?:no|avoid|exclude)\b/i.test(clause)) continue;
+    if (
+      /\b(mornings?|early|late|starts?|starting|finish(?:es)?|weekends?|weekdays?|days?\s+off|splits?|van|vans|shuttle|shuttles|bus|buses)\b/i.test(
+        clause
+      )
+    ) {
+      continue;
+    }
+
+    for (const [canonical, aliases] of Object.entries(CANONICAL_TERMINAL_ALIASES)) {
+      for (const alias of Array.from(new Set([canonical, ...aliases]))) {
+        const normalizedAlias = alias.toLowerCase().trim().replace(/\s+/g, " ");
+        const pattern = new RegExp(`\\b${escaped(normalizedAlias)}\\b`, "i");
+
+        if (pattern.test(clause)) {
+          excluded.add(canonical);
+        }
+      }
+    }
+  }
+
   return excluded;
 }
 
@@ -4743,15 +4770,88 @@ function applyDeterministicPreferenceRulesV2(
           normalizeTerminalName(scope.normalized_terminal || scope.terminal)
         )
     );
+
+    nextParsed.filters = nextParsed.filters
+      .map((filter) => {
+        if (
+          filter.field !== "terminal" ||
+          filter.operator !== "in" ||
+          !Array.isArray(filter.value)
+        ) {
+          return filter;
+        }
+
+        return {
+          ...filter,
+          value: filter.value.filter(
+            (value) =>
+              !explicitlyExcludedTerminals.has(
+                normalizeTerminalName(String(value))
+              )
+          ),
+        };
+      })
+      .filter(
+        (filter) =>
+          !(
+            filter.field === "terminal" &&
+            filter.operator === "in" &&
+            Array.isArray(filter.value) &&
+            filter.value.length === 0
+          )
+      );
   }
 
-  if (implicitlyAllowedTerminals.length > 0) {
+  const allowedTerminals = implicitlyAllowedTerminals.filter(
+    (terminal) => !explicitlyExcludedTerminals.has(normalizeTerminalName(terminal))
+  );
+
+  if (allowedTerminals.length > 0) {
     nextParsed.filters.push({
       field: "terminal",
       operator: "in",
-      value: implicitlyAllowedTerminals,
+      value: allowedTerminals,
       strength: "hard",
     });
+  }
+
+  if (intents.has("exclude_shuttle_bus") || intents.has("only_shuttle_bus")) {
+    nextParsed.filters = nextParsed.filters.filter((filter) => {
+      if (
+        filter.field !== "job_type" &&
+        filter.field !== "job_subtype" &&
+        filter.field !== "job_direction"
+      ) {
+        return true;
+      }
+
+      const values = Array.isArray(filter.value) ? filter.value : [filter.value];
+      const hasShuttleValue = values.some((value) =>
+        /\b(shuttle|bus)\b/i.test(String(value))
+      );
+
+      return !hasShuttleValue;
+    });
+  }
+
+  if (intents.has("exclude_van") || intents.has("only_van")) {
+    nextParsed.filters = nextParsed.filters.filter(
+      (filter) => filter.field !== "van_hours_daily"
+    );
+    nextParsed.sort_preferences = nextParsed.sort_preferences.filter(
+      (sort) => sort.field !== "van_hours_daily"
+    );
+    nextParsed.scoped_preferences = (nextParsed.scoped_preferences ?? []).map(
+      (scope) => ({
+        ...scope,
+        filters: (scope.filters ?? []).filter(
+          (filter) => filter.field !== "van_hours_daily"
+        ),
+        sort_preferences: (scope.sort_preferences ?? []).filter(
+          (sort) => sort.field !== "van_hours_daily"
+        ),
+      })
+    );
   }
 
   if (intents.has("exclude_up")) {

@@ -618,6 +618,15 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
         },
       },
       {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lincolnville", "lewis road", "willowbrook", "barrie"],
+          strength: "hard",
+        },
+      },
+      {
         type: "parsed_global_filter_present",
         value: {
           field: "split_time",
@@ -883,6 +892,15 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           field: "van",
           operator: "=",
           value: false,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "van_hours_daily",
+          operator: "=",
+          value: 0,
           strength: "hard",
         },
       },
