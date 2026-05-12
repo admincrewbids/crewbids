@@ -1382,10 +1382,11 @@ function hasExplicitSoftWeekendsOffLanguage(text: string) {
   const normalized = text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
 
   return (
+    containsAny(normalized, PHRASES.weekends_off_first) ||
     /\b(prefer|preferred|want|would like|like|if possible|nice to have)\b[^.]*\bweekends?\s+off\b/i.test(
       normalized
     ) ||
-    /\bweekends?\s+off\b[^.]*\b(prefer|preferred|first|if possible|nice to have)\b/i.test(
+    /\bweekends?\s+off\b[^.]*\b(prefer|preferred|if possible|nice to have)\b/i.test(
       normalized
     )
   );
@@ -1703,6 +1704,24 @@ function areFiltersEquivalent(
   );
 }
 
+function getFilterScopeKey(filter: ParsedPreferences["filters"][number]) {
+  const values = (Array.isArray(filter.value) ? filter.value : [filter.value])
+    .map((value) => String(value).toLowerCase().trim())
+    .filter(Boolean);
+
+  const referencesSplit =
+    (filter.field === "job_type" ||
+      filter.field === "job_subtype" ||
+      filter.field === "split_time") &&
+    (values.includes("split") || values.includes("none"));
+
+  if (referencesSplit) {
+    return "split_jobs";
+  }
+
+  return filter.field;
+}
+
 function clauseExplicitlyRequestsFilter(
   clause: string,
   filter: ParsedPreferences["filters"][number]
@@ -1851,11 +1870,11 @@ function removeOvergeneralizedMergedRules(
   const fallbackGlobalFilters = fallback.filters ?? [];
   const fallbackScopedFilterFields = new Set(
     (fallback.scoped_preferences ?? []).flatMap((scope) =>
-      (scope.filters ?? []).map((filter) => filter.field)
+      (scope.filters ?? []).map((filter) => getFilterScopeKey(filter))
     )
   );
   const fallbackGlobalFilterFields = new Set(
-    fallbackGlobalFilters.map((filter) => filter.field)
+    fallbackGlobalFilters.map((filter) => getFilterScopeKey(filter))
   );
   const fallbackScopedOnlyFilterFields = new Set(
     Array.from(fallbackScopedFilterFields).filter(
@@ -1864,7 +1883,7 @@ function removeOvergeneralizedMergedRules(
   );
 
   merged.filters = (merged.filters ?? []).filter((filter) => {
-    if (!fallbackScopedOnlyFilterFields.has(filter.field)) {
+    if (!fallbackScopedOnlyFilterFields.has(getFilterScopeKey(filter))) {
       return true;
     }
 
@@ -3548,7 +3567,10 @@ function applyConflictResolutionRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return normalizeParsedTerminalAliases(nextParsed, promptText);
+  return normalizeParsedTerminalAliases(
+    normalizeOperatingSortFields(nextParsed, promptText),
+    promptText
+  );
 }
 
 
@@ -4826,7 +4848,10 @@ function applyDeterministicPreferenceRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return normalizeParsedTerminalAliases(nextParsed, prompt);
+  return normalizeParsedTerminalAliases(
+    normalizeOperatingSortFields(nextParsed, prompt),
+    prompt
+  );
 }
 
 function applyDeterministicPreferenceRulesV2(
