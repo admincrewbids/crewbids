@@ -2411,8 +2411,21 @@ const PHRASES = {
     "late jobs only",
     "later starts only",
     "only late starts",
+  ],
+
+  afternoons_only: [
     "afternoons only",
-    "afternoon and evening only",
+    "only afternoons",
+    "afternoon only",
+    "only afternoon",
+    "afternoon jobs only",
+    "only afternoon jobs",
+    "just afternoons",
+    "just afternoon jobs",
+    "strictly afternoons",
+    "strictly afternoon jobs",
+    "nothing but afternoons",
+    "keep it afternoons",
   ],
 
   prefer_evenings: [
@@ -3003,7 +3016,11 @@ const PHRASE_INTENT_DEFINITIONS = {
   },
   evenings_only: {
     phrases: PHRASES.evenings_only,
-    conflictsWith: ["mornings_only", "prefer_mornings"],
+    conflictsWith: ["mornings_only", "prefer_mornings", "afternoons_only"],
+  },
+  afternoons_only: {
+    phrases: PHRASES.afternoons_only,
+    conflictsWith: ["mornings_only", "prefer_mornings", "evenings_only"],
   },
   prefer_evenings: {
     phrases: PHRASES.prefer_evenings,
@@ -4126,11 +4143,12 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
           (mentionsMorning && !clauseIntents.has("prefer_mornings")));
 
       const eveningsOnly = clauseIntents.has("evenings_only");
+      const afternoonsOnly = clauseIntents.has("afternoons_only");
       const noNights = clauseIntents.has("no_nights");
       const preferMornings =
         !morningsOnly && clauseIntents.has("prefer_mornings");
       const preferEvenings =
-        !eveningsOnly && clauseIntents.has("prefer_evenings");
+        !eveningsOnly && !afternoonsOnly && clauseIntents.has("prefer_evenings");
 
       if (morningsOnly) {
         parsed.filters.push({
@@ -4155,6 +4173,21 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
           field: "on_duty",
           operator: ">=",
           value: TIME_BUCKETS.evening.start,
+          strength: "hard",
+        });
+      }
+
+      if (afternoonsOnly) {
+        parsed.filters.push({
+          field: "on_duty",
+          operator: ">=",
+          value: TIME_BUCKETS.afternoon.start,
+          strength: "hard",
+        });
+        parsed.filters.push({
+          field: "on_duty",
+          operator: "<=",
+          value: TIME_BUCKETS.afternoon.end,
           strength: "hard",
         });
       }
@@ -4441,6 +4474,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         (mentionsMorning && !clauseIntents.has("prefer_mornings")));
 
     const eveningsOnly = clauseIntents.has("evenings_only");
+    const afternoonsOnly = clauseIntents.has("afternoons_only");
 
     const noNights = clauseIntents.has("no_nights");
 
@@ -4450,6 +4484,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     const preferEvenings =
       !eveningsOnly &&
+      !afternoonsOnly &&
       (clauseIntents.has("prefer_evenings") ||
         (mentionsEvening && !mentionsMorning && !clauseIntents.has("prefer_mornings")));
 
@@ -4476,6 +4511,21 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         field: "on_duty",
         operator: ">=",
         value: TIME_BUCKETS.evening.start,
+        strength: "hard",
+      });
+    }
+
+    if (afternoonsOnly) {
+      scoped.filters.push({
+        field: "on_duty",
+        operator: ">=",
+        value: TIME_BUCKETS.afternoon.start,
+        strength: "hard",
+      });
+      scoped.filters.push({
+        field: "on_duty",
+        operator: "<=",
+        value: TIME_BUCKETS.afternoon.end,
         strength: "hard",
       });
     }
@@ -5945,6 +5995,17 @@ function crewHasShuttleBusComponent(crew: Crew) {
 }
 
 function hasVanTimeValue(value: unknown) {
+  if (typeof value === "string") {
+    const directMatch = value.match(/van(?:\s*time)?\s*:\s*(\d{1,2}:\d{2})/i);
+    const rowMatch = value.match(/^VAN\b.*?(\d{1,2}:\d{2})\s*$/im);
+    const timeToken = directMatch?.[1] ?? rowMatch?.[1];
+
+    if (timeToken) {
+      const minutes = timeToMinutes(timeToken);
+      return minutes != null && minutes > 0;
+    }
+  }
+
   const n = Number(value);
   return Number.isFinite(n) && n > 0;
 }
@@ -5960,7 +6021,8 @@ function crewHasVanComponent(crew: Crew) {
 
     if (
       hasVanTimeValue(day?.van_hours_daily) ||
-      hasVanTimeValue(day?.job_detail?.van_hours_daily)
+      hasVanTimeValue(day?.job_detail?.van_hours_daily) ||
+      hasVanTimeValue(day?.job_detail?.raw_text)
     ) {
       return true;
     }
@@ -5969,7 +6031,7 @@ function crewHasVanComponent(crew: Crew) {
   if (sawWorkedDailyRow) return false;
 
   return (crew.job_details ?? []).some((job: any) =>
-    hasVanTimeValue(job?.van_hours_daily)
+    hasVanTimeValue(job?.van_hours_daily) || hasVanTimeValue(job?.raw_text)
   );
 }
 
