@@ -126,6 +126,8 @@ function humanizeFieldName(field: string) {
       return "split jobs";
     case "shuttle_bus":
       return "shuttle bus jobs";
+    case "van":
+      return "van jobs";
     case "weekday_days_off_count":
       return "weekday days off";
     case "weekend_days_off":
@@ -217,6 +219,14 @@ function formatFilterRuleLabel(
   }
 
   if (
+    filter.field === "required_days_off" &&
+    filter.operator === "includes_all" &&
+    Array.isArray(filter.value)
+  ) {
+    return `Must include days off: ${filter.value.join(", ")}`;
+  }
+
+  if (
     filter.field === "weekday_days_off_count" &&
     filter.operator === "=" &&
     typeof filter.value === "number"
@@ -274,6 +284,14 @@ function formatFilterRuleLabel(
     filter.value === true
   ) {
     return "Only shuttle bus jobs";
+  }
+
+  if (filter.field === "van" && filter.operator === "=" && filter.value === false) {
+    return "No van jobs";
+  }
+
+  if (filter.field === "van" && filter.operator === "=" && filter.value === true) {
+    return "Only van jobs";
   }
 
   if (

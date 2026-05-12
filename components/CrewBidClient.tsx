@@ -1130,16 +1130,26 @@ function hasExplicitTerminalExclusionLanguage(text: string) {
   return false;
 }
 
-function isUpExpressUnknownClause(text: string) {
+function isBareUpExpressOnlyClause(text: string) {
   const normalized = text
     .toLowerCase()
     .replace(/[ÃƒÂ¢Ã¢Â‚Â¬Ã¢Â„Â¢]/g, "'")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-  return /^(up|upx|up express|airport jobs?|pearson jobs?|union pearson)$/.test(
+  return /^(up|ups|upx|up express|up jobs?|ups jobs?|upx jobs?|up express jobs?|airport jobs?|pearson jobs?|union pearson)$/.test(
     normalized
   );
+}
+
+function promptHasBareUpExpressOnlyClause(prompt: string) {
+  return splitIntoPreferenceClauses(prompt).some((clauseEntry) =>
+    isBareUpExpressOnlyClause(clauseEntry.text)
+  );
+}
+
+function isUpExpressUnknownClause(text: string) {
+  return isBareUpExpressOnlyClause(text);
 }
 
 function dedupeSortPreferences(
@@ -1259,6 +1269,9 @@ function normalizeDayName(day: unknown) {
   return DAY_NAME_TO_SHORT[normalized] ?? DAY_SHORT_TO_SHORT[normalized] ?? normalized;
 }
 
+const DAY_TOKEN_PATTERN =
+  "\\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday|tues|thurs|thur|sun|mon|tue|wed|thu|fri|sat)\\b";
+
 function normalizeRequiredDaysOff(days: unknown[]) {
   return Array.from(
     new Set(
@@ -1273,11 +1286,9 @@ function extractNamedDayMentions(clause: string): string[] {
   return Array.from(
     new Set(
       Array.from(
-        clause.matchAll(
-          /\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi
-        )
+        clause.matchAll(new RegExp(DAY_TOKEN_PATTERN, "gi"))
       )
-        .map((match) => DAY_NAME_TO_SHORT[match[1].toLowerCase()] ?? null)
+        .map((match) => normalizeDayName(match[1]))
         .filter(Boolean) as string[]
     )
   );
@@ -1926,6 +1937,8 @@ function hasTerminalScopedConstraintLanguage(prompt: string) {
       clauseIntents.has("no_splits") ||
       clauseIntents.has("exclude_shuttle_bus") ||
       clauseIntents.has("only_shuttle_bus") ||
+      clauseIntents.has("exclude_van") ||
+      clauseIntents.has("only_van") ||
       Boolean(generalDaysOffIntent) ||
       namedDaysOffRequirement.length > 0 ||
       /\b(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\b/i.test(
@@ -2265,28 +2278,70 @@ const PHRASES = {
   ],
 
   exclude_shuttle_bus: [
+    "no shuttle",
+    "no shuttles",
     "no shuttle bus",
     "no shuttle buses",
     "no bus",
     "no buses",
+    "exclude shuttle",
+    "exclude shuttles",
     "exclude shuttle bus",
     "exclude shuttle buses",
+    "avoid shuttle",
+    "avoid shuttles",
     "avoid shuttle bus",
     "avoid shuttle buses",
+    "without shuttle",
+    "without shuttles",
     "without shuttle bus",
     "without shuttle buses",
+    "hide shuttle",
+    "hide shuttles",
     "hide shuttle bus",
     "hide shuttle buses",
   ],
 
   only_shuttle_bus: [
+    "only shuttle",
+    "only shuttles",
     "only shuttle bus",
     "only shuttle buses",
+    "only shuttle jobs",
     "only shuttle bus jobs",
+    "shuttle only",
+    "shuttles only",
     "shuttle bus only",
     "shuttle buses only",
+    "shuttle jobs only",
     "shuttle bus jobs only",
     "only bus jobs",
+  ],
+
+  exclude_van: [
+    "no van",
+    "no vans",
+    "no van jobs",
+    "no van time",
+    "exclude van",
+    "exclude vans",
+    "exclude van jobs",
+    "avoid van",
+    "avoid vans",
+    "avoid van jobs",
+    "without van",
+    "without vans",
+    "hide van",
+    "hide vans",
+  ],
+
+  only_van: [
+    "only van",
+    "only vans",
+    "only van jobs",
+    "van only",
+    "vans only",
+    "van jobs only",
   ],
 
   exclude_up: [
@@ -2712,6 +2767,14 @@ const PHRASE_INTENT_DEFINITIONS = {
     phrases: PHRASES.only_shuttle_bus,
     conflictsWith: ["exclude_shuttle_bus"],
   },
+  exclude_van: {
+    phrases: PHRASES.exclude_van,
+    conflictsWith: ["only_van"],
+  },
+  only_van: {
+    phrases: PHRASES.only_van,
+    conflictsWith: ["exclude_van"],
+  },
   exclude_up: {
     phrases: PHRASES.exclude_up,
     conflictsWith: [],
@@ -2801,6 +2864,10 @@ function isClauseDeterministicallyHandled(clause: string) {
     return true;
   }
 
+  if (isBareUpExpressOnlyClause(clause)) {
+    return true;
+  }
+
   if (
     /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,2}(?::\d{1,2})?\s*(am|pm)?/i.test(
       clause
@@ -2833,10 +2900,7 @@ function isClauseDeterministicallyHandled(clause: string) {
     return true;
   }
 
-  if (
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(clause) &&
-    /( off|days off|must have|prefer |want |need |free)/i.test(clause)
-  ) {
+  if (extractNamedDaysOffRequirement(clause).length > 0) {
     return true;
   }
 
@@ -3723,6 +3787,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       }
 
+      if (clauseIntents.has("exclude_van")) {
+        parsed.filters.push({
+          field: "van",
+          operator: "=",
+          value: false,
+          strength: "hard",
+        });
+      }
+
+      if (clauseIntents.has("only_van")) {
+        parsed.filters.push({
+          field: "van",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        });
+      }
+
       const notBeforeMatch = clause.match(
         /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
       );
@@ -3979,15 +4061,12 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       }
 
       if (namedDaysOffRequirement.length > 0) {
-        for (const terminal of allKnownTerminals) {
-          const globalScope = ensureScope(terminal);
-          globalScope.required_days_off = normalizeRequiredDaysOff(
-            [
-              ...(globalScope.required_days_off ?? []),
-              ...namedDaysOffRequirement,
-            ]
-          );
-        }
+        parsed.filters.push({
+          field: "required_days_off",
+          operator: "includes_all",
+          value: normalizeRequiredDaysOff(namedDaysOffRequirement),
+          strength: "hard",
+        });
       }
     }
 
@@ -4333,6 +4412,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       });
     }
 
+    if (clauseIntents.has("exclude_van")) {
+      scoped.filters.push({
+        field: "van",
+        operator: "=",
+        value: false,
+        strength: "hard",
+      });
+    }
+
+    if (clauseIntents.has("only_van")) {
+      scoped.filters.push({
+        field: "van",
+        operator: "=",
+        value: true,
+        strength: "hard",
+      });
+    }
+
     if (namedDaysOffRequirement.length > 0) {
       scoped.required_days_off = normalizeRequiredDaysOff(
         [...(scoped.required_days_off ?? []), ...namedDaysOffRequirement]
@@ -4441,6 +4538,8 @@ function applyDeterministicPreferenceRules(
     })),
   };
 
+  const hasBareUpExpressOnly = promptHasBareUpExpressOnlyClause(prompt);
+
   if (containsAny(text, PHRASES.exclude_up)) {
     nextParsed.filters.push({
       field: "exclude_up_crews",
@@ -4453,7 +4552,8 @@ function applyDeterministicPreferenceRules(
   if (
     containsAny(text, PHRASES.prefer_up) &&
     !containsAny(text, PHRASES.exclude_up) &&
-    !containsAny(text, PHRASES.only_up)
+    !containsAny(text, PHRASES.only_up) &&
+    !hasBareUpExpressOnly
   ) {
     nextParsed.tradeoffs.push({
       type: "prefer_up",
@@ -4471,7 +4571,7 @@ function applyDeterministicPreferenceRules(
     });
   }
 
-  if (containsAny(text, PHRASES.only_up)) {
+  if (containsAny(text, PHRASES.only_up) || hasBareUpExpressOnly) {
     nextParsed.filters.push({
       field: "include_only_up_crews",
       operator: "=",
@@ -4560,6 +4660,9 @@ function applyDeterministicPreferenceRulesV2(
 ): ParsedPreferences {
   const text = prompt.toLowerCase().replace(/[ÃÂ¢Ã¢âÂ¬Ã¢âÂ¢]/g, "'");
   const intents = detectPhraseIntents(text);
+  if (promptHasBareUpExpressOnlyClause(prompt)) {
+    intents.add("only_up");
+  }
   const explicitTerminalOnlyLanguage = hasExplicitTerminalOnlyLanguage(text);
   const implicitTerminalAllowlist =
     shouldImplicitlyRestrictToMentionedTerminals(prompt);
@@ -5026,6 +5129,38 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
     }
 
     if (
+      filter.field === "shuttle_bus" &&
+      filter.operator === "=" &&
+      filter.value === false
+    ) {
+      items.push("No shuttle bus jobs");
+    }
+
+    if (
+      filter.field === "shuttle_bus" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      items.push("Only shuttle bus jobs");
+    }
+
+    if (
+      filter.field === "van" &&
+      filter.operator === "=" &&
+      filter.value === false
+    ) {
+      items.push("No van jobs");
+    }
+
+    if (
+      filter.field === "van" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      items.push("Only van jobs");
+    }
+
+    if (
       filter.field === "job_direction" &&
       (filter.operator === "=" ||
         filter.operator === "!=" ||
@@ -5104,6 +5239,18 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.value === true
     ) {
       items.push("Must have weekends off");
+    }
+
+    if (
+      filter.field === "required_days_off" &&
+      filter.operator === "includes_all" &&
+      Array.isArray(filter.value)
+    ) {
+      items.push(
+        `Must include days off: ${filter.value
+          .map((day: unknown) => String(day).charAt(0).toUpperCase() + String(day).slice(1))
+          .join(", ")}`
+      );
     }
 
     if (
@@ -5424,6 +5571,27 @@ function crewHasShuttleBusComponent(crew: Crew) {
   }
 
   return false;
+}
+
+function hasVanTimeValue(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0;
+}
+
+function crewHasVanComponent(crew: Crew) {
+  for (const day of crew.daily ?? []) {
+    if (day?.is_day_off) continue;
+    if (
+      hasVanTimeValue(day?.van_hours_daily) ||
+      hasVanTimeValue(day?.job_detail?.van_hours_daily)
+    ) {
+      return true;
+    }
+  }
+
+  return (crew.job_details ?? []).some((job: any) =>
+    hasVanTimeValue(job?.van_hours_daily)
+  );
 }
 
 function normalizeNumber(value: unknown) {
@@ -6506,6 +6674,13 @@ const weekendDaysOffFilter = effectiveFilters.find(
     f.value === false
 );
 
+const requiredDaysOffFilter = effectiveFilters.find(
+  (f) =>
+    f.field === "required_days_off" &&
+    f.operator === "includes_all" &&
+    Array.isArray(f.value)
+);
+
 const noSplitsFilter = effectiveFilters.find(
   (f) =>
     f.field === "split_time" &&
@@ -6527,6 +6702,20 @@ const shuttleBusExcludedFilter = effectiveFilters.find(
     f.value === false
 );
 
+const vanRequiredFilter = effectiveFilters.find(
+  (f) =>
+    f.field === "van" &&
+    f.operator === "=" &&
+    f.value === true
+);
+
+const vanExcludedFilter = effectiveFilters.find(
+  (f) =>
+    f.field === "van" &&
+    f.operator === "=" &&
+    f.value === false
+);
+
   const crewNumber = getCrewNumberValue(crew);
   const isSpareboardCrew = isSpareboardCrewNumber(crewNumber);
   const isUpCrew = isUpExpressCrewNumber(crewNumber);
@@ -6540,6 +6729,7 @@ const shuttleBusExcludedFilter = effectiveFilters.find(
     crewTerminal === "standby" || crewWithSchedule.is_two_week_stby === true;
   const crewHasSplitTime = crewHasSplitTimeComponent(crewWithSchedule);
   const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
+  const crewHasVan = crewHasVanComponent(crewWithSchedule);
   const isThreeDayOffCrew = crewWithSchedule.days_off_count === 3;
 
 if (
@@ -6743,6 +6933,8 @@ const hasHardWeekendsOffRule = Boolean(hardWeekendsOffFilter);
 const hasNoSplitsRule = Boolean(noSplitsFilter);
 const hasShuttleBusOnlyRule = Boolean(shuttleBusRequiredFilter);
 const hasNoShuttleBusRule = Boolean(shuttleBusExcludedFilter);
+const hasVanOnlyRule = Boolean(vanRequiredFilter);
+const hasNoVanRule = Boolean(vanExcludedFilter);
 
 if (hasNoSplitsRule && crewHasSplitTime && !overridden) {
   excluded.push({
@@ -6771,6 +6963,24 @@ if (hasNoShuttleBusRule && crewHasShuttleBus && !overridden) {
   continue;
 }
 
+if (hasVanOnlyRule && !crewHasVan && !overridden) {
+  excluded.push({
+    id: crew.id,
+    terminal: formatTerminalDisplayName(crew.terminal),
+    reason: "Excluded because only jobs with van time were allowed",
+  });
+  continue;
+}
+
+if (hasNoVanRule && crewHasVan && !overridden) {
+  excluded.push({
+    id: crew.id,
+    terminal: formatTerminalDisplayName(crew.terminal),
+    reason: "Excluded because van jobs were excluded by your preferences",
+  });
+  continue;
+}
+
 // Schedule filters
 if (hasHardWeekendsOffRule) {
   if (crewWithSchedule.works_weekends && !overridden) {
@@ -6786,6 +6996,34 @@ if (hasHardWeekendsOffRule) {
   if (!crewWithSchedule.works_weekends) {
     scoreBreakdown.push({
       label: "Matches weekends_off preference",
+      points: 0,
+    });
+  }
+}
+
+if (requiredDaysOffFilter) {
+  const crewDaysOff = (crewWithSchedule.days_off ?? crewWithSchedule.days_off_list ?? []).map(
+    normalizeDayName
+  );
+  const requiredDaysOff = normalizeRequiredDaysOff(
+    requiredDaysOffFilter.value as unknown[]
+  );
+  const hasAllRequiredDays = requiredDaysOff.every((day) =>
+    crewDaysOff.includes(day)
+  );
+
+  if (!hasAllRequiredDays && !overridden) {
+    excluded.push({
+      id: crew.id,
+      terminal: formatTerminalDisplayName(crew.terminal),
+      reason: `Excluded because it does not include required days off (${requiredDaysOff.join(", ")})`,
+    });
+    continue;
+  }
+
+  if (hasAllRequiredDays) {
+    scoreBreakdown.push({
+      label: `Matches required days off (${requiredDaysOff.join(", ")})`,
       points: 0,
     });
   }
@@ -7133,6 +7371,8 @@ function humanizePreferenceField(field: string): string {
       return "split jobs";
     case "shuttle_bus":
       return "shuttle bus jobs";
+    case "van":
+      return "van jobs";
     case "weekday_days_off_count":
       return "weekday days off";
     case "weekend_days_off":
@@ -7356,6 +7596,16 @@ function formatFilterLabel(
   }
 
   if (
+    f.field === "required_days_off" &&
+    f.operator === "includes_all" &&
+    Array.isArray(f.value)
+  ) {
+    return `Must include: ${f.value
+      .map((day: unknown) => String(day).charAt(0).toUpperCase() + String(day).slice(1))
+      .join(", ")}`;
+  }
+
+  if (
     f.field === "weekday_days_off_count" &&
     f.operator === "=" &&
     typeof f.value === "number"
@@ -7381,6 +7631,14 @@ function formatFilterLabel(
 
   if (f.field === "shuttle_bus" && f.operator === "=" && f.value === true) {
     return "Only shuttle bus jobs";
+  }
+
+  if (f.field === "van" && f.operator === "=" && f.value === false) {
+    return "No van jobs";
+  }
+
+  if (f.field === "van" && f.operator === "=" && f.value === true) {
+    return "Only van jobs";
   }
 
   if (f.field === "exclude_up_crews" && f.operator === "=" && f.value === true) {
@@ -9798,6 +10056,38 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
     }
 
     if (
+      filter.field === "shuttle_bus" &&
+      filter.operator === "=" &&
+      filter.value === false
+    ) {
+      hardRules.push("No shuttle bus jobs");
+    }
+
+    if (
+      filter.field === "shuttle_bus" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      hardRules.push("Only shuttle bus jobs");
+    }
+
+    if (
+      filter.field === "van" &&
+      filter.operator === "=" &&
+      filter.value === false
+    ) {
+      hardRules.push("No van jobs");
+    }
+
+    if (
+      filter.field === "van" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      hardRules.push("Only van jobs");
+    }
+
+    if (
       filter.field === "include_only_spareboard_crews" &&
       filter.operator === "=" &&
       filter.value === true
@@ -9867,6 +10157,18 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
       filter.value === true
     ) {
       hardRules.push("Weekends off required");
+    }
+
+    if (
+      filter.field === "required_days_off" &&
+      filter.operator === "includes_all" &&
+      Array.isArray(filter.value)
+    ) {
+      hardRules.push(
+        `Must include days off: ${filter.value
+          .map((day: unknown) => String(day).charAt(0).toUpperCase() + String(day).slice(1))
+          .join(", ")}`
+      );
     }
 
     if (

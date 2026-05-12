@@ -316,6 +316,66 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-mon-tues-off-global",
+    label: "Mon/Tues off global required days",
+    prompt: "Mon/Tues Off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "required_days_off",
+          operator: "includes_all",
+          value: ["mon", "tue"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "Mon/Tues",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-tuesday-wednesday-off-global",
+    label: "Tuesday and Wednesday off global required days",
+    prompt: "Tuesday and Wednesday off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "required_days_off",
+          operator: "includes_all",
+          value: ["tue", "wed"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "Tuesday and Wednesday off",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-lewis-road-only",
     label: "Lewis Road only",
     prompt: "Lewis Road only",
@@ -785,6 +845,63 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           field: "shuttle_bus",
           operator: "=",
           value: false,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-no-shuttles",
+    label: "No shuttles",
+    prompt: "No shuttles",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "shuttle_bus",
+          operator: "=",
+          value: false,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-no-vans",
+    label: "No vans",
+    prompt: "No vans",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "van",
+          operator: "=",
+          value: false,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-only-vans",
+    label: "Only vans",
+    prompt: "Only vans",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "van",
+          operator: "=",
+          value: true,
           strength: "hard",
         },
       },
@@ -1951,6 +2068,29 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           operator: "=",
           value: true,
           strength: "hard",
+        },
+      },
+    ],
+  },
+  {
+    id: "up-language-bare-ups-weekends-no-early",
+    label: "Bare UPS means UP Express only",
+    prompt: "UPS, weekends off no early starts",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "UPS",
         },
       },
     ],

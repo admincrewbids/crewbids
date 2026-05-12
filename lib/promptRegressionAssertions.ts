@@ -36,6 +36,7 @@ type DayLike = {
   on_duty?: string | null;
   off_duty?: string | null;
   split_time?: string | null;
+  van_hours_daily?: unknown;
   job_detail?: JobDetailLike | null;
 };
 
@@ -375,6 +376,27 @@ function crewHasShuttleBus(crew: RankedCrewLike) {
   return false;
 }
 
+function hasVanTimeValue(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0;
+}
+
+function crewHasVan(crew: RankedCrewLike) {
+  for (const day of crew.daily ?? []) {
+    if (day?.is_day_off) continue;
+    if (
+      hasVanTimeValue(day?.van_hours_daily) ||
+      hasVanTimeValue(day?.job_detail?.van_hours_daily)
+    ) {
+      return true;
+    }
+  }
+
+  return (crew.job_details ?? []).some((job) =>
+    hasVanTimeValue(job?.van_hours_daily)
+  );
+}
+
 function getCrewNumber(crew: RankedCrewLike) {
   return String(crew.crew_number ?? crew.id ?? "").trim();
 }
@@ -414,6 +436,34 @@ function hasWeekendDaysOff(crew: RankedCrewLike) {
     const normalized = day.trim().toLowerCase();
     return ["sat", "saturday", "sun", "sunday"].includes(normalized);
   });
+}
+
+function normalizeDayShort(day: unknown) {
+  const normalized = String(day ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+  const map: Record<string, string> = {
+    sunday: "sun",
+    sun: "sun",
+    monday: "mon",
+    mon: "mon",
+    tuesday: "tue",
+    tue: "tue",
+    tues: "tue",
+    wednesday: "wed",
+    wed: "wed",
+    thursday: "thu",
+    thu: "thu",
+    thur: "thu",
+    thurs: "thu",
+    friday: "fri",
+    fri: "fri",
+    saturday: "sat",
+    sat: "sat",
+  };
+
+  return map[normalized] ?? normalized;
 }
 
 function getDaysOffCount(crew: RankedCrewLike) {
@@ -592,6 +642,25 @@ function evaluateHardFilterOnCrew(
     }
   }
 
+  if (filter.field === "van" && filter.operator === "=") {
+    const hasVan = crewHasVan(crew);
+    if (filter.value === false) {
+      return {
+        supported: true,
+        passes: !hasVan,
+        reason: "crew contains van time",
+      };
+    }
+
+    if (filter.value === true) {
+      return {
+        supported: true,
+        passes: hasVan,
+        reason: "crew does not contain van time",
+      };
+    }
+  }
+
   if (filter.field === "weekday_days_off_count" && filter.operator === "=" && typeof filter.value === "number") {
     return {
       supported: true,
@@ -613,6 +682,22 @@ function evaluateHardFilterOnCrew(
       supported: true,
       passes: crew.works_weekends === false,
       reason: "crew works weekends",
+    };
+  }
+
+  if (
+    filter.field === "required_days_off" &&
+    filter.operator === "includes_all" &&
+    Array.isArray(filter.value)
+  ) {
+    const daysOff = new Set(getCrewDaysOffList(crew).map(normalizeDayShort));
+    const requiredDays = filter.value.map(normalizeDayShort);
+    const missing = requiredDays.filter((day) => !daysOff.has(day));
+
+    return {
+      supported: true,
+      passes: missing.length === 0,
+      reason: `crew is missing required days off: ${missing.join(", ")}`,
     };
   }
 
