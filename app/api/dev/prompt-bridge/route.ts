@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+export const dynamic = "force-dynamic";
+
 type PromptBridgeCommand = {
   id: string;
   action:
@@ -27,7 +29,10 @@ type PromptBridgeState = {
   latestResult: PromptBridgeResult | null;
 };
 
-const DEBUG_DIR = path.join(process.cwd(), ".debug");
+const DEBUG_DIR =
+  process.env.VERCEL === "1"
+    ? path.join("/tmp", "crewbids-prompt-bridge")
+    : path.join(process.cwd(), ".debug");
 const STATE_FILE = path.join(DEBUG_DIR, "prompt-bridge-state.json");
 
 async function ensureStateFile() {
@@ -58,7 +63,11 @@ async function writeState(state: PromptBridgeState) {
 
 export async function GET() {
   const state = await readState();
-  return NextResponse.json(state);
+  return NextResponse.json(state, {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }
 
 export async function POST(request: Request) {
