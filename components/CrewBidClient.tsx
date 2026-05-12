@@ -1494,6 +1494,154 @@ function removeRedundantPlainTerminalPriorityGroups(
   }));
 }
 
+function promptPrefersStouffvilleDisplay(prompt?: string): boolean {
+  return /\b(?:stouffville|stouff)\b/i.test(prompt ?? "");
+}
+
+function getTerminalDisplayNameForPrompt(
+  terminal: string | undefined,
+  prompt?: string
+): string {
+  const normalized = normalizeTerminalName(terminal);
+
+  if (normalized === "lincolnville" && promptPrefersStouffvilleDisplay(prompt)) {
+    return "Stouffville";
+  }
+
+  return formatTerminalDisplayName(terminal);
+}
+
+function normalizeTerminalFilter(filter: ParsedPreferences["filters"][number]) {
+  if (filter.field !== "terminal") return filter;
+
+  if (Array.isArray(filter.value)) {
+    return {
+      ...filter,
+      value: Array.from(
+        new Set(
+          filter.value
+            .map((value) => normalizeTerminalName(String(value)))
+            .filter(Boolean)
+        )
+      ),
+    };
+  }
+
+  if (typeof filter.value === "string") {
+    return {
+      ...filter,
+      value: normalizeTerminalName(filter.value),
+    };
+  }
+
+  return filter;
+}
+
+function normalizeParsedTerminalAliases(
+  parsed: ParsedPreferences,
+  prompt?: string
+): ParsedPreferences {
+  const normalizedPriorityGroups = removeRedundantPlainTerminalPriorityGroups(
+    (parsed.priority_groups ?? [])
+      .map((group) => ({
+        ...group,
+        conditions: group.conditions.map((condition) =>
+          condition.field === "terminal" && typeof condition.value === "string"
+            ? {
+                ...condition,
+                value: normalizeTerminalName(condition.value),
+              }
+            : condition
+        ),
+      }))
+      .sort((a, b) => a.rank - b.rank)
+  );
+
+  const rankByTerminal = new Map<string, number>();
+  for (const group of normalizedPriorityGroups) {
+    const terminalCondition = group.conditions.find(
+      (condition) =>
+        condition.field === "terminal" && typeof condition.value === "string"
+    );
+
+    if (terminalCondition) {
+      rankByTerminal.set(
+        normalizeTerminalName(String(terminalCondition.value)),
+        group.rank
+      );
+    }
+  }
+
+  const scopesByTerminal = new Map<string, ScopedPreference>();
+
+  for (const scope of (parsed.scoped_preferences ?? []).sort(
+    (a, b) => a.priority_rank - b.priority_rank
+  )) {
+    const normalizedTerminal = normalizeTerminalName(
+      scope.normalized_terminal || scope.terminal
+    );
+
+    if (!normalizedTerminal) continue;
+
+    const normalizedScope: ScopedPreference = {
+      ...scope,
+      terminal: getTerminalDisplayNameForPrompt(normalizedTerminal, prompt),
+      normalized_terminal: normalizedTerminal,
+      filters: dedupeFilters((scope.filters ?? []).map(normalizeTerminalFilter)),
+      sort_preferences: dedupeSortPreferences(scope.sort_preferences ?? []),
+      required_days_off: normalizeRequiredDaysOff(scope.required_days_off ?? []),
+    };
+
+    const existing = scopesByTerminal.get(normalizedTerminal);
+    if (!existing) {
+      scopesByTerminal.set(normalizedTerminal, normalizedScope);
+      continue;
+    }
+
+    scopesByTerminal.set(normalizedTerminal, {
+      ...existing,
+      terminal: getTerminalDisplayNameForPrompt(normalizedTerminal, prompt),
+      priority_rank: Math.min(
+        existing.priority_rank ?? Number.MAX_SAFE_INTEGER,
+        normalizedScope.priority_rank ?? Number.MAX_SAFE_INTEGER
+      ),
+      filters: dedupeFilters([
+        ...(existing.filters ?? []),
+        ...(normalizedScope.filters ?? []),
+      ]),
+      sort_preferences: dedupeSortPreferences([
+        ...(existing.sort_preferences ?? []),
+        ...(normalizedScope.sort_preferences ?? []),
+      ]),
+      required_days_off: normalizeRequiredDaysOff([
+        ...(existing.required_days_off ?? []),
+        ...(normalizedScope.required_days_off ?? []),
+      ]),
+      requires_weekends_off:
+        Boolean(existing.requires_weekends_off) ||
+        Boolean(normalizedScope.requires_weekends_off),
+    });
+  }
+
+  const scopedPreferences = Array.from(scopesByTerminal.values())
+    .sort((a, b) => {
+      const aRank = rankByTerminal.get(a.normalized_terminal) ?? a.priority_rank;
+      const bRank = rankByTerminal.get(b.normalized_terminal) ?? b.priority_rank;
+      return aRank - bRank;
+    })
+    .map((scope, index) => ({
+      ...scope,
+      priority_rank: rankByTerminal.get(scope.normalized_terminal) ?? index + 1,
+    }));
+
+  return {
+    ...parsed,
+    filters: dedupeFilters((parsed.filters ?? []).map(normalizeTerminalFilter)),
+    priority_groups: normalizedPriorityGroups,
+    scoped_preferences: scopedPreferences,
+  };
+}
+
 function shouldTreatOperatingAsWeekly(prompt: string) {
   const text = prompt.toLowerCase().replace(/[â]/g, "'");
 
@@ -3400,7 +3548,7 @@ function applyConflictResolutionRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return nextParsed;
+  return normalizeParsedTerminalAliases(nextParsed, promptText);
 }
 
 
@@ -4678,7 +4826,7 @@ function applyDeterministicPreferenceRules(
     sort_preferences: dedupeSortPreferences(scope.sort_preferences),
   }));
 
-  return nextParsed;
+  return normalizeParsedTerminalAliases(nextParsed, prompt);
 }
 
 function applyDeterministicPreferenceRulesV2(
@@ -6503,6 +6651,8 @@ const crewDaysOff =
     ? crew.days_off
     : schedule?.days_off ?? [];
 
+const overridden = overrides.includes(crew.id);
+
 const scheduleOperatingHoursWeekly = schedule?.operating_time
   ? round1(timeToHours(schedule.operating_time))
   : undefined;
@@ -6555,7 +6705,7 @@ if (crewTerminal === "lewis road") {
   });
 }
 
-if (scoped && !passesScopedFilters(crewWithSchedule, scoped)) {
+if (scoped && !passesScopedFilters(crewWithSchedule, scoped) && !overridden) {
   excluded.push({
     id: crew.id,
     terminal: formatTerminalDisplayName(crew.terminal),
@@ -6607,8 +6757,6 @@ const representativeJob: any =
       : parsed.filters;
     const scoreBreakdown: ScoreBreakdownItem[] = [];
     let score = 0;
-
-    const overridden = overrides.includes(crew.id);
 
     const startFilter = effectiveFilters.find(
       (f) => f.field === "on_duty" && f.operator === ">="
