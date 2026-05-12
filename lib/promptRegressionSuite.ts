@@ -117,6 +117,7 @@ export type PromptRegressionAssertion =
           | "on_duty"
           | "off_duty"
           | "operating_hours_daily"
+          | "operating_hours_weekly"
           | "van_hours_daily"
           | "overtime_hours_weekly"
           | "total_paid_hours_weekly";
@@ -134,6 +135,7 @@ export type PromptRegressionAssertion =
             | "on_duty"
             | "off_duty"
             | "operating_hours_daily"
+            | "operating_hours_weekly"
             | "van_hours_daily"
             | "overtime_hours_weekly"
             | "total_paid_hours_weekly"
@@ -145,6 +147,7 @@ export type PromptRegressionAssertion =
             | "on_duty"
             | "off_duty"
             | "operating_hours_daily"
+            | "operating_hours_weekly"
             | "van_hours_daily"
             | "overtime_hours_weekly"
             | "total_paid_hours_weekly";
@@ -438,6 +441,173 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
           value: true,
           strength: "hard",
         },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-lewis-road-lowest-operating-scoped-order",
+    label: "Lewis Road scoped lowest operating time order",
+    prompt:
+      "Only Willowbrook, Lewis Road, and Milton. Willowbrook no mornings and weekends off. Lewis Road starts after 12:30 and lowest operating time. Milton weekends off, highest OT first. No UP.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Willowbrook", "Lewis Road", "Milton"],
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:30",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Lewis Road",
+          sort: {
+            field: "operating_hours_weekly",
+            direction: "asc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Lewis Road",
+          field: "operating_hours_weekly",
+          direction: "asc",
+          mode: "pairwise_consecutive_distinct",
+          requireAtLeastComparablePairs: 2,
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-stouffville-lewis-wb-scoped-constraints",
+    label: "Stouffville, Lewis Road, and WB scoped constraints",
+    prompt:
+      "Stouffville jobs with weekends off first, Lewis Road after 12:30 next, WB no split jobs and no starts before 13:00 last. No Barrie, no UP, most overtime first.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lincolnville", "Lewis Road", "Willowbrook"],
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "in",
+          value: ["lincolnville", "lewis road", "willowbrook"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "terminal",
+          operator: "not_in",
+          value: ["barrie"],
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "exclude_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lincolnville",
+          filter: {
+            field: "weekends_off_hard",
+            operator: "=",
+            value: true,
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:30",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "split_time",
+            operator: "=",
+            value: "none",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Willowbrook",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "13:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "split_time",
+          operator: "=",
+          value: "none",
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "on_duty",
+          operator: ">=",
+          value: "13:00",
+          strength: "hard",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "UP",
+        },
+      },
+      {
+        type: "ranked_terminals_only",
+        value: ["Lincolnville", "Lewis Road", "Willowbrook"],
       },
       {
         type: "no_visible_contradictions",

@@ -45,6 +45,7 @@ type RankedCrewLike = PromptDebugRankedCrewLike & {
   days_off_count?: number;
   works_weekends?: boolean;
   split_time_weekly?: string;
+  operating_hours_weekly?: unknown;
   overtime_hours_weekly?: unknown;
   total_paid_hours_weekly?: unknown;
 };
@@ -194,6 +195,7 @@ function getSortableFieldValue(
     | "on_duty"
     | "off_duty"
     | "operating_hours_daily"
+    | "operating_hours_weekly"
     | "van_hours_daily"
     | "overtime_hours_weekly"
     | "total_paid_hours_weekly"
@@ -216,6 +218,14 @@ function getSortableFieldValue(
   if (field === "operating_hours_daily") {
     const value = Number(representativeDetail?.operating_hours_daily);
     return Number.isFinite(value) ? value : null;
+  }
+
+  if (field === "operating_hours_weekly") {
+    const value = Number(crew.operating_hours_weekly);
+    if (Number.isFinite(value)) return value;
+
+    const minutes = hhmmToMinutes(crew.operating_time_weekly);
+    return minutes == null ? null : minutes / 60;
   }
 
   if (field === "van_hours_daily") {
@@ -794,6 +804,7 @@ function evaluateScopedRankOrderRespectsSortAssertion(
     | "on_duty"
     | "off_duty"
     | "operating_hours_daily"
+    | "operating_hours_weekly"
     | "van_hours_daily"
     | "overtime_hours_weekly"
     | "total_paid_hours_weekly",
@@ -833,6 +844,7 @@ function evaluateScopedRankOrderRespectsSortAssertion(
           | "on_duty"
           | "off_duty"
           | "operating_hours_daily"
+          | "operating_hours_weekly"
           | "van_hours_daily"
           | "overtime_hours_weekly"
           | "total_paid_hours_weekly"
@@ -843,6 +855,7 @@ function evaluateScopedRankOrderRespectsSortAssertion(
           | "on_duty"
           | "off_duty"
           | "operating_hours_daily"
+          | "operating_hours_weekly"
           | "van_hours_daily"
           | "overtime_hours_weekly"
           | "total_paid_hours_weekly"
@@ -896,6 +909,7 @@ function evaluateScopedTerminalSuppressesGlobalSortAssertion(
       | "on_duty"
       | "off_duty"
       | "operating_hours_daily"
+      | "operating_hours_weekly"
       | "van_hours_daily"
       | "overtime_hours_weekly"
       | "total_paid_hours_weekly"
@@ -907,6 +921,7 @@ function evaluateScopedTerminalSuppressesGlobalSortAssertion(
       | "on_duty"
       | "off_duty"
       | "operating_hours_daily"
+      | "operating_hours_weekly"
       | "van_hours_daily"
       | "overtime_hours_weekly"
       | "total_paid_hours_weekly";

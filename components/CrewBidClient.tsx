@@ -1101,6 +1101,47 @@ function getExplicitlyExcludedTerminalsFromText(text: string) {
 
   return excluded;
 }
+
+function hasExplicitTerminalExclusionLanguage(text: string) {
+  const normalizedText = text
+    .toLowerCase()
+    .replace(/[ÃƒÂ¢Ã¢Â‚Â¬Ã¢Â„Â¢]/g, "'")
+    .trim()
+    .replace(/\s+/g, " ");
+  const escaped = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  for (const [canonical, aliases] of Object.entries(CANONICAL_TERMINAL_ALIASES)) {
+    for (const alias of Array.from(new Set([canonical, ...aliases]))) {
+      const normalizedAlias = alias.toLowerCase().trim().replace(/\s+/g, " ");
+      const pattern = new RegExp(
+        `\\b(?:no|avoid|exclude|without|not|anything but)\\s+${escaped(
+          normalizedAlias
+        )}\\b`,
+        "i"
+      );
+
+      if (pattern.test(normalizedText)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function isUpExpressUnknownClause(text: string) {
+  const normalized = text
+    .toLowerCase()
+    .replace(/[ÃƒÂ¢Ã¢Â‚Â¬Ã¢Â„Â¢]/g, "'")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  return /^(up|upx|up express|airport jobs?|pearson jobs?|union pearson)$/.test(
+    normalized
+  );
+}
+
 function dedupeSortPreferences(
   sortPreferences: ParsedPreferences["sort_preferences"]
 ): ParsedPreferences["sort_preferences"] {
@@ -1476,6 +1517,91 @@ function areFiltersEquivalent(
   );
 }
 
+function clauseExplicitlyRequestsFilter(
+  clause: string,
+  filter: ParsedPreferences["filters"][number]
+) {
+  const normalizedClause = clause
+    .toLowerCase()
+    .replace(/[ÃƒÂ¢Ã¢Â‚Â¬Ã¢Â„Â¢]/g, "'")
+    .trim();
+  const clauseIntents = detectPhraseIntents(normalizedClause);
+
+  if (
+    filter.field === "split_time" &&
+    filter.operator === "=" &&
+    filter.value === "none"
+  ) {
+    return clauseIntents.has("no_splits");
+  }
+
+  if (
+    filter.field === "weekends_off_hard" &&
+    filter.operator === "=" &&
+    filter.value === true
+  ) {
+    return clauseIntents.has("weekends_off_hard");
+  }
+
+  if (
+    filter.field === "on_duty" &&
+    filter.operator === ">=" &&
+    typeof filter.value === "string"
+  ) {
+    const notBeforeMatch = normalizedClause.match(
+      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+    );
+
+    if (!notBeforeMatch) return false;
+
+    const value = normalizeTimeToken(
+      notBeforeMatch[2],
+      notBeforeMatch[3],
+      notBeforeMatch[4]
+    );
+
+    return value === filter.value;
+  }
+
+  return false;
+}
+
+function isFilterExplicitlyRequestedGlobally(
+  prompt: string,
+  filter: ParsedPreferences["filters"][number]
+) {
+  return splitIntoPreferenceClauses(prompt).some((clauseEntry) => {
+    if (extractKnownTerminalMentions(clauseEntry.text).length > 0) {
+      return false;
+    }
+
+    return clauseExplicitlyRequestsFilter(clauseEntry.text, filter);
+  });
+}
+
+function removeMirroredScopedGlobalFilters(
+  parsed: ParsedPreferences,
+  prompt: string
+): ParsedPreferences {
+  const scopedFilters = (parsed.scoped_preferences ?? []).flatMap(
+    (scope) => scope.filters ?? []
+  );
+
+  if (scopedFilters.length === 0) return parsed;
+
+  return {
+    ...parsed,
+    filters: (parsed.filters ?? []).filter((filter) => {
+      const isScopedDuplicate = scopedFilters.some((scopedFilter) =>
+        areFiltersEquivalent(filter, scopedFilter)
+      );
+
+      if (!isScopedDuplicate) return true;
+      return isFilterExplicitlyRequestedGlobally(prompt, filter);
+    }),
+  };
+}
+
 function removeRedundantTerminalAllowlistFilters(
   filters: ParsedPreferences["filters"]
 ): ParsedPreferences["filters"] {
@@ -1741,8 +1867,7 @@ function getIncludedTerminalMentionsFromPrompt(prompt: string) {
 
     if (clauseTerminals.length === 0) continue;
 
-    const isExclusionClause =
-      /\b(no|avoid|exclude|without|anything but|not)\b/i.test(clause);
+    const isExclusionClause = hasExplicitTerminalExclusionLanguage(clause);
 
     if (isExclusionClause) continue;
 
@@ -3225,7 +3350,6 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
   for (const clauseEntry of clauses) {
     const rawClause = clauseEntry.text;
-    const clause = rawClause.toLowerCase().replace(/[â]/g, "'");
     const clauseTerminals = extractTerminalPriorities(rawClause, crews)
       .map(normalizeTerminalName)
       .filter(Boolean);
@@ -3233,14 +3357,9 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     if (clauseTerminals.length === 0) continue;
 
     const isExclusionClause =
-      clause.includes("exclude ") ||
-      clause.includes("no ") ||
-      clause.includes("anything but ") ||
-      clause.includes("not ") ||
+      hasExplicitTerminalExclusionLanguage(rawClause) ||
       Boolean(getExcludedTerminalFromClause(rawClause, crews)) ||
-      Boolean(getAvoidTerminalFromClause(rawClause, crews)) ||
-      clause.includes("exclude standby") ||
-      clause.includes("no standby");
+      Boolean(getAvoidTerminalFromClause(rawClause, crews));
 
     if (isExclusionClause) continue;
 
@@ -4523,6 +4642,10 @@ function applyDeterministicPreferenceRulesV2(
   }
 
   if (intents.has("exclude_up")) {
+    nextParsed.unknown_clauses = (nextParsed.unknown_clauses ?? []).filter(
+      (clause) => !isUpExpressUnknownClause(clause.text)
+    );
+
     nextParsed.filters = nextParsed.filters.filter((filter) => {
       if (
         filter.field === "job_direction" &&
@@ -4562,6 +4685,10 @@ function applyDeterministicPreferenceRulesV2(
   }
 
   if (intents.has("only_up")) {
+    nextParsed.unknown_clauses = (nextParsed.unknown_clauses ?? []).filter(
+      (clause) => !isUpExpressUnknownClause(clause.text)
+    );
+
     nextParsed.filters = nextParsed.filters.filter(
       (filter) => !(filter.field === "exclude_up_crews" && filter.operator === "=")
     );
@@ -4583,6 +4710,10 @@ function applyDeterministicPreferenceRulesV2(
     !intents.has("exclude_up") &&
     !intents.has("only_up")
   ) {
+    nextParsed.unknown_clauses = (nextParsed.unknown_clauses ?? []).filter(
+      (clause) => !isUpExpressUnknownClause(clause.text)
+    );
+
     nextParsed.tradeoffs.push({
       type: "prefer_up",
       value: "up",
@@ -4715,7 +4846,11 @@ function applyDeterministicPreferenceRulesV2(
       });
   }
 
-  return applyConflictResolutionRules(nextParsed, intents, prompt);
+  return applyConflictResolutionRules(
+    removeMirroredScopedGlobalFilters(nextParsed, prompt),
+    intents,
+    prompt
+  );
 }
 
 function buildReviewItems(parsed: ParsedPreferences): string[] {
@@ -6043,6 +6178,18 @@ const crewDaysOff =
     ? crew.days_off
     : schedule?.days_off ?? [];
 
+const scheduleOperatingHoursWeekly = schedule?.operating_time
+  ? round1(timeToHours(schedule.operating_time))
+  : undefined;
+
+const scheduleOvertimeHoursWeekly = schedule?.overtime
+  ? round1(timeToHours(schedule.overtime))
+  : undefined;
+
+const scheduleTotalPaidHoursWeekly = schedule?.work_time
+  ? round1(timeToHours(schedule.work_time))
+  : undefined;
+
 const crewWithSchedule = {
   ...crew,
   works_weekends:
@@ -6058,19 +6205,22 @@ const crewWithSchedule = {
       : (crew.job_details ?? []),
 
   operating_hours_weekly:
-    schedule?.operating_time
-      ? round1(timeToHours(schedule.operating_time))
-      : crew.operating_hours_weekly,
+    typeof crew.operating_hours_weekly === "number" &&
+    crew.operating_hours_weekly > 0
+      ? crew.operating_hours_weekly
+      : scheduleOperatingHoursWeekly,
 
   overtime_hours_weekly:
-    schedule?.overtime
-      ? round1(timeToHours(schedule.overtime))
-      : crew.overtime_hours_weekly,
+    typeof crew.overtime_hours_weekly === "number" &&
+    crew.overtime_hours_weekly >= 0
+      ? crew.overtime_hours_weekly
+      : scheduleOvertimeHoursWeekly,
 
   total_paid_hours_weekly:
-    schedule?.work_time
-      ? round1(timeToHours(schedule.work_time))
-      : crew.total_paid_hours_weekly,
+    typeof crew.total_paid_hours_weekly === "number" &&
+    crew.total_paid_hours_weekly > 0
+      ? crew.total_paid_hours_weekly
+      : scheduleTotalPaidHoursWeekly,
 };
 
 if (crewTerminal === "lewis road") {
