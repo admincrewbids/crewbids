@@ -2829,6 +2829,10 @@ function isClauseDeterministicallyHandled(clause: string) {
     return true;
   }
 
+  if (/\bweekdays?\s+off\b/i.test(clause)) {
+    return true;
+  }
+
   if (
     /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(clause) &&
     /( off|days off|must have|prefer |want |need |free)/i.test(clause)
@@ -4801,6 +4805,29 @@ function applyDeterministicPreferenceRulesV2(
     );
   }
 
+  const requestedPositiveTerminals = new Set(
+    getIncludedTerminalMentionsFromPrompt(prompt)
+  );
+
+  nextParsed.priority_groups = (nextParsed.priority_groups ?? []).filter((group) => {
+    const terminalCondition = group.conditions.find(
+      (condition) => condition.field === "terminal"
+    );
+
+    if (!terminalCondition) return true;
+
+    return requestedPositiveTerminals.has(
+      normalizeTerminalName(String(terminalCondition.value))
+    );
+  });
+
+  nextParsed.scoped_preferences = (nextParsed.scoped_preferences ?? []).filter(
+    (scope) =>
+      requestedPositiveTerminals.has(
+        normalizeTerminalName(scope.normalized_terminal || scope.terminal)
+      )
+  );
+
   const explicitlyPrioritizedTerminals = new Set(
     [
       ...(nextParsed.priority_groups ?? []).flatMap((group) =>
@@ -5108,7 +5135,9 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
     }
 
     if (sort.field === "weekends_off") {
-      items.push(`Prefer weekends off`);
+      items.push(
+        sort.direction === "asc" ? `Prefer weekdays off` : `Prefer weekends off`
+      );
     }
 
     if (sort.field === "days_off_count" || sort.field === "days_off") {
@@ -5483,8 +5512,12 @@ function formatExplanationReason(label: string, points: number): string {
 
   if (lower.includes("weekends_off")) {
     return isPositive
-      ? `it better matches your weekends off preference`
-      : `it is weaker for your weekends off preference`;
+      ? label.includes("asc")
+        ? `it better matches your weekdays off preference`
+        : `it better matches your weekends off preference`
+      : label.includes("asc")
+        ? `it is weaker for your weekdays off preference`
+        : `it is weaker for your weekends off preference`;
   }
 
   return label;
@@ -5534,7 +5567,9 @@ function buildCrewExplanation(scoreBreakdown: ScoreBreakdownItem[]): string {
 
     // DAYS OFF
     if (!daysOffMatch && label.includes("weekends_off")) {
-      daysOffMatch = "Includes preferred days off";
+      daysOffMatch = label.includes("asc")
+        ? "Leans toward weekday days off"
+        : "Includes preferred days off";
       continue;
     }
 
@@ -7457,7 +7492,7 @@ function formatSortLabel(s: any): string {
   }
 
   if (s.field === "weekends_off") {
-    return "Weekends off first";
+    return s.direction === "asc" ? "Weekdays off first" : "Weekends off first";
   }
 
   if (s.field === "days_off_count" || s.field === "days_off") {
@@ -7524,6 +7559,16 @@ function buildMatchBadges(scoreBreakdown: ScoreBreakdownItem[]): string[] {
     }
 
     if (label.includes("matches weekends_off preference")) {
+      push(`Weekends off`);
+      continue;
+    }
+
+    if (label.includes("weekends_off preference (asc)")) {
+      push(`Weekday days off`);
+      continue;
+    }
+
+    if (label.includes("weekends_off preference (desc)")) {
       push(`Weekends off`);
       continue;
     }
@@ -9917,7 +9962,9 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
     }
 
     if (sort.field === "weekends_off") {
-      preferences.push("Prefer weekends off");
+      preferences.push(
+        sort.direction === "asc" ? "Prefer weekdays off" : "Prefer weekends off"
+      );
     }
 
     if (sort.field === "days_off_count" || sort.field === "days_off") {
@@ -10347,7 +10394,9 @@ function buildPreferenceChips(parsed: ParsedPreferences | null): string[] {
   const chips: string[] = [];
 
   parsed.sort_preferences.forEach((sort) => {
-    if (sort.field === "weekends_off") chips.push("Weekends Off");
+    if (sort.field === "weekends_off") {
+      chips.push(sort.direction === "asc" ? "Weekdays Off" : "Weekends Off");
+    }
     if (sort.field === "three_day_off_jobs" && sort.direction === "desc") {
       chips.push("3 Day Off First");
     }

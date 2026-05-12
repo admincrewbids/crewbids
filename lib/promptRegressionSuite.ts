@@ -179,6 +179,72 @@ export type PromptRegressionCase = {
 // only from the user-provided canonical set.
 export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
   {
+    id: "canonical-weekends-off-global-no-terminal-scope",
+    label: "Weekends off without terminal mention",
+    prompt: "weekends off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_priority_terminal_absent",
+        value: {
+          terminal: "Standby",
+        },
+      },
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "weekends_off",
+          direction: "desc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "include_only_standby_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
+    id: "canonical-weekdays-off-global-no-warning",
+    label: "Weekdays off without terminal mention",
+    prompt: "weekdays off",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: [],
+      },
+      {
+        type: "parsed_global_sort_present",
+        value: {
+          field: "weekends_off",
+          direction: "asc",
+          strength: "strong",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "weekdays off",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-lewis-road-only",
     label: "Lewis Road only",
     prompt: "Lewis Road only",

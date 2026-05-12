@@ -358,6 +358,10 @@ function formatSortRuleLabel(sort: ParsedPreferenceSortLike) {
     return "Weekends off first";
   }
 
+  if (sort.field === "weekends_off" && sort.direction === "asc") {
+    return "Weekdays off first";
+  }
+
   if (
     (sort.field === "days_off_count" || sort.field === "days_off") &&
     sort.direction === "desc"
