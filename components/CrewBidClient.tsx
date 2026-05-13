@@ -578,7 +578,8 @@ type SortField =
   | "weekends_off"
   | "days_off"
   | "days_off_count"
-  | "three_day_off_jobs";
+  | "three_day_off_jobs"
+  | "split_time";
 
 type ScopedPreference = {
   terminal: string;
@@ -1169,9 +1170,26 @@ function isBareUpExpressOnlyClause(text: string) {
   );
 }
 
-function promptHasBareUpExpressOnlyClause(prompt: string) {
+function promptHasBareUpExpressClause(prompt: string) {
   return splitIntoPreferenceClauses(prompt).some((clauseEntry) =>
     isBareUpExpressOnlyClause(clauseEntry.text)
+  );
+}
+
+function promptHasMixedBareUpExpressRequest(prompt: string) {
+  const text = prompt.toLowerCase().replace(/[ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã‚â€šÃ‚Â¬ÃƒÂ¢Ã‚â€žÃ‚Â¢]/g, "'");
+
+  return (
+    promptHasBareUpExpressClause(prompt) &&
+    getIncludedTerminalMentionsFromPrompt(prompt).length > 0 &&
+    !containsAny(text, PHRASES.only_up)
+  );
+}
+
+function promptHasBareUpExpressOnlyClause(prompt: string) {
+  return (
+    promptHasBareUpExpressClause(prompt) &&
+    !promptHasMixedBareUpExpressRequest(prompt)
   );
 }
 
@@ -5000,6 +5018,7 @@ function applyDeterministicPreferenceRulesV2(
 ): ParsedPreferences {
   const text = prompt.toLowerCase().replace(/[ÃÂ¢Ã¢âÂ¬Ã¢âÂ¢]/g, "'");
   const intents = detectPhraseIntents(text);
+  const hasMixedBareUpExpressRequest = promptHasMixedBareUpExpressRequest(prompt);
   if (promptHasBareUpExpressOnlyClause(prompt)) {
     intents.add("only_up");
   }
@@ -5228,6 +5247,38 @@ function applyDeterministicPreferenceRulesV2(
       operator: "=",
       value: true,
       strength: "hard",
+    });
+  }
+
+  if (
+    hasMixedBareUpExpressRequest &&
+    !intents.has("exclude_up") &&
+    !intents.has("only_up")
+  ) {
+    nextParsed.unknown_clauses = (nextParsed.unknown_clauses ?? []).filter(
+      (clause) => !isUpExpressUnknownClause(clause.text)
+    );
+
+    nextParsed.filters = nextParsed.filters.filter(
+      (filter) =>
+        !(
+          filter.field === "include_only_up_crews" &&
+          filter.operator === "=" &&
+          filter.value === true
+        )
+    );
+
+    nextParsed.filters.push({
+      field: "include_up_crews",
+      operator: "=",
+      value: true,
+      strength: "hard",
+    });
+
+    nextParsed.tradeoffs.push({
+      type: "prefer_up",
+      value: "up",
+      weight: getPreferenceWeight(text, 12),
     });
   }
 
@@ -5539,6 +5590,14 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       filter.value === true
     ) {
       items.push("Only UP Express crews/jobs");
+    }
+
+    if (
+      filter.field === "include_up_crews" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      items.push("Including UP Express crews/jobs");
     }
 
     if (
@@ -5917,6 +5976,22 @@ function timeToHours(value?: string | null) {
   const [h, m] = value.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return undefined;
   return h + m / 60;
+}
+
+function durationToMinutes(value?: string | null) {
+  if (!value || typeof value !== "string") return null;
+
+  const normalized = value.trim();
+  if (!normalized || normalized === "-") return 0;
+
+  const match = normalized.match(/^(\d{1,3}):(\d{2})$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (Number.isNaN(hours) || Number.isNaN(minutes) || minutes >= 60) return null;
+
+  return hours * 60 + minutes;
 }
 
 function hasSplitTimeValue(value?: string | null) {
@@ -6337,6 +6412,32 @@ function getNumericSortValue(crew: RankedCrew, field: SortField): number | null 
 
   if (field === "days_off_count" || field === "days_off") {
     return getDaysOffCount(crew);
+  }
+
+  if (field === "split_time") {
+    const weeklySplitMinutes = durationToMinutes(crew.split_time_weekly ?? null);
+    if (weeklySplitMinutes !== null) return weeklySplitMinutes;
+
+    const dailySplitMinutes = (crew.daily ?? [])
+      .filter((day: any) => !day?.is_day_off)
+      .map((day: any) =>
+        durationToMinutes(day?.split_time ?? day?.job_detail?.split_time ?? null)
+      )
+      .filter((value: number | null): value is number => value !== null);
+
+    if (dailySplitMinutes.length > 0) {
+      return dailySplitMinutes.reduce((total, value) => total + value, 0);
+    }
+
+    const jobDetailSplitMinutes = (crew.job_details ?? [])
+      .map((job: any) => durationToMinutes(job?.split_time ?? null))
+      .filter((value: number | null): value is number => value !== null);
+
+    if (jobDetailSplitMinutes.length > 0) {
+      return jobDetailSplitMinutes.reduce((total, value) => total + value, 0);
+    }
+
+    return null;
   }
 
   const firstWorkedDay = crew.daily?.find((d: any) => !d.is_day_off);
@@ -7043,6 +7144,10 @@ const includeOnlyUpCrewsFilter = effectiveFilters.find(
   (f) => f.field === "include_only_up_crews" && f.operator === "=" && f.value === true
 );
 
+const includeUpCrewsFilter = effectiveFilters.find(
+  (f) => f.field === "include_up_crews" && f.operator === "=" && f.value === true
+);
+
 const includeOnlySpareboardCrewsFilter = effectiveFilters.find(
   (f) =>
     f.field === "include_only_spareboard_crews" &&
@@ -7183,6 +7288,7 @@ if (
     if (normalizedTerminal === "standby" && isStandbyCrew) return true;
     return false;
   }) &&
+  !(includeUpCrewsFilter && hasUpExpressWork) &&
   !overridden
 ) {
   excluded.push({
@@ -8088,6 +8194,10 @@ function formatFilterLabel(
 
   if (f.field === "include_only_up_crews" && f.operator === "=" && f.value === true) {
     return "Only UP Express crews/jobs";
+  }
+
+  if (f.field === "include_up_crews" && f.operator === "=" && f.value === true) {
+    return "Including UP Express crews/jobs";
   }
 
   if (
@@ -10494,6 +10604,14 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
       filter.value === true
     ) {
       hardRules.push("Only UP Express crews/jobs");
+    }
+
+    if (
+      filter.field === "include_up_crews" &&
+      filter.operator === "=" &&
+      filter.value === true
+    ) {
+      hardRules.push("Including UP Express crews/jobs");
     }
 
     if (
