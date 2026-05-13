@@ -554,6 +554,12 @@ type Crew = {
   topup_weekly?: string;
   split_time_weekly?: string;
   operating_time_weekly?: string;
+  week_key?: string;
+  week_index?: number;
+  week_label?: string;
+  week_start_label?: string;
+  week_end_label?: string;
+  week_variants?: Crew[];
 
   // â STBY-only 2-week shape
   is_two_week_stby?: boolean;
@@ -1829,6 +1835,10 @@ function getFilterScopeKey(filter: ParsedPreferences["filters"][number]) {
       filter.field === "split_time") &&
     (values.includes("split") || values.includes("none"));
 
+  if (filter.field === "split_time_weekly") {
+    return "long_split_shifts";
+  }
+
   if (referencesSplit) {
     return "split_jobs";
   }
@@ -1852,6 +1862,14 @@ function clauseExplicitlyRequestsFilter(
     filter.value === "none"
   ) {
     return clauseIntents.has("no_splits");
+  }
+
+  if (
+    filter.field === "split_time_weekly" &&
+    filter.operator === "<=" &&
+    filter.value === "10:00"
+  ) {
+    return clauseIntents.has("no_long_splits");
   }
 
   if (
@@ -2243,6 +2261,7 @@ function hasTerminalScopedConstraintLanguage(prompt: string) {
       clauseIntents.has("weekdays_off_only") ||
       clauseIntents.has("three_day_off_only") ||
       clauseIntents.has("no_splits") ||
+      clauseIntents.has("no_long_splits") ||
       clauseIntents.has("exclude_shuttle_bus") ||
       clauseIntents.has("only_shuttle_bus") ||
       clauseIntents.has("exclude_van") ||
@@ -2596,6 +2615,31 @@ const PHRASES = {
     "don't want splits",
     "do not want splits",
     "without splits",
+  ],
+
+  no_long_splits: [
+    "no long split",
+    "no long splits",
+    "no long split shift",
+    "no long split shifts",
+    "no long split job",
+    "no long split jobs",
+    "avoid long split",
+    "avoid long splits",
+    "avoid long split shift",
+    "avoid long split shifts",
+    "avoid long split job",
+    "avoid long split jobs",
+    "exclude long split",
+    "exclude long splits",
+    "exclude long split shift",
+    "exclude long split shifts",
+    "exclude long split job",
+    "exclude long split jobs",
+    "without long split",
+    "without long splits",
+    "without long split shift",
+    "without long split shifts",
   ],
 
   exclude_shuttle_bus: [
@@ -3082,6 +3126,10 @@ const PHRASE_INTENT_DEFINITIONS = {
   },
   no_splits: {
     phrases: PHRASES.no_splits,
+    conflictsWith: [],
+  },
+  no_long_splits: {
+    phrases: PHRASES.no_long_splits,
     conflictsWith: [],
   },
   exclude_shuttle_bus: {
@@ -4094,6 +4142,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       }
 
+      if (clauseIntents.has("no_long_splits")) {
+        parsed.filters.push({
+          field: "split_time_weekly",
+          operator: "<=",
+          value: "10:00",
+          strength: "hard",
+        });
+      }
+
       if (clauseIntents.has("exclude_shuttle_bus")) {
         parsed.filters.push({
           field: "shuttle_bus",
@@ -4748,6 +4805,15 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         field: "split_time",
         operator: "=",
         value: "none",
+        strength: "hard",
+      });
+    }
+
+    if (clauseIntents.has("no_long_splits")) {
+      scoped.filters.push({
+        field: "split_time_weekly",
+        operator: "<=",
+        value: "10:00",
         strength: "hard",
       });
     }
@@ -5732,6 +5798,14 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
     ) {
       items.push("No split jobs");
     }
+
+    if (
+      filter.field === "split_time_weekly" &&
+      filter.operator === "<=" &&
+      filter.value === "10:00"
+    ) {
+      items.push("No long split shifts");
+    }
   });
 
   parsed.sort_preferences.forEach((sort) => {
@@ -6321,6 +6395,204 @@ function getDaysOffCount(crew: Crew): number {
   }
 
   return (crew.days_off ?? crew.days_off_list ?? []).length;
+}
+
+function getCrewWeekVariants(crew: Partial<Crew> | null | undefined): Crew[] {
+  const variants = Array.isArray(crew?.week_variants)
+    ? crew?.week_variants ?? []
+    : [];
+
+  return variants.length > 0 ? variants : (crew ? [crew as Crew] : []);
+}
+
+function everyCrewWeekVariant(
+  crew: Crew,
+  predicate: (variant: Crew) => boolean
+): boolean {
+  return getCrewWeekVariants(crew).every(predicate);
+}
+
+function formatMinutesAsHHMM(totalMinutes: number): string {
+  const rounded = Math.round(totalMinutes);
+  const hours = Math.floor(rounded / 60);
+  const minutes = rounded % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function averageNumbers(values: Array<number | undefined | null>): number | undefined {
+  const numeric = values.filter(
+    (value): value is number => typeof value === "number" && Number.isFinite(value)
+  );
+
+  if (!numeric.length) return undefined;
+  return numeric.reduce((sum, value) => sum + value, 0) / numeric.length;
+}
+
+function averageHHMM(values: Array<string | undefined | null>): string {
+  const minutes = values
+    .map((value) => durationToMinutes(value ?? null))
+    .filter((value): value is number => value !== null);
+
+  if (!minutes.length) return "-";
+  return formatMinutesAsHHMM(
+    minutes.reduce((sum, value) => sum + value, 0) / minutes.length
+  );
+}
+
+function getDaysOffIntersection(variants: Crew[]): string[] {
+  const dayOrder = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const dayLabels: Record<string, string> = {
+    sun: "Sun",
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+  };
+
+  if (!variants.length) return [];
+
+  const variantSets = variants.map(
+    (variant) =>
+      new Set(
+        (variant.days_off ?? variant.days_off_list ?? [])
+          .map(normalizeDayName)
+          .filter(Boolean)
+      )
+  );
+
+  return dayOrder
+    .filter((day) => variantSets.every((set) => set.has(day)))
+    .map((day) => dayLabels[day]);
+}
+
+function groupCrewWeekVariants(crews: Crew[]): Crew[] {
+  const groups = new Map<string, Crew[]>();
+
+  for (const crew of crews) {
+    const key = String(crew.crew_number ?? crew.id ?? "").trim();
+    if (!key) continue;
+
+    const existing = groups.get(key) ?? [];
+    existing.push(crew);
+    groups.set(key, existing);
+  }
+
+  const grouped: Crew[] = [];
+
+  for (const crew of crews) {
+    const key = String(crew.crew_number ?? crew.id ?? "").trim();
+    const variants = groups.get(key) ?? [crew];
+
+    if (variants[0] !== crew) continue;
+
+    if (variants.length === 1) {
+      grouped.push(crew);
+      continue;
+    }
+
+    const sortedVariants = [...variants].sort((a, b) => {
+      const aWeek = a.week_index ?? Number.MAX_SAFE_INTEGER;
+      const bWeek = b.week_index ?? Number.MAX_SAFE_INTEGER;
+      if (aWeek !== bWeek) return aWeek - bWeek;
+      return String(a.week_key ?? "").localeCompare(String(b.week_key ?? ""));
+    });
+
+    const first = sortedVariants[0];
+    const daily = sortedVariants.flatMap((variant) =>
+      (variant.daily ?? []).map((day: any) => ({
+        ...day,
+        week_key: variant.week_key,
+        week_label: variant.week_label,
+        week_start_label: variant.week_start_label,
+        week_end_label: variant.week_end_label,
+      }))
+    );
+    const jobs = sortedVariants.flatMap((variant) => variant.jobs ?? []);
+    const jobDetails = sortedVariants.flatMap((variant: any) =>
+      Array.isArray(variant.job_details) ? variant.job_details : []
+    );
+    const daysOffList = getDaysOffIntersection(sortedVariants);
+    const daysOff = daysOffList.map(normalizeDayName);
+    const daysOffCountValues = sortedVariants
+      .map((variant) => variant.days_off_count)
+      .filter((value): value is number => typeof value === "number");
+    const daysOffCount = daysOffCountValues.length
+      ? Math.min(...daysOffCountValues)
+      : daysOffList.length;
+
+    grouped.push({
+      ...first,
+      id: String(first.crew_number ?? first.id),
+      crew_number: String(first.crew_number ?? first.id),
+      daily,
+      jobs,
+      job_details: jobDetails,
+      days_off: daysOff,
+      days_off_list: daysOffList,
+      days_off_count: daysOffCount,
+      works_weekends: sortedVariants.some((variant) => variant.works_weekends),
+      week_variants: sortedVariants,
+      week_label: undefined,
+      week_key: undefined,
+      week_start_label: sortedVariants[0]?.week_start_label,
+      week_end_label: sortedVariants[sortedVariants.length - 1]?.week_end_label,
+      operating_hours_weekly: averageNumbers(
+        sortedVariants.map((variant) => variant.operating_hours_weekly)
+      ),
+      overtime_hours_weekly: averageNumbers(
+        sortedVariants.map((variant) => variant.overtime_hours_weekly)
+      ),
+      total_paid_hours_weekly: averageNumbers(
+        sortedVariants.map((variant) => variant.total_paid_hours_weekly)
+      ),
+      work_time_weekly: averageHHMM(
+        sortedVariants.map((variant) => variant.work_time_weekly)
+      ),
+      overtime_weekly_text: averageHHMM(
+        sortedVariants.map((variant) => variant.overtime_weekly_text)
+      ),
+      split_time_weekly: averageHHMM(
+        sortedVariants.map((variant) => variant.split_time_weekly)
+      ),
+      operating_time_weekly: averageHHMM(
+        sortedVariants.map((variant) => variant.operating_time_weekly)
+      ),
+    });
+  }
+
+  return grouped;
+}
+
+function getCrewDisplayVariant(crew: Crew, selectedWeekKey?: string): any {
+  const variants = getCrewWeekVariants(crew);
+  if (variants.length <= 1) return crew;
+
+  const selected =
+    variants.find((variant) => variant.week_key === selectedWeekKey) ??
+    variants[0];
+
+  return {
+    ...crew,
+    daily: selected.daily,
+    jobs: selected.jobs,
+    job_details: (selected as any).job_details,
+    days_off: selected.days_off,
+    days_off_list: selected.days_off_list,
+    days_off_count: selected.days_off_count,
+    works_weekends: selected.works_weekends,
+    work_time_weekly: selected.work_time_weekly,
+    overtime_weekly_text: selected.overtime_weekly_text,
+    topup_weekly: selected.topup_weekly,
+    split_time_weekly: selected.split_time_weekly,
+    operating_time_weekly: selected.operating_time_weekly,
+    week_key: selected.week_key,
+    week_index: selected.week_index,
+    week_label: selected.week_label,
+    week_start_label: selected.week_start_label,
+    week_end_label: selected.week_end_label,
+  };
 }
 
 function getCrewComparableTimes(
@@ -6953,9 +7225,9 @@ const crewWithSchedule = {
   jobs: crewJobs,
   daily: crewDaily,
   job_details:
-    jobDetails.length > 0
-      ? jobDetails
-      : (crew.job_details ?? []),
+    Array.isArray(crew.job_details) && crew.job_details.length > 0
+      ? crew.job_details
+      : jobDetails,
 
   operating_hours_weekly:
     typeof crew.operating_hours_weekly === "number" &&
@@ -7234,6 +7506,13 @@ const noSplitsFilter = effectiveFilters.find(
     f.value === "none"
 );
 
+const maxWeeklySplitTimeFilter = effectiveFilters.find(
+  (f) =>
+    f.field === "split_time_weekly" &&
+    f.operator === "<=" &&
+    typeof f.value === "string"
+);
+
 const shuttleBusRequiredFilter = effectiveFilters.find(
   (f) =>
     f.field === "shuttle_bus" &&
@@ -7276,7 +7555,11 @@ const vanExcludedFilter = effectiveFilters.find(
   const crewHasSplitTime = crewHasSplitTimeComponent(crewWithSchedule);
   const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
   const crewHasVan = crewHasVanComponent(crewWithSchedule);
-  const isThreeDayOffCrew = crewWithSchedule.days_off_count === 3;
+  const weekVariants = getCrewWeekVariants(crewWithSchedule as Crew);
+  const isThreeDayOffCrew = everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => getDaysOffCount(variant) === 3
+  );
 
 if (
   terminalOnlyFilter &&
@@ -7426,7 +7709,10 @@ if (
 
 if (
   minDaysOffCountFilter &&
-  getDaysOffCount(crewWithSchedule) < Number(minDaysOffCountFilter.value) &&
+  !everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => getDaysOffCount(variant) >= Number(minDaysOffCountFilter.value)
+  ) &&
   !overridden
 ) {
   excluded.push({
@@ -7439,7 +7725,10 @@ if (
 
 if (
   exactDaysOffCountFilter &&
-  getDaysOffCount(crewWithSchedule) !== Number(exactDaysOffCountFilter.value) &&
+  !everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => getDaysOffCount(variant) === Number(exactDaysOffCountFilter.value)
+  ) &&
   !overridden
 ) {
   excluded.push({
@@ -7452,7 +7741,10 @@ if (
 
 if (
   weekdayDaysOffCountFilter &&
-  getWeekdayDaysOffCount(crewWithSchedule) !== weekdayDaysOffCountFilter.value &&
+  !everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => getWeekdayDaysOffCount(variant) === weekdayDaysOffCountFilter.value
+  ) &&
   !overridden
 ) {
   excluded.push({
@@ -7465,7 +7757,10 @@ if (
 
 if (
   weekendDaysOffFilter &&
-  hasWeekendDaysOff(crewWithSchedule) &&
+  !everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => !hasWeekendDaysOff(variant)
+  ) &&
   !overridden
 ) {
   excluded.push({
@@ -7490,6 +7785,44 @@ if (hasNoSplitsRule && crewHasSplitTime && !overridden) {
     reason: "Excluded because this crew has split time",
   });
   continue;
+}
+
+if (maxWeeklySplitTimeFilter) {
+  const maxWeeklySplitMinutes = durationToMinutes(
+    String(maxWeeklySplitTimeFilter.value)
+  );
+  const crewWeeklySplitMinutesByWeek = weekVariants
+    .map((variant) => getNumericSortValue(variant as RankedCrew, "split_time"))
+    .filter((value): value is number => value !== null);
+  const longestCrewWeeklySplitMinutes =
+    crewWeeklySplitMinutesByWeek.length > 0
+      ? Math.max(...crewWeeklySplitMinutesByWeek)
+      : getNumericSortValue(crewWithSchedule as RankedCrew, "split_time");
+
+  if (
+    maxWeeklySplitMinutes !== null &&
+    longestCrewWeeklySplitMinutes !== null &&
+    longestCrewWeeklySplitMinutes > maxWeeklySplitMinutes &&
+    !overridden
+  ) {
+    excluded.push({
+      id: crew.id,
+      terminal: formatTerminalDisplayName(crew.terminal),
+      reason: `Excluded because weekly split time is greater than ${maxWeeklySplitTimeFilter.value}`,
+    });
+    continue;
+  }
+
+  if (
+    maxWeeklySplitMinutes !== null &&
+    longestCrewWeeklySplitMinutes !== null &&
+    longestCrewWeeklySplitMinutes <= maxWeeklySplitMinutes
+  ) {
+    scoreBreakdown.push({
+      label: `Weekly split time is ${maxWeeklySplitTimeFilter.value} or less`,
+      points: 0,
+    });
+  }
 }
 
 if (hasShuttleBusOnlyRule && !crewHasShuttleBus && !overridden) {
@@ -7549,14 +7882,18 @@ if (hasHardWeekendsOffRule) {
 }
 
 if (requiredDaysOffFilter) {
-  const crewDaysOff = (crewWithSchedule.days_off ?? crewWithSchedule.days_off_list ?? []).map(
-    normalizeDayName
-  );
   const requiredDaysOff = normalizeRequiredDaysOff(
     requiredDaysOffFilter.value as unknown[]
   );
-  const hasAllRequiredDays = requiredDaysOff.every((day) =>
-    crewDaysOff.includes(day)
+  const hasAllRequiredDays = everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => {
+      const crewDaysOff = (
+        variant.days_off ?? variant.days_off_list ?? []
+      ).map(normalizeDayName);
+
+      return requiredDaysOff.every((day) => crewDaysOff.includes(day));
+    }
   );
 
   if (!hasAllRequiredDays && !overridden) {
@@ -7577,13 +7914,17 @@ if (requiredDaysOffFilter) {
 }
 
 if (scoped?.required_days_off?.length) {
-  const crewDaysOff = (crewWithSchedule.days_off ?? crewWithSchedule.days_off_list ?? []).map(
-    normalizeDayName
-  );
   const requiredDaysOff = normalizeRequiredDaysOff(scoped.required_days_off);
 
-  const hasAllRequiredDays = requiredDaysOff.every((day) =>
-    crewDaysOff.includes(day)
+  const hasAllRequiredDays = everyCrewWeekVariant(
+    crewWithSchedule as Crew,
+    (variant) => {
+      const crewDaysOff = (
+        variant.days_off ?? variant.days_off_list ?? []
+      ).map(normalizeDayName);
+
+      return requiredDaysOff.every((day) => crewDaysOff.includes(day));
+    }
   );
 
   if (!hasAllRequiredDays && !overridden) {
@@ -8172,6 +8513,14 @@ function formatFilterLabel(
     return "No split jobs";
   }
 
+  if (
+    f.field === "split_time_weekly" &&
+    f.operator === "<=" &&
+    f.value === "10:00"
+  ) {
+    return "No long split shifts";
+  }
+
   if (f.field === "shuttle_bus" && f.operator === "=" && f.value === false) {
     return "No shuttle bus jobs";
   }
@@ -8457,6 +8806,7 @@ const [overriddenCrewIds, setOverriddenCrewIds] = useState<string[]>([]);
 const lastSavedRunKeyRef = useRef<string | null>(null);
 const [expandedCrewId, setExpandedCrewId] = useState<string | null>(null);
 const [expandedExcludedCrewId, setExpandedExcludedCrewId] = useState<string | null>(null);
+const [selectedCrewWeekById, setSelectedCrewWeekById] = useState<Record<string, string>>({});
 const [uploadState, setUploadState] = useState<"idle" | "uploading" | "success">("idle");
 const [uploadProgress, setUploadProgress] = useState(0);
 const [pdfPages, setPdfPages] = useState<string[]>([]);
@@ -9573,7 +9923,7 @@ const enriched = parsedRows.map((row: any) =>
   );
 
   // ð¥ THIS IS THE FIX â map to Crew shape
-const crews = enriched.map((row: any, index: number) => {
+const rowCrews = enriched.map((row: any, index: number) => {
 const summedWeeklyOperating =
   (row.daily || []).reduce((sum: number, day: any) => {
     if (!day) return sum;
@@ -9615,9 +9965,16 @@ const summedWeeklyOperating =
 
 
   return {
-    id: row.crew_id || `${row.crew_code}-${index}`,
+    id: row.week_key
+      ? `${row.crew_id || row.crew_code}-${row.week_key}`
+      : row.crew_id || `${row.crew_code}-${index}`,
 
     crew_number: row.crew_id,
+    week_key: row.week_key,
+    week_index: row.week_index,
+    week_label: row.week_label,
+    week_start_label: row.week_start_label,
+    week_end_label: row.week_end_label,
     terminal:
       row.is_two_week_stby === true || row.crew_code === "STBY"
         ? "Standby"
@@ -9625,6 +9982,9 @@ const summedWeeklyOperating =
 
     daily: row.daily || [],
     jobs: row.jobs || [],
+    job_details: (row.daily || [])
+      .map((day: any) => day?.job_detail)
+      .filter(Boolean),
 
     days_off: row.days_off || [],
     days_off_list: row.days_off_list || [],
@@ -9637,9 +9997,10 @@ const summedWeeklyOperating =
     week2: row.week2,
 
     // â WEEKLY numeric (used by ranking engine)
-    operating_hours_weekly: hhmmToHours(
-      row.raw_cells?.operating_time_weekly
-    ),
+    operating_hours_weekly:
+      summedWeeklyOperating > 0
+        ? round1(summedWeeklyOperating)
+        : hhmmToHours(row.raw_cells?.operating_time_weekly),
     overtime_hours_weekly: hhmmToHours(
       row.raw_cells?.overtime_weekly
     ),
@@ -9673,6 +10034,7 @@ const summedWeeklyOperating =
     ].join(" | "),
   };
 });
+const crews = groupCrewWeekVariants(rowCrews);
 debugLog(
   "BRADFORD CREWS IN FINAL LIST",
   crews.filter((crew: any) => crew.terminal === "Bradford")
@@ -10752,6 +11114,14 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
       filter.value === "none"
     ) {
       hardRules.push("No split jobs");
+    }
+
+    if (
+      filter.field === "split_time_weekly" &&
+      filter.operator === "<=" &&
+      filter.value === "10:00"
+    ) {
+      hardRules.push("No long split shifts");
     }
 
     if (filter.field === "on_duty" && (filter.operator === ">=" || filter.operator === ">")) {
@@ -12667,7 +13037,12 @@ style={{
 
     {/* CREW LIST */}
     <div style={{ marginTop: 24, display: "grid", gap: 16 }}>
-      {orderedVisibleRankedCrews.map((crew, index) => {
+      {orderedVisibleRankedCrews.map((rankedCrew, index) => {
+        const crew = getCrewDisplayVariant(
+          rankedCrew,
+          selectedCrewWeekById[rankedCrew.id]
+        );
+        const weekVariants = getCrewWeekVariants(rankedCrew);
         const matchBadges = buildMatchBadges(crew.scoreBreakdown || []);
         const isExpanded = expandedCrewId === crew.id;
 
@@ -12756,6 +13131,55 @@ onDrop={() => {
                   >
                     {formatTerminalDisplayName(crew.terminal)}
                   </div>
+
+                  {weekVariants.length > 1 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 6,
+                        marginTop: 10,
+                      }}
+                    >
+                      {weekVariants.map((variant) => {
+                        const isSelected = variant.week_key === crew.week_key;
+
+                        return (
+                          <button
+                            key={variant.week_key ?? variant.week_label}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCrewWeekById((prev) => ({
+                                ...prev,
+                                [rankedCrew.id]: variant.week_key ?? "",
+                              }));
+                            }}
+                            title={[
+                              variant.week_start_label,
+                              variant.week_end_label,
+                            ]
+                              .filter(Boolean)
+                              .join(" - ")}
+                            style={{
+                              border: isSelected
+                                ? "1px solid #f97316"
+                                : "1px solid #cbd5e1",
+                              background: isSelected ? "#fff7ed" : "#fff",
+                              color: isSelected ? "#c2410c" : "#334155",
+                              borderRadius: 999,
+                              padding: "5px 9px",
+                              fontSize: 11,
+                              fontWeight: 800,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {variant.week_label ?? "Week"}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: "grid", gap: 12 }}>
@@ -13059,7 +13483,11 @@ onDrop={() => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <strong>
-                    {crew.is_two_week_stby ? "2-Week Schedule" : "Daily Schedule"}
+                    {crew.is_two_week_stby
+                      ? "2-Week Schedule"
+                      : crew.week_label
+                        ? `${crew.week_label} Schedule`
+                        : "Daily Schedule"}
                   </strong>
 
                   {crew.daily.map((dayEntry: any, dayIndex: number) => {
@@ -13496,7 +13924,12 @@ onDrop={() => {
 
                     {isExpanded && (
                       <div style={{ display: "grid", gap: 10, padding: 14 }}>
-                        {group.crews.map((crew) => {
+                        {group.crews.map((excludedCrew) => {
+                          const crew = getCrewDisplayVariant(
+                            excludedCrew as Crew,
+                            selectedCrewWeekById[String(excludedCrew.id)]
+                          );
+                          const weekVariants = getCrewWeekVariants(excludedCrew as Crew);
                           const isCrewExpanded = expandedExcludedCrewId === String(crew.id);
 
                           return (
@@ -13558,6 +13991,61 @@ onDrop={() => {
                                   >
                                     {formatTerminalDisplayName(crew.terminal)}
                                   </div>
+
+                                  {weekVariants.length > 1 && (
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 6,
+                                        marginTop: 10,
+                                      }}
+                                    >
+                                      {weekVariants.map((variant) => {
+                                        const isSelected =
+                                          variant.week_key === crew.week_key;
+
+                                        return (
+                                          <button
+                                            key={variant.week_key ?? variant.week_label}
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setSelectedCrewWeekById((prev) => ({
+                                                ...prev,
+                                                [String(excludedCrew.id)]:
+                                                  variant.week_key ?? "",
+                                              }));
+                                            }}
+                                            title={[
+                                              variant.week_start_label,
+                                              variant.week_end_label,
+                                            ]
+                                              .filter(Boolean)
+                                              .join(" - ")}
+                                            style={{
+                                              border: isSelected
+                                                ? "1px solid #f97316"
+                                                : "1px solid #cbd5e1",
+                                              background: isSelected
+                                                ? "#fff7ed"
+                                                : "#fff",
+                                              color: isSelected
+                                                ? "#c2410c"
+                                                : "#334155",
+                                              borderRadius: 999,
+                                              padding: "5px 9px",
+                                              fontSize: 11,
+                                              fontWeight: 800,
+                                              cursor: "pointer",
+                                            }}
+                                          >
+                                            {variant.week_label ?? "Week"}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <div style={{ display: "grid", gap: 12 }}>
@@ -13737,7 +14225,11 @@ onDrop={() => {
                                   }}
                                 >
                                   <strong>
-                                    {crew.is_two_week_stby ? "2-Week Schedule" : "Daily Schedule"}
+                                    {crew.is_two_week_stby
+                                      ? "2-Week Schedule"
+                                      : crew.week_label
+                                        ? `${crew.week_label} Schedule`
+                                        : "Daily Schedule"}
                                   </strong>
 
                                   {crew.daily.map((dayEntry: any, dayIndex: number) => {

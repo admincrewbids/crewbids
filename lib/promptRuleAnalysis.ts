@@ -124,6 +124,8 @@ function humanizeFieldName(field: string) {
       return "job direction";
     case "split_time":
       return "split jobs";
+    case "split_time_weekly":
+      return "weekly split time";
     case "shuttle_bus":
       return "shuttle bus jobs";
     case "van":
@@ -268,6 +270,14 @@ function formatFilterRuleLabel(
 
   if (filter.field === "split_time" && filter.operator === "=" && filter.value === "none") {
     return "No split jobs";
+  }
+
+  if (
+    filter.field === "split_time_weekly" &&
+    filter.operator === "<=" &&
+    filter.value === "10:00"
+  ) {
+    return "No long split shifts";
   }
 
   if (

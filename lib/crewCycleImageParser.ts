@@ -22,6 +22,13 @@ type ParsedCycleRow = {
   crew_id: string;
   crew_code: string;
   terminal: string;
+  crew_number?: string;
+  week_key?: string;
+  week_index?: number;
+  week_label?: string;
+  week_start_label?: string;
+  week_end_label?: string;
+  pdf_page_number?: number;
 
   // existing shape stays
   daily: ParsedCycleDay[];
@@ -98,7 +105,9 @@ export function parseCrewCycleFromTextPages(
 
  
 
-  return dedupeRowsByCrewId(parsedRows);
+  assignWeekIndexes(parsedRows);
+
+  return dedupeRowsByCrewIdAndWeek(parsedRows);
 }
 function isKnownCrewCodeToken(text: string): boolean {
   const upper = text.trim().toUpperCase();
@@ -118,6 +127,12 @@ function isLikelyCrewCycleTextPage(page: CycleTextPage): boolean {
     }));
 
   if (!cleanedItems.length) return false;
+
+  const pageText = cleanedItems.map((item) => item.str).join(" ");
+  const hasCycleCrewHeader =
+    /\bCycle\b/i.test(pageText) && /\bCrew\s*#/i.test(pageText);
+
+  if (!hasCycleCrewHeader) return false;
 
   const leftBandItems = cleanedItems.filter(
     (item) =>
@@ -158,6 +173,136 @@ function isLikelyCrewCycleTextPage(page: CycleTextPage): boolean {
     (hasEnoughCrewCodes || hasEnoughCrewNumbers)
   );
 }
+
+type WeekBlock = {
+  key: string;
+  y: number;
+  startLabel: string;
+  endLabel?: string;
+};
+
+function normalizeWeekKey(label?: string): string | undefined {
+  const normalized = String(label || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
+  return normalized || undefined;
+}
+
+function getWeekBlocksForPage(
+  items: Array<{ text?: string; str?: string; x: number; y: number }>
+): WeekBlock[] {
+  const normalized = items.map((item) => ({
+    ...item,
+    text: String((item as any).text ?? (item as any).str ?? "").trim(),
+  }));
+
+  const saturdayHeaders = normalized.filter((item) =>
+    /^Sat(?:urday)?\s+\d{1,2}\s+[A-Za-z]+$/i.test(item.text)
+  );
+
+  return normalized
+    .filter((item) =>
+      /^Sun(?:day)?\s+\d{1,2}\s+[A-Za-z]+$/i.test(item.text)
+    )
+    .map((item) => {
+      const matchingSaturday = saturdayHeaders
+        .filter((candidate) => Math.abs(candidate.y - item.y) <= 8)
+        .sort((a, b) => Math.abs(a.y - item.y) - Math.abs(b.y - item.y))[0];
+
+      return {
+        key: normalizeWeekKey(item.text) || `week-y-${Math.round(item.y)}`,
+        y: item.y,
+        startLabel: item.text,
+        endLabel: matchingSaturday?.text,
+      };
+    })
+    .sort((a, b) => a.y - b.y);
+}
+
+function getWeekBlockForAnchor(
+  weekBlocks: WeekBlock[],
+  anchorY: number
+): WeekBlock | undefined {
+  if (!weekBlocks.length) return undefined;
+
+  let selected = weekBlocks[0];
+
+  for (const block of weekBlocks) {
+    if (anchorY >= block.y - 4) {
+      selected = block;
+      continue;
+    }
+    break;
+  }
+
+  return selected;
+}
+
+function assignWeekIndexes(rows: ParsedCycleRow[]) {
+  const weekLabels = new Map<string, string>();
+
+  for (const row of rows) {
+    const key = normalizeWeekKey(row.week_start_label);
+    if (!key) continue;
+
+    if (!weekLabels.has(key)) weekLabels.set(key, row.week_start_label || key);
+  }
+
+  const orderedKeys = Array.from(weekLabels.keys()).sort((a, b) => {
+    const aValue = getMonthDaySortValue(weekLabels.get(a));
+    const bValue = getMonthDaySortValue(weekLabels.get(b));
+
+    if (aValue != null && bValue != null && aValue !== bValue) {
+      return aValue - bValue;
+    }
+
+    return 0;
+  });
+
+  const weekOrder = new Map<string, number>();
+  orderedKeys.forEach((key, index) => weekOrder.set(key, index + 1));
+
+  for (const row of rows) {
+    const key = normalizeWeekKey(row.week_start_label);
+    if (!key) continue;
+
+    const weekIndex = weekOrder.get(key);
+    row.week_index = weekIndex;
+    row.week_label = weekIndex ? `Week ${weekIndex}` : undefined;
+    row.week_key = key;
+  }
+}
+
+function getMonthDaySortValue(label?: string): number | null {
+  const match = String(label || "").match(
+    /\b(?:Sun|Sunday)\s+(\d{1,2})\s+([A-Za-z]+)\b/i
+  );
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const monthName = match[2].slice(0, 3).toLowerCase();
+  const monthIndex = [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "oct",
+    "nov",
+    "dec",
+  ].indexOf(monthName);
+
+  if (monthIndex < 0 || !Number.isFinite(day)) return null;
+  return monthIndex * 100 + day;
+}
+
 function parseSingleCycleTextPage(page: CycleTextPage): ParsedCycleRow[] {
   if (!isLikelyCrewCycleTextPage(page)) {
     console.log("REJECTED NON-CYCLE PAGE", page.pageNumber);
@@ -172,6 +317,7 @@ function parseSingleCycleTextPage(page: CycleTextPage): ParsedCycleRow[] {
       ...item,
       str: item.str.trim(),
     }));
+  const weekBlocks = getWeekBlocksForPage(cleanedItems);
 const bdItems = cleanedItems.filter((item) =>
   /BD|_D|Bradford/i.test(String(item.str || ""))
 );
@@ -307,12 +453,20 @@ if (
 const parsed = parseSingleRowFromSortedItems(mergedItems);
 
 if (parsed) {
+  const weekBlock = getWeekBlockForAnchor(weekBlocks, anchorY);
   const finalParsed =
     parsed.crew_code === "STBY"
       ? enrichStandbyRowFromNearbyItems(parsed, cleanedItems, anchorY)
       : parsed;
 
-  rows.push(finalParsed);
+  rows.push({
+    ...finalParsed,
+    crew_number: finalParsed.crew_id,
+    week_key: weekBlock?.key,
+    week_start_label: weekBlock?.startLabel,
+    week_end_label: weekBlock?.endLabel,
+    pdf_page_number: page.pageNumber,
+  });
 }
   }
 
@@ -1271,7 +1425,7 @@ const daily: ParsedCycleDay[] = DAY_KEYS.map((dayKey, index) => {
     ];
   }
 
-  return dedupeRowsByCrewId(parsedRows);
+  return dedupeRowsByCrewIdAndWeek(parsedRows);
 }
 
 export async function loadImageToCanvasForDebug(
@@ -1727,12 +1881,16 @@ function cropCanvas(
   return canvas;
 }
 
-function dedupeRowsByCrewId(rows: ParsedCycleRow[]): ParsedCycleRow[] {
+function dedupeRowsByCrewIdAndWeek(rows: ParsedCycleRow[]): ParsedCycleRow[] {
   const map = new Map<string, ParsedCycleRow>();
 
   for (const row of rows) {
-    if (!map.has(row.crew_id)) {
-      map.set(row.crew_id, row);
+    const key = row.week_key
+      ? `${row.crew_id}|${row.week_key}`
+      : row.crew_id;
+
+    if (!map.has(key)) {
+      map.set(key, row);
     }
   }
 

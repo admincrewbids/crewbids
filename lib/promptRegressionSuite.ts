@@ -594,6 +594,25 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-no-long-split-shifts",
+    label: "No long split shifts",
+    prompt: "No long split shifts",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "split_time_weekly",
+          operator: "<=",
+          value: "10:00",
+          strength: "hard",
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-no-up-no-barrie-no-splits-terminal-priority",
     label: "No UP, no Barrie, no split jobs with terminal priorities and weekends off",
     prompt:
