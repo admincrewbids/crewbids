@@ -16,8 +16,8 @@
           </h1>
 
           <p className="mt-5 text-base leading-7 text-slate-300">
-            We're making updates to improve bid analysis and reliability.
-            Please check back shortly.
+            We're retooling CrewBids for the new bid package format and
+            expect to be back online within the next 24-48 hours.
           </p>
         </section>
       </div>
