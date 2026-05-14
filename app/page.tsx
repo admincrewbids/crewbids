@@ -51,7 +51,9 @@ export default async function Home({
 
   const sortColumn = allowedSorts.includes(sort) ? sort : "created_at";
 
-  const { data, error } = await supabase.from("crews").select("*");
+  // Temporary safety: do not block the public homepage on the legacy crews table.
+  // The uploaded bid package still provides the active crew data for ranking.
+  const data: any[] = [];
 
   const crewsWithScore = (data || []).map((crew) => {
     const score =
@@ -78,7 +80,7 @@ export default async function Home({
   return (
   <CrewBidClient
     crews={sortedCrews || []}
-    errorMessage={error?.message || null}
+    errorMessage={null}
   />
 );
 }
