@@ -1377,6 +1377,13 @@ function parseGeneralDaysOffIntent(clause: string): GeneralDaysOffIntent | null 
     return { mode: "exact", count: Number(exactlyMatch[1]) };
   }
 
+  const onlyMatch = normalized.match(
+    /\b(?:only\s+)?(\d+)\s+days?\s+off\s+only\b|\bonly\s+(\d+)\s+days?\s+off\b/i
+  );
+  if (onlyMatch) {
+    return { mode: "exact", count: Number(onlyMatch[1] ?? onlyMatch[2]) };
+  }
+
   const minimumMatch = normalized.match(
     /\b(?:at\s+least|need|must\s+have|require)\s+(\d+)\s+days?\s+off\b/i
   );
@@ -6749,6 +6756,48 @@ function getCrewDisplayVariant(crew: Crew, selectedWeekKey?: string): any {
     week_start_label: selected.week_start_label,
     week_end_label: selected.week_end_label,
   };
+}
+
+const FIFA_WEEK_DISPLAY_LABELS: Record<number, string> = {
+  1: "June 7",
+  2: "June 14",
+  3: "June 21",
+  4: "June 28",
+};
+
+function getCrewWeekDisplayLabel(week: any) {
+  const rawStartLabel = String(week?.week_start_label ?? "").trim();
+  const startMatch = rawStartLabel.match(
+    /\b(?:Sun|Sunday)\s+(\d{1,2})\s+([A-Za-z]+)\b/i
+  );
+
+  if (startMatch) {
+    const day = Number(startMatch[1]);
+    const month = startMatch[2];
+
+    if (Number.isFinite(day) && month) {
+      return `${month.charAt(0).toUpperCase()}${month
+        .slice(1, 3)
+        .toLowerCase()}${month.length > 3 ? month.slice(3).toLowerCase() : ""} ${day}`;
+    }
+  }
+
+  if (
+    typeof week?.week_index === "number" &&
+    FIFA_WEEK_DISPLAY_LABELS[week.week_index]
+  ) {
+    return FIFA_WEEK_DISPLAY_LABELS[week.week_index];
+  }
+
+  const weekLabelMatch = String(week?.week_label ?? "").match(/\bweek\s+(\d+)\b/i);
+  if (weekLabelMatch) {
+    const weekIndex = Number(weekLabelMatch[1]);
+    if (FIFA_WEEK_DISPLAY_LABELS[weekIndex]) {
+      return FIFA_WEEK_DISPLAY_LABELS[weekIndex];
+    }
+  }
+
+  return week?.week_label ?? "Week";
 }
 
 function getCrewComparableTimes(
@@ -13354,7 +13403,7 @@ onDrop={() => {
                               cursor: "pointer",
                             }}
                           >
-                            {variant.week_label ?? "Week"}
+                            {getCrewWeekDisplayLabel(variant)}
                           </button>
                         );
                       })}
@@ -13666,7 +13715,7 @@ onDrop={() => {
                     {crew.is_two_week_stby
                       ? "2-Week Schedule"
                       : crew.week_label
-                        ? `${crew.week_label} Schedule`
+                        ? `${getCrewWeekDisplayLabel(crew)} Schedule`
                         : "Daily Schedule"}
                   </strong>
 
@@ -14220,7 +14269,7 @@ onDrop={() => {
                                               cursor: "pointer",
                                             }}
                                           >
-                                            {variant.week_label ?? "Week"}
+                                            {getCrewWeekDisplayLabel(variant)}
                                           </button>
                                         );
                                       })}
@@ -14408,7 +14457,7 @@ onDrop={() => {
                                     {crew.is_two_week_stby
                                       ? "2-Week Schedule"
                                       : crew.week_label
-                                        ? `${crew.week_label} Schedule`
+                                        ? `${getCrewWeekDisplayLabel(crew)} Schedule`
                                         : "Daily Schedule"}
                                   </strong>
 

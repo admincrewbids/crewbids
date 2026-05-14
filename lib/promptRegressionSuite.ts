@@ -1791,6 +1791,38 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "general-days-off-only-3-with-up",
+    label: "UP Jobs, 3 days off only",
+    prompt: "UP Jobs, 3 days off only.",
+    assertions: [
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "include_only_up_crews",
+          operator: "=",
+          value: true,
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_global_filter_present",
+        value: {
+          field: "days_off_count",
+          operator: "=",
+          value: 3,
+          strength: "hard",
+        },
+      },
+      {
+        type: "interpretation_issue_absent",
+        value: {
+          code: "unknown_clause",
+          messageIncludes: "UP Jobs",
+        },
+      },
+    ],
+  },
+  {
     id: "general-days-off-more",
     label: "more days off",
     prompt: "more days off",
