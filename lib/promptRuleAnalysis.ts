@@ -136,6 +136,8 @@ function humanizeFieldName(field: string) {
       return "weekend days off";
     case "days_off_count":
       return "days off";
+    case "total_paid_hours_weekly":
+      return "work time";
     default:
       return field.replace(/_/g, " ");
   }
@@ -372,6 +374,14 @@ function formatSortRuleLabel(sort: ParsedPreferenceSortLike) {
 
   if (sort.field === "operating_hours_daily" && sort.direction === "desc") {
     return "Highest operating time first";
+  }
+
+  if (sort.field === "total_paid_hours_weekly" && sort.direction === "asc") {
+    return "Lowest work time first";
+  }
+
+  if (sort.field === "total_paid_hours_weekly" && sort.direction === "desc") {
+    return "Highest work time first";
   }
 
   if (sort.field === "van_hours_daily" && sort.direction === "asc") {

@@ -287,6 +287,42 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "canonical-lincolnville-lowest-work-time",
+    label: "Lincolnville weekends off sorted by lowest work time",
+    prompt:
+      "Lincolnville jobs with Saturday and Sunday off, lowest work time first.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lincolnville"],
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Lincolnville",
+          sort: {
+            field: "total_paid_hours_weekly",
+            direction: "asc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "scoped_rank_order_respects_sort",
+        value: {
+          terminal: "Lincolnville",
+          field: "total_paid_hours_weekly",
+          direction: "asc",
+          mode: "pairwise_consecutive_distinct",
+          requireAtLeastComparablePairs: 1,
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-weekdays-off-global-no-warning",
     label: "Weekdays off without terminal mention",
     prompt: "weekdays off",

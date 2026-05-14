@@ -3020,6 +3020,46 @@ const PHRASES = {
     "want the most operating",
   ],
 
+  least_work_time: [
+    "least work time",
+    "lowest work time",
+    "lowest total work time",
+    "least total work time",
+    "shortest work time",
+    "shortest total work time",
+    "minimum work time",
+    "minimal work time",
+    "lowest paid time",
+    "least paid time",
+    "lowest work time first",
+    "least work time first",
+    "lowest total work time first",
+    "sort by lowest work time",
+    "sort by least work time",
+    "sort by lowest total work time",
+    "from least work time to most",
+    "from lowest work time to highest",
+  ],
+
+  most_work_time: [
+    "most work time",
+    "highest work time",
+    "most total work time",
+    "highest total work time",
+    "longest work time",
+    "longest total work time",
+    "maximum work time",
+    "highest paid time",
+    "most paid time",
+    "highest work time first",
+    "most work time first",
+    "sort by highest work time",
+    "sort by most work time",
+    "sort by highest total work time",
+    "from most work time to least",
+    "from highest work time to lowest",
+  ],
+
   least_van: [
     "least van",
     "lowest van",
@@ -3203,6 +3243,14 @@ const PHRASE_INTENT_DEFINITIONS = {
   most_operating: {
     phrases: PHRASES.most_operating,
     conflictsWith: ["least_operating"],
+  },
+  least_work_time: {
+    phrases: PHRASES.least_work_time,
+    conflictsWith: ["most_work_time"],
+  },
+  most_work_time: {
+    phrases: PHRASES.most_work_time,
+    conflictsWith: ["least_work_time"],
   },
   least_van: {
     phrases: PHRASES.least_van,
@@ -3504,6 +3552,32 @@ function applyConflictResolutionRules(
     );
   }
 
+  if (intents.has("most_work_time")) {
+    nextParsed.sort_preferences = removeSortPreferenceByField(
+      nextParsed.sort_preferences,
+      "total_paid_hours_weekly",
+      "asc"
+    );
+    nextParsed.sort_preferences = prioritizeSortPreference(
+      nextParsed.sort_preferences,
+      "total_paid_hours_weekly",
+      "desc"
+    );
+  }
+
+  if (intents.has("least_work_time")) {
+    nextParsed.sort_preferences = removeSortPreferenceByField(
+      nextParsed.sort_preferences,
+      "total_paid_hours_weekly",
+      "desc"
+    );
+    nextParsed.sort_preferences = prioritizeSortPreference(
+      nextParsed.sort_preferences,
+      "total_paid_hours_weekly",
+      "asc"
+    );
+  }
+
   if (intents.has("most_van")) {
     nextParsed.sort_preferences = removeSortPreferenceByField(
       nextParsed.sort_preferences,
@@ -3684,6 +3758,32 @@ function applyConflictResolutionRules(
           nextScopeSorts,
           "operating_hours_weekly",
           "desc"
+        );
+      }
+
+      if (intents.has("most_work_time")) {
+        nextScopeSorts = removeSortPreferenceByField(
+          nextScopeSorts,
+          "total_paid_hours_weekly",
+          "asc"
+        );
+        nextScopeSorts = prioritizeSortPreference(
+          nextScopeSorts,
+          "total_paid_hours_weekly",
+          "desc"
+        );
+      }
+
+      if (intents.has("least_work_time")) {
+        nextScopeSorts = removeSortPreferenceByField(
+          nextScopeSorts,
+          "total_paid_hours_weekly",
+          "desc"
+        );
+        nextScopeSorts = prioritizeSortPreference(
+          nextScopeSorts,
+          "total_paid_hours_weekly",
+          "asc"
         );
       }
 
@@ -4440,6 +4540,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       }
 
+      if (containsAny(clause, PHRASES.least_work_time)) {
+        parsed.sort_preferences.push({
+          field: "total_paid_hours_weekly",
+          direction: "asc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 9),
+        });
+      }
+
+      if (containsAny(clause, PHRASES.most_work_time)) {
+        parsed.sort_preferences.push({
+          field: "total_paid_hours_weekly",
+          direction: "desc",
+          strength: "strong",
+          weight: getPreferenceWeight(clause, 9),
+        });
+      }
+
       if (containsAny(clause, PHRASES.least_van)) {
         parsed.sort_preferences.push({
           field: "van_hours_daily",
@@ -4891,6 +5009,24 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     if (containsAny(clause, PHRASES.most_operating)) {
       scoped.sort_preferences.push({
         field: "operating_hours_weekly",
+        direction: "desc",
+        strength: "strong",
+        weight: getPreferenceWeight(clause, 9),
+      });
+    }
+
+    if (containsAny(clause, PHRASES.least_work_time)) {
+      scoped.sort_preferences.push({
+        field: "total_paid_hours_weekly",
+        direction: "asc",
+        strength: "strong",
+        weight: getPreferenceWeight(clause, 9),
+      });
+    }
+
+    if (containsAny(clause, PHRASES.most_work_time)) {
+      scoped.sort_preferences.push({
+        field: "total_paid_hours_weekly",
         direction: "desc",
         strength: "strong",
         weight: getPreferenceWeight(clause, 9),
@@ -5821,6 +5957,14 @@ function buildReviewItems(parsed: ParsedPreferences): string[] {
       items.push(`Sort by lowest van time`);
     }
 
+    if (sort.field === "total_paid_hours_weekly" && sort.direction === "asc") {
+      items.push(`Sort by lowest work time`);
+    }
+
+    if (sort.field === "total_paid_hours_weekly" && sort.direction === "desc") {
+      items.push(`Sort by highest work time`);
+    }
+
     if (sort.field === "overtime_hours_weekly" && sort.direction === "desc") {
       items.push(`Prefer highest overtime`);
     }
@@ -6262,6 +6406,18 @@ function formatExplanationReason(label: string, points: number): string {
     return isPositive
       ? `it has lower operating time`
       : `it has higher operating time`;
+  }
+
+  if (lower.includes("total_paid_hours_weekly preference (asc)")) {
+    return isPositive
+      ? `it has lower work time`
+      : `it has higher work time`;
+  }
+
+  if (lower.includes("total_paid_hours_weekly preference (desc)")) {
+    return isPositive
+      ? `it has higher work time`
+      : `it has lower work time`;
   }
 
   if (lower.includes("van_hours_daily preference (asc)")) {
@@ -7552,10 +7708,12 @@ const vanExcludedFilter = effectiveFilters.find(
   );
   const isStandbyCrew =
     crewTerminal === "standby" || crewWithSchedule.is_two_week_stby === true;
-  const crewHasSplitTime = crewHasSplitTimeComponent(crewWithSchedule);
+  const weekVariants = getCrewWeekVariants(crewWithSchedule as Crew);
+  const crewHasSplitTime =
+    crewHasSplitTimeComponent(crewWithSchedule) ||
+    weekVariants.some((variant) => crewHasSplitTimeComponent(variant));
   const crewHasShuttleBus = crewHasShuttleBusComponent(crewWithSchedule);
   const crewHasVan = crewHasVanComponent(crewWithSchedule);
-  const weekVariants = getCrewWeekVariants(crewWithSchedule as Crew);
   const isThreeDayOffCrew = everyCrewWeekVariant(
     crewWithSchedule as Crew,
     (variant) => getDaysOffCount(variant) === 3
@@ -8267,6 +8425,8 @@ function humanizePreferenceField(field: string): string {
       return "weekend days off";
     case "days_off_count":
       return "days off";
+    case "total_paid_hours_weekly":
+      return "work time";
     default:
       return field.replace(/_/g, " ");
   }
@@ -8645,6 +8805,14 @@ function formatSortLabel(s: any): string {
     s.direction === "desc"
   ) {
     return "Highest operating time first";
+  }
+
+  if (s.field === "total_paid_hours_weekly" && s.direction === "asc") {
+    return "Lowest work time first";
+  }
+
+  if (s.field === "total_paid_hours_weekly" && s.direction === "desc") {
+    return "Highest work time first";
   }
 
   if (s.field === "van_hours_daily" && s.direction === "asc") {
@@ -10012,7 +10180,7 @@ const summedWeeklyOperating =
     split_time_weekly:
       summedWeeklySplit > 0
         ? formatHoursToHHMM(summedWeeklySplit)
-        : "-",
+        : row.raw_cells?.split_time_weekly || "-",
     operating_time_weekly:
       summedWeeklyOperating > 0
         ? (() => {
@@ -11182,6 +11350,14 @@ function summarizePreferencesForDisplay(parsed: ParsedPreferences) {
       preferences.push("Most van time first");
     }
 
+    if (sort.field === "total_paid_hours_weekly" && sort.direction === "asc") {
+      preferences.push("Least work time first");
+    }
+
+    if (sort.field === "total_paid_hours_weekly" && sort.direction === "desc") {
+      preferences.push("Most work time first");
+    }
+
     if (sort.field === "overtime_hours_weekly" && sort.direction === "desc") {
       preferences.push("Most overtime first");
     }
@@ -11368,13 +11544,14 @@ async function handleApplyAndRank() {
   const parsed = resolvedPrompt.parsedPreferences;
 
   setParsedPreferences(parsed);
+  setOverriddenCrewIds([]);
 
   const results = rankCrews(
     realCrews,
     parsed,
     crewScheduleMap,
     jobLookupMap,
-    overriddenCrewIds
+    []
   );
 
   const {
@@ -11648,6 +11825,9 @@ function buildPreferenceChips(parsed: ParsedPreferences | null): string[] {
         sort.field === "operating_hours_weekly") &&
       sort.direction === "asc"
     ) chips.push("Low Op Time");
+    if (sort.field === "total_paid_hours_weekly" && sort.direction === "asc") {
+      chips.push("Low Work Time");
+    }
     if (sort.field === "van_hours_daily" && sort.direction === "asc") chips.push("Low Van");
   });
 
