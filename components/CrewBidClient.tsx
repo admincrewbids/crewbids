@@ -1277,7 +1277,19 @@ function normalizeTimeToken(
   meridiemRaw?: string
 ) {
   if (!hourRaw) return null;
-  let hourNumber = Number(hourRaw);
+  let normalizedHourRaw = hourRaw;
+  let normalizedMinuteRaw = minuteRaw;
+
+  if (
+    !normalizedMinuteRaw &&
+    /^\d{3,4}$/.test(normalizedHourRaw) &&
+    !meridiemRaw
+  ) {
+    normalizedMinuteRaw = normalizedHourRaw.slice(-2);
+    normalizedHourRaw = normalizedHourRaw.slice(0, -2);
+  }
+
+  let hourNumber = Number(normalizedHourRaw);
   if (Number.isNaN(hourNumber)) return null;
 
   const meridiem = meridiemRaw?.toLowerCase();
@@ -1288,7 +1300,7 @@ function normalizeTimeToken(
   }
 
   const hour = String(hourNumber).padStart(2, "0");
-  const minute = (minuteRaw ?? "00").padStart(2, "0");
+  const minute = (normalizedMinuteRaw ?? "00").padStart(2, "0");
   return `${hour}:${minute}`;
 }
 
@@ -4766,15 +4778,19 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     );
 
     if (startAfterMatch) {
-      const hour = startAfterMatch[2].padStart(2, "0");
-      const minute = startAfterMatch[3] ?? "00";
+      const value = normalizeTimeToken(
+        startAfterMatch[2],
+        startAfterMatch[3]
+      );
 
-      scoped.filters.push({
-        field: "on_duty",
-        operator: ">=",
-        value: `${hour}:${minute}`,
-        strength: "hard",
-      });
+      if (value) {
+        scoped.filters.push({
+          field: "on_duty",
+          operator: ">=",
+          value,
+          strength: "hard",
+        });
+      }
     }
 
     const finishBeforeMidnightMatch = clause.match(
