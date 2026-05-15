@@ -9031,6 +9031,8 @@ const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 const [authUser, setAuthUser] = useState<any>(null);
 const bidPackageInputRef = useRef<HTMLInputElement | null>(null);
 const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+const [authSubmitting, setAuthSubmitting] = useState(false);
+const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
 const [userProfile, setUserProfile] = useState<any>(null);
 const [hasFullAccess, setHasFullAccess] = useState(false);
 const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
@@ -9469,24 +9471,65 @@ async function handleUnlockPackage() {
 
   setHasFullAccess(true);
 }
+function getSignInFailureMessage(error: any) {
+  const message = String(error?.message || "");
+  const status = Number(error?.status || error?.code || 0);
+  const looksLikeServiceFailure =
+    status >= 500 ||
+    status === 0 ||
+    /fetch|network|timeout|timed out|522|service|unavailable/i.test(message);
+
+  if (looksLikeServiceFailure) {
+    return "CrewBids cannot reach the authentication service right now. Your password may be correct; please try again in a few minutes.";
+  }
+
+  return "Sign in failed. Check your credentials.";
+}
+
 async function handleSignIn() {
+  if (authSubmitting) return false;
+
   if (!email.trim() || !password.trim()) {
     alert("Please enter your email and password.");
-    return;
+    return false;
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  setAuthSubmitting(true);
+  setAuthErrorMessage(null);
 
-  if (error) {
-    console.error("Sign in failed:", error);
-    alert("Sign in failed. Check your credentials.");
-    return;
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (error) {
+      const failureMessage = getSignInFailureMessage(error);
+      console.warn("Sign in failed:", {
+        name: error.name,
+        status: (error as any).status,
+        message: error.message,
+      });
+      setAuthErrorMessage(failureMessage);
+      alert(failureMessage);
+      return false;
+    }
+
+    window.location.reload();
+    return true;
+  } catch (error: any) {
+    const failureMessage = getSignInFailureMessage(error);
+    console.warn("Sign in request failed:", {
+      name: error?.name,
+      status: error?.status,
+      message: error?.message,
+    });
+    setAuthErrorMessage(failureMessage);
+    alert(failureMessage);
+    return false;
+  } finally {
+    setAuthSubmitting(false);
   }
-
-  window.location.reload();
 }
 async function handleSignUp() {
   if (!email.trim() || !password.trim()) {
@@ -12165,7 +12208,10 @@ New Account
 type="email"
 placeholder="Email address"
 value={email}
-onChange={(e) => setEmail(e.target.value)}
+onChange={(e) => {
+  setEmail(e.target.value);
+  setAuthErrorMessage(null);
+}}
 style={{
 width: "100%",
 padding: "12px 14px",
@@ -12181,7 +12227,10 @@ boxSizing: "border-box",
 type="password"
 placeholder={authMode === "signin" ? "Password" : "Create a password"}
 value={password}
-onChange={(e) => setPassword(e.target.value)}
+onChange={(e) => {
+  setPassword(e.target.value);
+  setAuthErrorMessage(null);
+}}
 style={{
 width: "100%",
 padding: "12px 14px",
@@ -12192,6 +12241,23 @@ outline: "none",
 boxSizing: "border-box",
 }}
 />
+
+{authErrorMessage && (
+<div
+style={{
+background: "#fff7ed",
+border: "1px solid #fed7aa",
+borderRadius: 12,
+color: "#9a3412",
+fontSize: 13,
+fontWeight: 700,
+lineHeight: 1.4,
+padding: "10px 12px",
+}}
+>
+{authErrorMessage}
+</div>
+)}
 
 {authMode === "signin" && (
 <button
@@ -12223,27 +12289,35 @@ flexDirection: isMobile ? "column" : "row",
 <button
 type="button"
 onClick={async () => {
+if (authSubmitting) return;
 if (authMode === "signin") {
-await handleSignIn();
+const signedIn = await handleSignIn();
+if (signedIn) {
 setShowSignInPanel(false);
+}
 } else {
 await handleSignUp();
 }
 }}
+disabled={authSubmitting}
 style={{
 flex: 1,
-background: "#f97316",
+background: authSubmitting ? "#fdba74" : "#f97316",
 color: "#fff",
 border: "none",
 borderRadius: 12,
 padding: "12px 16px",
 fontSize: 16,
 fontWeight: 700,
-cursor: "pointer",
+cursor: authSubmitting ? "not-allowed" : "pointer",
 width: isMobile ? "100%" : undefined,
 }}
 >
-{authMode === "signin" ? "Sign In" : "Create Account"}
+{authSubmitting
+  ? "Please wait..."
+  : authMode === "signin"
+    ? "Sign In"
+    : "Create Account"}
 </button>
 
 <button
