@@ -9332,6 +9332,7 @@ const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
 const [shouldRestoreStoredPdf, setShouldRestoreStoredPdf] = useState(false);
 const [currentFileHash, setCurrentFileHash] = useState<string | null>(null);
 const [savedRuns, setSavedRuns] = useState<any[]>([]);
+const [savingBidList, setSavingBidList] = useState(false);
 const [parsedPreferences, setParsedPreferences] =
   useState<ParsedPreferences | null>(null);
 const [viewportWidth, setViewportWidth] = useState(1280);
@@ -12077,6 +12078,8 @@ function handleDropOnCrew(targetCrewId: string) {
 
 
 async function handleGenerateList() {
+  if (savingBidList) return;
+
   if (!authUser?.id) {
     alert("Please sign in first.");
     return;
@@ -12091,26 +12094,44 @@ async function handleGenerateList() {
 
   const crewNumbers = finalCrews.map((crew) => crew.crew_number ?? crew.id);
   const crewIds = finalCrews.map((crew) => crew.id);
+  const rankedSnapshot = finalCrews.map((crew, index) => ({
+    rank: index + 1,
+    id: crew.id,
+    crew_number: crew.crew_number ?? crew.id,
+    terminal: crew.terminal ?? null,
+    days_off_count: crew.days_off_count ?? null,
+    days_off_list: crew.days_off_list ?? [],
+    total_paid_hours_weekly: crew.total_paid_hours_weekly ?? null,
+    operating_hours_weekly: crew.operating_hours_weekly ?? null,
+    overtime_hours_weekly: crew.overtime_hours_weekly ?? null,
+    split_time_weekly: crew.split_time_weekly ?? null,
+  }));
 
   const title = "Saved Bid List";
 
-  const { error } = await supabase.from("my_bids").insert({
-    user_id: authUser.id,
-    bid_package_id: currentPackageId ?? null,
-    title,
-    prompt,
-    crew_numbers: crewNumbers,
-    crew_ids: crewIds,
-    ranked_snapshot: finalCrews,
-  });
+  try {
+    setSavingBidList(true);
 
-  if (error) {
-    console.error("Error saving to my_bids:", error);
-    alert("Could not save bid list.");
-    return;
+    const { error } = await supabase.from("my_bids").insert({
+      user_id: authUser.id,
+      bid_package_id: currentPackageId ?? null,
+      title,
+      prompt,
+      crew_numbers: crewNumbers,
+      crew_ids: crewIds,
+      ranked_snapshot: rankedSnapshot,
+    });
+
+    if (error) {
+      console.error("Error saving to my_bids:", error);
+      alert("Could not save bid list.");
+      return;
+    }
+
+    alert("Saved to My Bids");
+  } finally {
+    setSavingBidList(false);
   }
-
-  alert("Saved to My Bids");
 }
 
 function handleResetOrder() {
@@ -13613,21 +13634,27 @@ style={{
     <button
       type="button"
       onClick={handleGenerateList}
+      disabled={savingBidList}
       style={{
-        background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+        background: savingBidList
+          ? "#cbd5e1"
+          : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
         color: "#fff",
         border: "none",
         borderRadius: 12,
         padding: "13px 18px",
         fontWeight: 800,
         fontSize: 14,
-        cursor: "pointer",
-        boxShadow: "0 10px 24px rgba(249, 115, 22, 0.28)",
+        cursor: savingBidList ? "wait" : "pointer",
+        opacity: savingBidList ? 0.8 : 1,
+        boxShadow: savingBidList
+          ? "none"
+          : "0 10px 24px rgba(249, 115, 22, 0.28)",
         whiteSpace: "nowrap",
         width: "100%",
       }}
     >
-      Save to My Bids
+      {savingBidList ? "Saving..." : "Save to My Bids"}
     </button>
   </div>
 </div>
