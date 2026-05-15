@@ -1909,7 +1909,7 @@ function clauseExplicitlyRequestsFilter(
     typeof filter.value === "string"
   ) {
     const notBeforeMatch = normalizedClause.match(
-      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
     );
 
     if (!notBeforeMatch) return false;
@@ -1918,6 +1918,34 @@ function clauseExplicitlyRequestsFilter(
       notBeforeMatch[2],
       notBeforeMatch[3],
       notBeforeMatch[4]
+    );
+
+    return value === filter.value;
+  }
+
+  if (
+    filter.field === "off_duty" &&
+    (filter.operator === "<=" || filter.operator === "<") &&
+    typeof filter.value === "string"
+  ) {
+    const finishBeforeMidnightMatch = normalizedClause.match(
+      /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by)?\s*midnight/i
+    );
+
+    if (finishBeforeMidnightMatch) {
+      return filter.value === "23:59";
+    }
+
+    const finishBeforeMatch = normalizedClause.match(
+      /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
+    );
+
+    if (!finishBeforeMatch) return false;
+
+    const value = normalizeTimeToken(
+      finishBeforeMatch[3],
+      finishBeforeMatch[4],
+      finishBeforeMatch[5]
     );
 
     return value === filter.value;
@@ -1937,6 +1965,148 @@ function isFilterExplicitlyRequestedGlobally(
 
     return clauseExplicitlyRequestsFilter(clauseEntry.text, filter);
   });
+}
+
+function isFilterExplicitlyRequestedForTerminalScope(
+  prompt: string,
+  terminal: string,
+  filter: ParsedPreferences["filters"][number]
+) {
+  const normalizedTargetTerminal = normalizeTerminalName(terminal);
+  const clauses = splitIntoPreferenceClauses(prompt);
+  const sentenceTerminalsByIndex = new Map<number, Set<string>>();
+
+  for (const clauseEntry of clauses) {
+    const sentenceTerminals = extractKnownTerminalMentions(clauseEntry.text)
+      .map(normalizeTerminalName)
+      .filter(Boolean);
+
+    if (sentenceTerminals.length === 0) continue;
+
+    const terminalsForSentence =
+      sentenceTerminalsByIndex.get(clauseEntry.sentenceIndex) ?? new Set<string>();
+
+    sentenceTerminals.forEach((candidate) => terminalsForSentence.add(candidate));
+    sentenceTerminalsByIndex.set(clauseEntry.sentenceIndex, terminalsForSentence);
+  }
+
+  const sentenceTerminalCounts = new Map<number, number>(
+    Array.from(sentenceTerminalsByIndex.entries()).map(
+      ([sentenceIndex, terminals]) => [sentenceIndex, terminals.size]
+    )
+  );
+
+  let activeTerminal: string | null = null;
+  let activeTerminalSentenceIndex = -1;
+
+  return clauses.some((clauseEntry) => {
+    const clause = clauseEntry.text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+    const clauseTerminal =
+      extractKnownTerminalMentions(clauseEntry.text)
+        .map(normalizeTerminalName)
+        .filter(Boolean)[0] ?? null;
+    const isGlobalClause = isClearlyGlobalClause(clause);
+
+    if (clauseTerminal) {
+      activeTerminal = clauseTerminal;
+      activeTerminalSentenceIndex = clauseEntry.sentenceIndex;
+    } else if (isGlobalClause) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    } else if (
+      activeTerminal &&
+      clauseEntry.sentenceIndex !== activeTerminalSentenceIndex &&
+      (sentenceTerminalCounts.get(activeTerminalSentenceIndex) ?? 0) > 1
+    ) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    }
+
+    const terminalForClause =
+      clauseTerminal ?? (!isGlobalClause ? activeTerminal : null);
+
+    return (
+      terminalForClause === normalizedTargetTerminal &&
+      clauseExplicitlyRequestsFilter(clauseEntry.text, filter)
+    );
+  });
+}
+
+function isFinishTimeFilter(filter: ParsedPreferences["filters"][number]) {
+  return (
+    filter.field === "off_duty" &&
+    (filter.operator === "<=" || filter.operator === "<") &&
+    typeof filter.value === "string"
+  );
+}
+
+function haveSameTimeFilterValue(
+  a: ParsedPreferences["filters"][number],
+  b: ParsedPreferences["filters"][number]
+) {
+  return a.field === b.field && a.operator === b.operator && a.value === b.value;
+}
+
+function removeLeakedScopedFinishFilters(
+  parsed: ParsedPreferences,
+  prompt: string
+): ParsedPreferences {
+  const scopedPreferences = parsed.scoped_preferences ?? [];
+
+  if (scopedPreferences.length < 2) return parsed;
+
+  const hasExplicitScopedEquivalent = (
+    filter: ParsedPreferences["filters"][number],
+    currentTerminal: string
+  ) =>
+    scopedPreferences.some((scope) => {
+      const normalizedScopeTerminal = normalizeTerminalName(
+        scope.normalized_terminal || scope.terminal
+      );
+
+      if (normalizedScopeTerminal === currentTerminal) return false;
+
+      const hasSameFilter = (scope.filters ?? []).some((candidate) =>
+        haveSameTimeFilterValue(candidate, filter)
+      );
+
+      return (
+        hasSameFilter &&
+        isFilterExplicitlyRequestedForTerminalScope(
+          prompt,
+          normalizedScopeTerminal,
+          filter
+        )
+      );
+    });
+
+  return {
+    ...parsed,
+    scoped_preferences: scopedPreferences.map((scope) => {
+      const normalizedScopeTerminal = normalizeTerminalName(
+        scope.normalized_terminal || scope.terminal
+      );
+
+      return {
+        ...scope,
+        filters: (scope.filters ?? []).filter((filter) => {
+          if (!isFinishTimeFilter(filter)) return true;
+
+          if (
+            isFilterExplicitlyRequestedForTerminalScope(
+              prompt,
+              normalizedScopeTerminal,
+              filter
+            )
+          ) {
+            return true;
+          }
+
+          return !hasExplicitScopedEquivalent(filter, normalizedScopeTerminal);
+        }),
+      };
+    }),
+  };
 }
 
 function removeMirroredScopedGlobalFilters(
@@ -3313,7 +3483,7 @@ function isClauseDeterministicallyHandled(clause: string) {
   }
 
   if (
-    /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,2}(?::\d{1,2})?\s*(am|pm)?/i.test(
+    /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,4}(?::\d{1,2})?\s*(am|pm)?/i.test(
       clause
     )
   ) {
@@ -3321,7 +3491,7 @@ function isClauseDeterministicallyHandled(clause: string) {
   }
 
   if (
-    /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*\d{1,2}(?::\d{1,2})?\s*(am|pm)?/i.test(
+    /(finish|finishes|end|ends|no finishes after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*\d{1,4}(?::\d{1,2})?\s*(am|pm)?/i.test(
       clause
     )
   ) {
@@ -4311,7 +4481,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       }
 
       const notBeforeMatch = clause.match(
-        /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+        /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
       );
 
       if (notBeforeMatch) {
@@ -4430,7 +4600,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
         });
       } else {
         const finishBeforeMatch = clause.match(
-          /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+          /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
         );
 
         if (finishBeforeMatch) {
@@ -4657,7 +4827,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
 
     // ---- scoped hard time filters ----
     const notBeforeMatch = clause.match(
-      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+      /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
     );
 
     if (notBeforeMatch) {
@@ -4774,7 +4944,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
     }
 
     const startAfterMatch = clause.match(
-      /(not before|no jobs before|start after|starts after|nothing starting before|nothing before)\s*(\d{1,2}):?(\d{2})?/i
+      /(not before|no jobs before|start after|starts after|nothing starting before|nothing before)\s*(\d{1,4})(?::(\d{2}))?/i
     );
 
     if (startAfterMatch) {
@@ -4806,7 +4976,7 @@ function parsePreferences(prompt: string, crews: Crew[]): ParsedPreferences {
       });
     } else {
       const finishBeforeMatch = clause.match(
-        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i
+        /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*(\d{1,4})(?::(\d{2}))?\s*(am|pm)?/i
       );
 
       if (finishBeforeMatch) {
@@ -5676,7 +5846,10 @@ function applyDeterministicPreferenceRulesV2(
   }
 
   return applyConflictResolutionRules(
-    removeMirroredScopedGlobalFilters(nextParsed, prompt),
+    removeMirroredScopedGlobalFilters(
+      removeLeakedScopedFinishFilters(nextParsed, prompt),
+      prompt
+    ),
     intents,
     prompt
   );
