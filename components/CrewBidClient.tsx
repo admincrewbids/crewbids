@@ -28,7 +28,11 @@ import {
 import { normalizePromptText } from "../lib/promptNormalization";
 import { evaluatePromptRegressionAssertions } from "../lib/promptRegressionAssertions";
 import { analyzeParsedPreferences } from "../lib/promptRuleAnalysis";
-import { supabase } from "../lib/supabase";
+import {
+  clearStaleSupabaseAuthSession,
+  isRefreshTokenNotFoundError,
+  supabase,
+} from "../lib/supabase";
 
 const DEBUG_LOGS = false;
 
@@ -9304,6 +9308,14 @@ async function restoreLatestRunForPackage(
     } = await supabase.auth.getSession();
 
     if (sessionError) {
+      if (isRefreshTokenNotFoundError(sessionError)) {
+        clearStaleSupabaseAuthSession();
+        if (!mounted) return;
+        setAuthUser(null);
+        setUserProfile(null);
+        return;
+      }
+
       console.error("Failed to get auth session:", sessionError);
       return;
     }
@@ -9475,6 +9487,7 @@ function getSignInFailureMessage(error: any) {
   const message = String(error?.message || "");
   const status = Number(error?.status || error?.code || 0);
   const looksLikeServiceFailure =
+    isRefreshTokenNotFoundError(error) ||
     status >= 500 ||
     status === 0 ||
     /fetch|network|timeout|timed out|522|service|unavailable/i.test(message);
@@ -9504,6 +9517,10 @@ async function handleSignIn() {
     });
 
     if (error) {
+      if (isRefreshTokenNotFoundError(error)) {
+        clearStaleSupabaseAuthSession();
+      }
+
       const failureMessage = getSignInFailureMessage(error);
       console.warn("Sign in failed:", {
         name: error.name,
@@ -9518,6 +9535,10 @@ async function handleSignIn() {
     window.location.reload();
     return true;
   } catch (error: any) {
+    if (isRefreshTokenNotFoundError(error)) {
+      clearStaleSupabaseAuthSession();
+    }
+
     const failureMessage = getSignInFailureMessage(error);
     console.warn("Sign in request failed:", {
       name: error?.name,
