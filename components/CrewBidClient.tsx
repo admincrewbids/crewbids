@@ -9034,6 +9034,7 @@ const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 const [userProfile, setUserProfile] = useState<any>(null);
 const [hasFullAccess, setHasFullAccess] = useState(false);
 const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
+const [shouldRestoreStoredPdf, setShouldRestoreStoredPdf] = useState(false);
 const [currentFileHash, setCurrentFileHash] = useState<string | null>(null);
 const [savedRuns, setSavedRuns] = useState<any[]>([]);
 const [parsedPreferences, setParsedPreferences] =
@@ -9166,23 +9167,27 @@ async function restoreStoredPdf(
 
 
 useEffect(() => {
-  if (!currentPackageId) return;
+  if (!currentPackageId || !shouldRestoreStoredPdf) return;
 
   const restorePackageFile = async () => {
-    const pkg = await getBidPackageById(currentPackageId);
-    if (!pkg) return;
+    try {
+      const pkg = await getBidPackageById(currentPackageId);
+      if (!pkg) return;
 
-    if (pkg.file_name) {
-      setPdfFileName(pkg.file_name);
-    }
+      if (pkg.file_name) {
+        setPdfFileName(pkg.file_name);
+      }
 
-    if (pkg.storage_path) {
-      await restoreStoredPdf(pkg.storage_path, pkg.file_name);
+      if (pkg.storage_path) {
+        await restoreStoredPdf(pkg.storage_path, pkg.file_name);
+      }
+    } finally {
+      setShouldRestoreStoredPdf(false);
     }
   };
 
   restorePackageFile();
-}, [currentPackageId]);
+}, [currentPackageId, shouldRestoreStoredPdf]);
 
 
 useEffect(() => {
@@ -9254,8 +9259,7 @@ useEffect(() => {
   const savedPackageId = localStorage.getItem("crewbids_last_package_id");
 
   if (savedPackageId) {
-    debugLog("Restoring package id from storage:", savedPackageId);
-    setCurrentPackageId(savedPackageId);
+    debugLog("Saved package id found; skipping automatic restore:", savedPackageId);
   }
 }, []);
   useEffect(() => {
@@ -9373,13 +9377,11 @@ if (currentPackageId) {
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   const packageIdFromUrl = params.get("packageId");
-  const packageIdFromStorage = localStorage.getItem("crewbids_last_package_id");
 
-  const restoredPackageId = packageIdFromUrl || packageIdFromStorage;
+  if (!packageIdFromUrl || params.get("checkout") === "success") return;
 
-  if (!restoredPackageId) return;
-
-  setCurrentPackageId(restoredPackageId);
+  setCurrentPackageId(packageIdFromUrl);
+  setShouldRestoreStoredPdf(true);
 }, []);
 
 useEffect(() => {
