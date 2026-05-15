@@ -2032,6 +2032,86 @@ function isFilterExplicitlyRequestedForTerminalScope(
   });
 }
 
+function clauseContainsExplicitFinishTime(clause: string) {
+  const normalizedClause = clause
+    .toLowerCase()
+    .replace(/[Ã¢Â€Â™]/g, "'")
+    .trim();
+
+  return (
+    /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by)?\s*midnight/i.test(
+      normalizedClause
+    ) ||
+    /(finish|finishes|end|ends|no finishes after|no jobs?\s+finishing after|doesn't finish past|doesnt finish past|not finishing past|not after|no later than)\s*(before|by|after)?\s*\d{1,4}(?::\d{2})?\s*(am|pm)?/i.test(
+      normalizedClause
+    )
+  );
+}
+
+function terminalScopeMentionsExplicitFinishTime(
+  prompt: string,
+  terminal: string
+) {
+  const normalizedTargetTerminal = normalizeTerminalName(terminal);
+  const clauses = splitIntoPreferenceClauses(prompt);
+  const sentenceTerminalsByIndex = new Map<number, Set<string>>();
+
+  for (const clauseEntry of clauses) {
+    const sentenceTerminals = extractKnownTerminalMentions(clauseEntry.text)
+      .map(normalizeTerminalName)
+      .filter(Boolean);
+
+    if (sentenceTerminals.length === 0) continue;
+
+    const terminalsForSentence =
+      sentenceTerminalsByIndex.get(clauseEntry.sentenceIndex) ?? new Set<string>();
+
+    sentenceTerminals.forEach((candidate) => terminalsForSentence.add(candidate));
+    sentenceTerminalsByIndex.set(clauseEntry.sentenceIndex, terminalsForSentence);
+  }
+
+  const sentenceTerminalCounts = new Map<number, number>(
+    Array.from(sentenceTerminalsByIndex.entries()).map(
+      ([sentenceIndex, terminals]) => [sentenceIndex, terminals.size]
+    )
+  );
+
+  let activeTerminal: string | null = null;
+  let activeTerminalSentenceIndex = -1;
+
+  return clauses.some((clauseEntry) => {
+    const clause = clauseEntry.text.toLowerCase().replace(/[Ã¢Â€Â™]/g, "'");
+    const clauseTerminal =
+      extractKnownTerminalMentions(clauseEntry.text)
+        .map(normalizeTerminalName)
+        .filter(Boolean)[0] ?? null;
+    const isGlobalClause = isClearlyGlobalClause(clause);
+
+    if (clauseTerminal) {
+      activeTerminal = clauseTerminal;
+      activeTerminalSentenceIndex = clauseEntry.sentenceIndex;
+    } else if (isGlobalClause) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    } else if (
+      activeTerminal &&
+      clauseEntry.sentenceIndex !== activeTerminalSentenceIndex &&
+      (sentenceTerminalCounts.get(activeTerminalSentenceIndex) ?? 0) > 1
+    ) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    }
+
+    const terminalForClause =
+      clauseTerminal ?? (!isGlobalClause ? activeTerminal : null);
+
+    return (
+      terminalForClause === normalizedTargetTerminal &&
+      clauseContainsExplicitFinishTime(clauseEntry.text)
+    );
+  });
+}
+
 function isFinishTimeFilter(filter: ParsedPreferences["filters"][number]) {
   return (
     filter.field === "off_duty" &&
@@ -2053,7 +2133,14 @@ function removeLeakedScopedFinishFilters(
 ): ParsedPreferences {
   const scopedPreferences = parsed.scoped_preferences ?? [];
 
-  if (scopedPreferences.length < 2) return parsed;
+  if (scopedPreferences.length === 0) return parsed;
+
+  const hasAnyScopedFinishTimeRequest = scopedPreferences.some((scope) =>
+    terminalScopeMentionsExplicitFinishTime(
+      prompt,
+      scope.normalized_terminal || scope.terminal
+    )
+  );
 
   const hasExplicitScopedEquivalent = (
     filter: ParsedPreferences["filters"][number],
@@ -2082,9 +2169,18 @@ function removeLeakedScopedFinishFilters(
 
   return {
     ...parsed,
+    filters: (parsed.filters ?? []).filter((filter) => {
+      if (!isFinishTimeFilter(filter)) return true;
+      if (isFilterExplicitlyRequestedGlobally(prompt, filter)) return true;
+      return !hasAnyScopedFinishTimeRequest;
+    }),
     scoped_preferences: scopedPreferences.map((scope) => {
       const normalizedScopeTerminal = normalizeTerminalName(
         scope.normalized_terminal || scope.terminal
+      );
+      const scopeMentionsFinishTime = terminalScopeMentionsExplicitFinishTime(
+        prompt,
+        normalizedScopeTerminal
       );
 
       return {
@@ -2100,6 +2196,10 @@ function removeLeakedScopedFinishFilters(
             )
           ) {
             return true;
+          }
+
+          if (scopeMentionsFinishTime) {
+            return false;
           }
 
           return !hasExplicitScopedEquivalent(filter, normalizedScopeTerminal);
