@@ -2320,10 +2320,93 @@ function terminalScopeMentionsExplicitFinishTime(
   });
 }
 
+function clauseContainsExplicitStartTime(clause: string) {
+  const normalizedClause = clause
+    .toLowerCase()
+    .replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'")
+    .trim();
+
+  return /(not before|no starts before|no jobs before|start after|starts after|no earlier than|nothing starting before|nothing before)\s+\d{1,4}(?::\d{2})?\s*(am|pm)?/i.test(
+    normalizedClause
+  );
+}
+
+function terminalScopeMentionsExplicitStartTime(
+  prompt: string,
+  terminal: string
+) {
+  const normalizedTargetTerminal = normalizeTerminalName(terminal);
+  const clauses = splitIntoPreferenceClauses(prompt);
+  const sentenceTerminalsByIndex = new Map<number, Set<string>>();
+
+  for (const clauseEntry of clauses) {
+    const sentenceTerminals = extractKnownTerminalMentions(clauseEntry.text)
+      .map(normalizeTerminalName)
+      .filter(Boolean);
+
+    if (sentenceTerminals.length === 0) continue;
+
+    const terminalsForSentence =
+      sentenceTerminalsByIndex.get(clauseEntry.sentenceIndex) ?? new Set<string>();
+
+    sentenceTerminals.forEach((candidate) => terminalsForSentence.add(candidate));
+    sentenceTerminalsByIndex.set(clauseEntry.sentenceIndex, terminalsForSentence);
+  }
+
+  const sentenceTerminalCounts = new Map<number, number>(
+    Array.from(sentenceTerminalsByIndex.entries()).map(
+      ([sentenceIndex, terminals]) => [sentenceIndex, terminals.size]
+    )
+  );
+
+  let activeTerminal: string | null = null;
+  let activeTerminalSentenceIndex = -1;
+
+  return clauses.some((clauseEntry) => {
+    const clause = clauseEntry.text.toLowerCase().replace(/[ÃƒÂ¢Ã‚â‚¬Ã‚â„¢]/g, "'");
+    const clauseTerminal =
+      extractKnownTerminalMentions(clauseEntry.text)
+        .map(normalizeTerminalName)
+        .filter(Boolean)[0] ?? null;
+    const isGlobalClause = isClearlyGlobalClause(clause);
+
+    if (clauseTerminal) {
+      activeTerminal = clauseTerminal;
+      activeTerminalSentenceIndex = clauseEntry.sentenceIndex;
+    } else if (isGlobalClause) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    } else if (
+      activeTerminal &&
+      clauseEntry.sentenceIndex !== activeTerminalSentenceIndex &&
+      (sentenceTerminalCounts.get(activeTerminalSentenceIndex) ?? 0) > 1
+    ) {
+      activeTerminal = null;
+      activeTerminalSentenceIndex = -1;
+    }
+
+    const terminalForClause =
+      clauseTerminal ?? (!isGlobalClause ? activeTerminal : null);
+
+    return (
+      terminalForClause === normalizedTargetTerminal &&
+      clauseContainsExplicitStartTime(clauseEntry.text)
+    );
+  });
+}
+
 function isFinishTimeFilter(filter: ParsedPreferences["filters"][number]) {
   return (
     filter.field === "off_duty" &&
     (filter.operator === "<=" || filter.operator === "<") &&
+    typeof filter.value === "string"
+  );
+}
+
+function isStartTimeMinimumFilter(filter: ParsedPreferences["filters"][number]) {
+  return (
+    filter.field === "on_duty" &&
+    filter.operator === ">=" &&
     typeof filter.value === "string"
   );
 }
@@ -2333,6 +2416,88 @@ function haveSameTimeFilterValue(
   b: ParsedPreferences["filters"][number]
 ) {
   return a.field === b.field && a.operator === b.operator && a.value === b.value;
+}
+
+function removeLeakedScopedStartFilters(
+  parsed: ParsedPreferences,
+  prompt: string
+): ParsedPreferences {
+  const scopedPreferences = parsed.scoped_preferences ?? [];
+
+  if (scopedPreferences.length === 0) return parsed;
+
+  const hasAnyScopedStartTimeRequest = scopedPreferences.some((scope) =>
+    terminalScopeMentionsExplicitStartTime(
+      prompt,
+      scope.normalized_terminal || scope.terminal
+    )
+  );
+
+  const hasExplicitScopedEquivalent = (
+    filter: ParsedPreferences["filters"][number],
+    currentTerminal: string
+  ) =>
+    scopedPreferences.some((scope) => {
+      const normalizedScopeTerminal = normalizeTerminalName(
+        scope.normalized_terminal || scope.terminal
+      );
+
+      if (normalizedScopeTerminal === currentTerminal) return false;
+
+      const hasSameFilter = (scope.filters ?? []).some((candidate) =>
+        haveSameTimeFilterValue(candidate, filter)
+      );
+
+      return (
+        hasSameFilter &&
+        isFilterExplicitlyRequestedForTerminalScope(
+          prompt,
+          normalizedScopeTerminal,
+          filter
+        )
+      );
+    });
+
+  return {
+    ...parsed,
+    filters: (parsed.filters ?? []).filter((filter) => {
+      if (!isStartTimeMinimumFilter(filter)) return true;
+      if (isFilterExplicitlyRequestedGlobally(prompt, filter)) return true;
+      return !hasAnyScopedStartTimeRequest;
+    }),
+    scoped_preferences: scopedPreferences.map((scope) => {
+      const normalizedScopeTerminal = normalizeTerminalName(
+        scope.normalized_terminal || scope.terminal
+      );
+      const scopeMentionsStartTime = terminalScopeMentionsExplicitStartTime(
+        prompt,
+        normalizedScopeTerminal
+      );
+
+      return {
+        ...scope,
+        filters: (scope.filters ?? []).filter((filter) => {
+          if (!isStartTimeMinimumFilter(filter)) return true;
+
+          if (
+            isFilterExplicitlyRequestedForTerminalScope(
+              prompt,
+              normalizedScopeTerminal,
+              filter
+            )
+          ) {
+            return true;
+          }
+
+          if (scopeMentionsStartTime) {
+            return false;
+          }
+
+          return !hasExplicitScopedEquivalent(filter, normalizedScopeTerminal);
+        }),
+      };
+    }),
+  };
 }
 
 function removeLeakedScopedFinishFilters(
@@ -6155,7 +6320,10 @@ function applyDeterministicPreferenceRulesV2(
 
   return applyConflictResolutionRules(
     removeMirroredScopedGlobalFilters(
-      removeLeakedScopedFinishFilters(nextParsed, prompt),
+      removeLeakedScopedFinishFilters(
+        removeLeakedScopedStartFilters(nextParsed, prompt),
+        prompt
+      ),
       prompt
     ),
     intents,

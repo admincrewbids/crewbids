@@ -757,6 +757,76 @@ export const DEFAULT_PROMPT_REGRESSION_SUITE: PromptRegressionCase[] = [
     ],
   },
   {
+    id: "prompt-builder-scoped-start-time-does-not-leak",
+    label: "Prompt Builder terminal-specific start time stays scoped",
+    prompt:
+      "Only Lewis Road, Willowbrook, and Milton. Lewis Road first, starts after 12:00, lowest operating time first. Willowbrook second, weekends off, highest overtime first. Milton third, weekends off, no split jobs. No UP, no standby, no spareboard.",
+    assertions: [
+      {
+        type: "parsed_priority_order_exact",
+        value: ["Lewis Road", "Willowbrook", "Milton"],
+      },
+      {
+        type: "parsed_scoped_filter_present",
+        value: {
+          terminal: "Lewis Road",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_filter_absent",
+        value: {
+          terminal: "Milton",
+          filter: {
+            field: "on_duty",
+            operator: ">=",
+            value: "12:00",
+            strength: "hard",
+          },
+        },
+      },
+      {
+        type: "parsed_global_filter_absent",
+        value: {
+          field: "on_duty",
+          operator: ">=",
+          value: "12:00",
+          strength: "hard",
+        },
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Lewis Road",
+          sort: {
+            field: "operating_hours_weekly",
+            direction: "asc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "parsed_scoped_sort_present",
+        value: {
+          terminal: "Willowbrook",
+          sort: {
+            field: "overtime_hours_weekly",
+            direction: "desc",
+            strength: "strong",
+          },
+        },
+      },
+      {
+        type: "no_visible_contradictions",
+      },
+    ],
+  },
+  {
     id: "canonical-stouffville-lewis-wb-scoped-constraints",
     label: "Stouffville, Lewis Road, and WB scoped constraints",
     prompt:
