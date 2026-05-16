@@ -693,6 +693,214 @@ const CANONICAL_TERMINAL_ALIASES: Record<string, string[]> = {
   standby: ["stdby", "standby", "stand by"],
 };
 
+const PROMPT_BUILDER_TERMINALS = [
+  "willowbrook",
+  "lewis road",
+  "richmond hill",
+  "milton",
+  "barrie",
+  "bradford",
+  "kitchener",
+  "lincolnville",
+  "wrmf",
+  "spareboard",
+] as const;
+
+const PROMPT_BUILDER_DAYS = [
+  { key: "monday", label: "Mon" },
+  { key: "tuesday", label: "Tue" },
+  { key: "wednesday", label: "Wed" },
+  { key: "thursday", label: "Thu" },
+  { key: "friday", label: "Fri" },
+  { key: "saturday", label: "Sat" },
+  { key: "sunday", label: "Sun" },
+] as const;
+
+type PromptBuilderSort =
+  | ""
+  | "highest_ot"
+  | "lowest_operating"
+  | "lowest_work"
+  | "earlier_starts"
+  | "later_starts";
+
+const PROMPT_BUILDER_SORT_OPTIONS: Array<{
+  value: PromptBuilderSort;
+  label: string;
+  promptText: string;
+}> = [
+  { value: "", label: "No sort preference", promptText: "" },
+  {
+    value: "highest_ot",
+    label: "Highest overtime first",
+    promptText: "highest overtime first",
+  },
+  {
+    value: "lowest_operating",
+    label: "Lowest operating time first",
+    promptText: "lowest operating time first",
+  },
+  {
+    value: "lowest_work",
+    label: "Lowest work time first",
+    promptText: "lowest work time first",
+  },
+  {
+    value: "earlier_starts",
+    label: "Earlier starts first",
+    promptText: "earlier starts first",
+  },
+  {
+    value: "later_starts",
+    label: "Later starts first",
+    promptText: "later starts first",
+  },
+];
+
+type PromptBuilderTerminalRule = {
+  weekendsOff: boolean;
+  daysOff: string[];
+  morningsOnly: boolean;
+  noMornings: boolean;
+  afternoonsOnly: boolean;
+  noSplits: boolean;
+  noVans: boolean;
+  noShuttles: boolean;
+  startAfter: string;
+  finishBy: string;
+  sorts: PromptBuilderSort[];
+};
+
+type PromptBuilderGlobalRule = {
+  noUp: boolean;
+  noSplits: boolean;
+  noVans: boolean;
+  noShuttles: boolean;
+  noStandby: boolean;
+  noSpareboard: boolean;
+  sortBy: PromptBuilderSort;
+};
+
+function createPromptBuilderTerminalRule(): PromptBuilderTerminalRule {
+  return {
+    weekendsOff: false,
+    daysOff: [],
+    morningsOnly: false,
+    noMornings: false,
+    afternoonsOnly: false,
+    noSplits: false,
+    noVans: false,
+    noShuttles: false,
+    startAfter: "",
+    finishBy: "",
+    sorts: [],
+  };
+}
+
+function getPromptBuilderSortText(sort: PromptBuilderSort) {
+  return (
+    PROMPT_BUILDER_SORT_OPTIONS.find((option) => option.value === sort)
+      ?.promptText ?? ""
+  );
+}
+
+function normalizePromptBuilderTime(value: string) {
+  const cleaned = value.trim();
+  if (!cleaned) return "";
+
+  const compact = cleaned.match(/^(\d{1,4})$/);
+  if (compact) {
+    const raw = compact[1];
+    if (raw.length <= 2) {
+      return raw.padStart(2, "0") + ":00";
+    }
+
+    return raw.slice(0, -2).padStart(2, "0") + ":" + raw.slice(-2);
+  }
+
+  return cleaned;
+}
+
+function getPromptBuilderPriorityWord(index: number) {
+  if (index === 0) return "first";
+  if (index === 1) return "second";
+  if (index === 2) return "third";
+  return `priority ${index + 1}`;
+}
+
+function buildPromptBuilderText(
+  selectedTerminals: string[],
+  terminalRules: Record<string, PromptBuilderTerminalRule>,
+  globalRules: PromptBuilderGlobalRule
+) {
+  const sentences: string[] = [];
+
+  if (selectedTerminals.length > 0) {
+    sentences.push(
+      `Only ${formatNaturalList(
+        selectedTerminals.map((terminal) => formatTerminalDisplayName(terminal))
+      )}.`
+    );
+  }
+
+  selectedTerminals.forEach((terminal, index) => {
+    const rules = terminalRules[terminal] ?? createPromptBuilderTerminalRule();
+    const parts = [
+      `${formatTerminalDisplayName(terminal)} ${getPromptBuilderPriorityWord(index)}`,
+    ];
+    const startAfter = normalizePromptBuilderTime(rules.startAfter);
+    const finishBy = normalizePromptBuilderTime(rules.finishBy);
+
+    if (rules.weekendsOff) parts.push("weekends off");
+    if (rules.daysOff.length > 0) {
+      parts.push(
+        `must have ${formatNaturalList(
+          rules.daysOff.map((day) => day.charAt(0).toUpperCase() + day.slice(1))
+        )} off`
+      );
+    }
+    if (rules.morningsOnly) {
+      parts.push("mornings only");
+    } else if (rules.noMornings) {
+      parts.push("no mornings");
+    } else if (rules.afternoonsOnly) {
+      parts.push("afternoons only");
+    }
+    if (startAfter) parts.push(`starts after ${startAfter}`);
+    if (finishBy) parts.push(`finishes by ${finishBy}`);
+    if (rules.noSplits) parts.push("no split jobs");
+    if (rules.noVans) parts.push("no vans");
+    if (rules.noShuttles) parts.push("no shuttles");
+    (rules.sorts ?? []).forEach((sort) => {
+      const sortText = getPromptBuilderSortText(sort);
+      if (sortText) parts.push(sortText);
+    });
+
+    sentences.push(parts.join(", ") + ".");
+  });
+
+  const globalParts: string[] = [];
+  if (globalRules.noUp) globalParts.push("No UP");
+  if (globalRules.noSplits) globalParts.push("no split jobs");
+  if (globalRules.noVans) globalParts.push("no vans");
+  if (globalRules.noShuttles) globalParts.push("no shuttles");
+  if (globalRules.noStandby) globalParts.push("no standby");
+  if (globalRules.noSpareboard) globalParts.push("no spareboard");
+
+  if (globalParts.length > 0) {
+    sentences.push(globalParts.join(", ") + ".");
+  }
+
+  const globalSortText = getPromptBuilderSortText(globalRules.sortBy);
+  if (globalSortText) {
+    sentences.push(
+      globalSortText.charAt(0).toUpperCase() + globalSortText.slice(1) + "."
+    );
+  }
+
+  return sentences.join(" ").trim();
+}
+
 function normalizeTerminalName(terminal: string | undefined): string {
   if (!terminal) return "";
 
@@ -9336,6 +9544,31 @@ const [savingBidList, setSavingBidList] = useState(false);
 const [parsedPreferences, setParsedPreferences] =
   useState<ParsedPreferences | null>(null);
 const [viewportWidth, setViewportWidth] = useState(1280);
+const [showPromptBuilder, setShowPromptBuilder] = useState(false);
+const [builderTerminals, setBuilderTerminals] = useState<string[]>([]);
+const [builderTerminalRules, setBuilderTerminalRules] = useState<
+  Record<string, PromptBuilderTerminalRule>
+>({});
+const [builderGlobalRules, setBuilderGlobalRules] =
+  useState<PromptBuilderGlobalRule>({
+    noUp: false,
+    noSplits: false,
+    noVans: false,
+    noShuttles: false,
+    noStandby: false,
+    noSpareboard: false,
+    sortBy: "",
+  });
+
+const builderPrompt = useMemo(
+  () =>
+    buildPromptBuilderText(
+      builderTerminals,
+      builderTerminalRules,
+      builderGlobalRules
+    ),
+  [builderTerminals, builderTerminalRules, builderGlobalRules]
+);
 
 const preferenceSummary = parsedPreferences
   ? summarizePreferencesForDisplay(parsedPreferences)
@@ -12015,6 +12248,153 @@ function handleReset() {
   setDraggedCrewId(null);
 }
 
+function togglePromptBuilderTerminal(terminal: string) {
+  setBuilderTerminals((prev) => {
+    if (prev.includes(terminal)) {
+      return prev.filter((item) => item !== terminal);
+    }
+
+    return [...prev, terminal];
+  });
+
+  setBuilderTerminalRules((prev) => ({
+    ...prev,
+    [terminal]: prev[terminal] ?? createPromptBuilderTerminalRule(),
+  }));
+}
+
+function movePromptBuilderTerminal(terminal: string, direction: -1 | 1) {
+  setBuilderTerminals((prev) => {
+    const currentIndex = prev.indexOf(terminal);
+    const nextIndex = currentIndex + direction;
+
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= prev.length) {
+      return prev;
+    }
+
+    const next = [...prev];
+    const [moved] = next.splice(currentIndex, 1);
+    next.splice(nextIndex, 0, moved);
+    return next;
+  });
+}
+
+function updatePromptBuilderTerminalRule<K extends keyof PromptBuilderTerminalRule>(
+  terminal: string,
+  key: K,
+  value: PromptBuilderTerminalRule[K]
+) {
+  setBuilderTerminalRules((prev) => {
+    const current = prev[terminal] ?? createPromptBuilderTerminalRule();
+    const next = {
+      ...current,
+      [key]: value,
+    };
+
+    if (key === "morningsOnly" && value === true) {
+      next.noMornings = false;
+      next.afternoonsOnly = false;
+    }
+
+    if (key === "noMornings" && value === true) {
+      next.morningsOnly = false;
+    }
+
+    if (key === "afternoonsOnly" && value === true) {
+      next.morningsOnly = false;
+    }
+
+    return {
+      ...prev,
+      [terminal]: next,
+    };
+  });
+}
+
+function togglePromptBuilderDayOff(terminal: string, day: string) {
+  setBuilderTerminalRules((prev) => {
+    const current = prev[terminal] ?? createPromptBuilderTerminalRule();
+    const currentDays = current.daysOff ?? [];
+    const daysOff = currentDays.includes(day)
+      ? currentDays.filter((item) => item !== day)
+      : [...currentDays, day];
+
+    return {
+      ...prev,
+      [terminal]: {
+        ...current,
+        daysOff,
+        weekendsOff:
+          daysOff.includes("saturday") && daysOff.includes("sunday")
+            ? true
+            : current.weekendsOff,
+      },
+    };
+  });
+}
+
+function addPromptBuilderTerminalSort(terminal: string) {
+  setBuilderTerminalRules((prev) => {
+    const current = prev[terminal] ?? createPromptBuilderTerminalRule();
+
+    return {
+      ...prev,
+      [terminal]: {
+        ...current,
+        sorts: [...(current.sorts ?? []), ""],
+      },
+    };
+  });
+}
+
+function updatePromptBuilderTerminalSort(
+  terminal: string,
+  sortIndex: number,
+  value: PromptBuilderSort
+) {
+  setBuilderTerminalRules((prev) => {
+    const current = prev[terminal] ?? createPromptBuilderTerminalRule();
+    const sorts = [...(current.sorts ?? [])];
+    sorts[sortIndex] = value;
+
+    return {
+      ...prev,
+      [terminal]: {
+        ...current,
+        sorts,
+      },
+    };
+  });
+}
+
+function removePromptBuilderTerminalSort(terminal: string, sortIndex: number) {
+  setBuilderTerminalRules((prev) => {
+    const current = prev[terminal] ?? createPromptBuilderTerminalRule();
+
+    return {
+      ...prev,
+      [terminal]: {
+        ...current,
+        sorts: (current.sorts ?? []).filter((_, index) => index !== sortIndex),
+      },
+    };
+  });
+}
+
+function resetPromptBuilder() {
+  setBuilderTerminals([]);
+  setBuilderTerminalRules({});
+  setBuilderGlobalRules({
+    noUp: false,
+    noSplits: false,
+    noVans: false,
+    noShuttles: false,
+    noStandby: false,
+    noSpareboard: false,
+    sortBy: "",
+  });
+}
+
 function handleViewJob(job: any) {
   if (!job?.pdf_page_number) {
     console.warn("No page number for job", job?.job_no);
@@ -12838,6 +13218,648 @@ background: "#ffffff",
 boxShadow: "inset 0 1px 2px rgba(15,23,42,0.04)",
 }}
 />
+
+<div
+style={{
+border: "1px solid #fdba74",
+borderRadius: 16,
+background: "#ffffff",
+overflow: "hidden",
+boxShadow: "0 10px 24px rgba(249, 115, 22, 0.1)",
+}}
+>
+<button
+type="button"
+onClick={() => setShowPromptBuilder((value) => !value)}
+style={{
+width: "100%",
+border: "none",
+background: showPromptBuilder
+  ? "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)"
+  : "linear-gradient(135deg, #ffffff 0%, #fff7ed 100%)",
+color: "#0f172a",
+padding: isMobile ? "14px" : "16px",
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+gap: 14,
+cursor: "pointer",
+}}
+>
+<div style={{ display: "grid", gap: 4, textAlign: "left" }}>
+<div
+style={{
+display: "flex",
+alignItems: "center",
+gap: 8,
+flexWrap: "wrap",
+}}
+>
+<span style={{ fontSize: isMobile ? 17 : 18, fontWeight: 900 }}>
+Prompt Builder
+</span>
+<span
+style={{
+borderRadius: 999,
+background: "#ffedd5",
+color: "#9a3412",
+padding: "4px 8px",
+fontSize: 11,
+fontWeight: 900,
+textTransform: "uppercase",
+letterSpacing: "0.05em",
+}}
+>
+Guided
+</span>
+</div>
+<span
+style={{
+fontSize: 13,
+fontWeight: 700,
+color: "#64748b",
+lineHeight: 1.35,
+}}
+>
+Build a guided prompt with terminals, days off, times, exclusions, and sort order.
+</span>
+</div>
+<span
+style={{
+borderRadius: 999,
+background: "#f97316",
+color: "#ffffff",
+padding: isMobile ? "8px 10px" : "9px 12px",
+fontSize: isMobile ? 12 : 13,
+fontWeight: 900,
+whiteSpace: "nowrap",
+}}
+>
+{showPromptBuilder ? "Hide Builder" : "Open Builder"}
+</span>
+</button>
+
+{showPromptBuilder && (
+<div
+style={{
+padding: isMobile ? 14 : 16,
+display: "grid",
+gap: 16,
+}}
+>
+<div style={{ display: "grid", gap: 8 }}>
+<div
+style={{
+fontSize: 12,
+fontWeight: 900,
+textTransform: "uppercase",
+letterSpacing: "0.05em",
+color: "#64748b",
+}}
+>
+Terminals
+</div>
+<div
+style={{
+display: "flex",
+flexWrap: "wrap",
+gap: 8,
+}}
+>
+{PROMPT_BUILDER_TERMINALS.map((terminal) => {
+  const selected = builderTerminals.includes(terminal);
+
+  return (
+    <button
+      key={terminal}
+      type="button"
+      onClick={() => togglePromptBuilderTerminal(terminal)}
+      style={{
+        border: selected ? "1px solid #f97316" : "1px solid #cbd5e1",
+        background: selected ? "#fff7ed" : "#ffffff",
+        color: selected ? "#9a3412" : "#334155",
+        borderRadius: 999,
+        padding: "8px 11px",
+        fontSize: 13,
+        fontWeight: 800,
+        cursor: "pointer",
+      }}
+    >
+      {formatTerminalDisplayName(terminal)}
+    </button>
+  );
+})}
+</div>
+</div>
+
+{builderTerminals.length > 0 && (
+<div style={{ display: "grid", gap: 10 }}>
+{builderTerminals.map((terminal, index) => {
+  const rules =
+    builderTerminalRules[terminal] ?? createPromptBuilderTerminalRule();
+
+  return (
+    <div
+      key={terminal}
+      style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: 14,
+        padding: 12,
+        background: "#f8fafc",
+        display: "grid",
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ fontSize: 15, fontWeight: 900, color: "#0f172a" }}>
+          {formatTerminalDisplayName(terminal)} Priority {index + 1}
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => movePromptBuilderTerminal(terminal, -1)}
+            disabled={index === 0}
+            style={{
+              border: "1px solid #cbd5e1",
+              background: "#ffffff",
+              borderRadius: 10,
+              padding: "6px 9px",
+              fontWeight: 800,
+              color: "#334155",
+              opacity: index === 0 ? 0.45 : 1,
+              cursor: index === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            Up
+          </button>
+          <button
+            type="button"
+            onClick={() => movePromptBuilderTerminal(terminal, 1)}
+            disabled={index === builderTerminals.length - 1}
+            style={{
+              border: "1px solid #cbd5e1",
+              background: "#ffffff",
+              borderRadius: 10,
+              padding: "6px 9px",
+              fontWeight: 800,
+              color: "#334155",
+              opacity: index === builderTerminals.length - 1 ? 0.45 : 1,
+              cursor:
+                index === builderTerminals.length - 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            Down
+          </button>
+          <button
+            type="button"
+            onClick={() => togglePromptBuilderTerminal(terminal)}
+            style={{
+              border: "1px solid #fecaca",
+              background: "#fff1f2",
+              borderRadius: 10,
+              padding: "6px 9px",
+              fontWeight: 800,
+              color: "#be123c",
+              cursor: "pointer",
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gap: 8 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            color: "#64748b",
+          }}
+        >
+          Specific Days Off
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+          {PROMPT_BUILDER_DAYS.map((day) => {
+            const selected = (rules.daysOff ?? []).includes(day.key);
+
+            return (
+              <button
+                key={day.key}
+                type="button"
+                onClick={() => togglePromptBuilderDayOff(terminal, day.key)}
+                style={{
+                  border: selected ? "1px solid #16a34a" : "1px solid #cbd5e1",
+                  background: selected ? "#dcfce7" : "#ffffff",
+                  color: selected ? "#166534" : "#334155",
+                  borderRadius: 999,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                {day.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
+          gap: 10,
+        }}
+      >
+        {[
+          ["weekendsOff", "Weekends off"],
+          ["morningsOnly", "Mornings only"],
+          ["noMornings", "No mornings"],
+          ["afternoonsOnly", "Afternoons only"],
+          ["noSplits", "No splits"],
+          ["noVans", "No vans"],
+          ["noShuttles", "No shuttles"],
+        ].map(([key, label]) => (
+          <label
+            key={key}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "#334155",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={Boolean(rules[key as keyof PromptBuilderTerminalRule])}
+              onChange={(event) =>
+                updatePromptBuilderTerminalRule(
+                  terminal,
+                  key as keyof PromptBuilderTerminalRule,
+                  event.target.checked as never
+                )
+              }
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
+          gap: 10,
+        }}
+      >
+        <label style={{ display: "grid", gap: 5 }}>
+          <span style={{ fontSize: 12, fontWeight: 900, color: "#64748b" }}>
+            Starts after
+          </span>
+          <input
+            value={rules.startAfter}
+            onChange={(event) =>
+              updatePromptBuilderTerminalRule(
+                terminal,
+                "startAfter",
+                event.target.value
+              )
+            }
+            style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: 10,
+              padding: "9px 10px",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#0f172a",
+              background: "#ffffff",
+            }}
+          />
+        </label>
+        <label style={{ display: "grid", gap: 5 }}>
+          <span style={{ fontSize: 12, fontWeight: 900, color: "#64748b" }}>
+            Finishes by
+          </span>
+          <input
+            value={rules.finishBy}
+            onChange={(event) =>
+              updatePromptBuilderTerminalRule(
+                terminal,
+                "finishBy",
+                event.target.value
+              )
+            }
+            style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: 10,
+              padding: "9px 10px",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#0f172a",
+              background: "#ffffff",
+            }}
+          />
+        </label>
+      </div>
+
+      <div style={{ display: "grid", gap: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "#64748b",
+            }}
+          >
+            Sort For This Priority
+          </div>
+          <button
+            type="button"
+            onClick={() => addPromptBuilderTerminalSort(terminal)}
+            style={{
+              border: "1px solid #fdba74",
+              background: "#fff7ed",
+              borderRadius: 999,
+              padding: "7px 10px",
+              fontSize: 12,
+              fontWeight: 900,
+              color: "#9a3412",
+              cursor: "pointer",
+            }}
+          >
+            Add Sort
+          </button>
+        </div>
+
+        {(rules.sorts ?? []).length === 0 && (
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>
+            Optional: add one or more sort rules that apply only to this priority.
+          </div>
+        )}
+
+        {(rules.sorts ?? []).map((sort, sortIndex) => (
+          <div
+            key={`${terminal}-sort-${sortIndex}`}
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 1fr) auto",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <select
+              value={sort}
+              onChange={(event) =>
+                updatePromptBuilderTerminalSort(
+                  terminal,
+                  sortIndex,
+                  event.target.value as PromptBuilderSort
+                )
+              }
+              style={{
+                border: "1px solid #cbd5e1",
+                borderRadius: 10,
+                padding: "10px 11px",
+                fontSize: 14,
+                fontWeight: 800,
+                color: "#0f172a",
+                background: "#ffffff",
+                width: "100%",
+              }}
+            >
+              {PROMPT_BUILDER_SORT_OPTIONS.map((option) => (
+                <option key={option.value || "none"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => removePromptBuilderTerminalSort(terminal, sortIndex)}
+              style={{
+                border: "1px solid #fecaca",
+                background: "#fff1f2",
+                borderRadius: 10,
+                padding: "10px 11px",
+                fontSize: 12,
+                fontWeight: 900,
+                color: "#be123c",
+                cursor: "pointer",
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+})}
+</div>
+)}
+
+<div
+style={{
+display: "grid",
+gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr",
+gap: 12,
+}}
+>
+<div
+style={{
+border: "1px solid #e5e7eb",
+borderRadius: 14,
+padding: 12,
+background: "#ffffff",
+display: "grid",
+gap: 10,
+}}
+>
+<div
+style={{
+fontSize: 12,
+fontWeight: 900,
+textTransform: "uppercase",
+letterSpacing: "0.05em",
+color: "#64748b",
+}}
+>
+Applies Everywhere
+</div>
+{[
+  ["noUp", "No UP"],
+  ["noSplits", "No splits"],
+  ["noVans", "No vans"],
+  ["noShuttles", "No shuttles"],
+  ["noStandby", "No standby"],
+  ["noSpareboard", "No spareboard"],
+].map(([key, label]) => (
+  <label
+    key={key}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: 13,
+      fontWeight: 800,
+      color: "#334155",
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={Boolean(builderGlobalRules[key as keyof PromptBuilderGlobalRule])}
+      onChange={(event) =>
+        setBuilderGlobalRules((prev) => ({
+          ...prev,
+          [key]: event.target.checked,
+        }))
+      }
+    />
+    {label}
+  </label>
+))}
+</div>
+
+<label
+style={{
+border: "1px solid #e5e7eb",
+borderRadius: 14,
+padding: 12,
+background: "#ffffff",
+display: "grid",
+gap: 8,
+}}
+>
+<span
+style={{
+fontSize: 12,
+fontWeight: 900,
+textTransform: "uppercase",
+letterSpacing: "0.05em",
+color: "#64748b",
+}}
+>
+Sort
+</span>
+<select
+value={builderGlobalRules.sortBy}
+onChange={(event) =>
+  setBuilderGlobalRules((prev) => ({
+    ...prev,
+    sortBy: event.target.value as PromptBuilderGlobalRule["sortBy"],
+  }))
+}
+style={{
+border: "1px solid #cbd5e1",
+borderRadius: 10,
+padding: "10px 11px",
+fontSize: 14,
+fontWeight: 800,
+color: "#0f172a",
+background: "#ffffff",
+}}
+>
+{PROMPT_BUILDER_SORT_OPTIONS.map((option) => (
+  <option key={option.value || "none"} value={option.value}>
+    {option.label}
+  </option>
+))}
+</select>
+</label>
+</div>
+
+<div
+style={{
+border: "1px solid #fed7aa",
+borderRadius: 14,
+background: "#fff7ed",
+padding: 12,
+display: "grid",
+gap: 10,
+}}
+>
+<div
+style={{
+fontSize: 12,
+fontWeight: 900,
+textTransform: "uppercase",
+letterSpacing: "0.05em",
+color: "#9a3412",
+}}
+>
+Generated Prompt
+</div>
+<div
+style={{
+minHeight: 54,
+fontSize: 14,
+lineHeight: 1.5,
+fontWeight: 700,
+color: builderPrompt ? "#0f172a" : "#94a3b8",
+}}
+>
+{builderPrompt || "Choose terminals or rules to build a prompt."}
+</div>
+<div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+<button
+type="button"
+disabled={!builderPrompt}
+onClick={() => setPrompt(builderPrompt)}
+style={{
+border: "none",
+borderRadius: 12,
+padding: "10px 13px",
+background: builderPrompt ? "#f97316" : "#cbd5e1",
+color: "#ffffff",
+fontWeight: 900,
+cursor: builderPrompt ? "pointer" : "not-allowed",
+}}
+>
+Use This Prompt
+</button>
+<button
+type="button"
+onClick={resetPromptBuilder}
+style={{
+border: "1px solid #cbd5e1",
+borderRadius: 12,
+padding: "10px 13px",
+background: "#ffffff",
+color: "#334155",
+fontWeight: 900,
+cursor: "pointer",
+}}
+>
+Reset Builder
+</button>
+</div>
+</div>
+</div>
+)}
+</div>
 
 <div
 style={{
