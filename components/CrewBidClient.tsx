@@ -987,6 +987,31 @@ async function unlockPackage(
 }
 
 const BID_PACKAGE_BUCKET = "bid-packages";
+const ACTIVE_BID_PACKAGE_SESSION_KEY = "crewbids_active_package_id";
+const LAST_BID_PACKAGE_ID_KEY = "crewbids_last_package_id";
+
+function rememberActiveBidPackage(packageId: string | null) {
+  if (!packageId || typeof window === "undefined") return;
+
+  sessionStorage.setItem(ACTIVE_BID_PACKAGE_SESSION_KEY, packageId);
+  localStorage.setItem(LAST_BID_PACKAGE_ID_KEY, packageId);
+}
+
+function getRememberedActiveBidPackageId() {
+  if (typeof window === "undefined") return null;
+
+  return (
+    sessionStorage.getItem(ACTIVE_BID_PACKAGE_SESSION_KEY) ||
+    localStorage.getItem(LAST_BID_PACKAGE_ID_KEY)
+  );
+}
+
+function forgetActiveBidPackage() {
+  if (typeof window === "undefined") return;
+
+  sessionStorage.removeItem(ACTIVE_BID_PACKAGE_SESSION_KEY);
+  localStorage.removeItem(LAST_BID_PACKAGE_ID_KEY);
+}
 
 async function uploadBidPackagePdf(
   file: File,
@@ -1058,7 +1083,7 @@ if (!data) {
   console.warn("No bid package found for id:", packageId);
 
   // prevent infinite retry loop
-  localStorage.removeItem("crewbids_last_package_id");
+  forgetActiveBidPackage();
 
   return null;
 }
@@ -9905,7 +9930,8 @@ useEffect(() => {
     });
 
     setCurrentPackageId(returnPackageId);
-    localStorage.setItem("crewbids_last_package_id", returnPackageId);
+    rememberActiveBidPackage(returnPackageId);
+    setShouldRestoreStoredPdf(true);
 
     if (sessionId) {
       try {
@@ -9953,12 +9979,16 @@ useEffect(() => {
 }, [authUser?.id]);
 
 useEffect(() => {
-  const savedPackageId = localStorage.getItem("crewbids_last_package_id");
+  if (!authUser?.id || currentPackageId) return;
 
-  if (savedPackageId) {
-    debugLog("Saved package id found; skipping automatic restore:", savedPackageId);
-  }
-}, []);
+  const savedPackageId = getRememberedActiveBidPackageId();
+
+  if (!savedPackageId) return;
+
+  debugLog("Restoring saved package id for active session:", savedPackageId);
+  setCurrentPackageId(savedPackageId);
+  setShouldRestoreStoredPdf(true);
+}, [authUser?.id, currentPackageId]);
   useEffect(() => {
   let mounted = true;
 
@@ -10070,7 +10100,7 @@ async function handleUnlockCheckout() {
       return;
     }
 if (currentPackageId) {
-  localStorage.setItem("crewbids_last_package_id", currentPackageId);
+  rememberActiveBidPackage(currentPackageId);
 }
     window.location.href = data.url;
   } catch (error) {
@@ -10131,7 +10161,7 @@ useEffect(() => {
 
   const packageIdFromUrl =
     params.get("packageId") ||
-    localStorage.getItem("crewbids_last_package_id");
+    getRememberedActiveBidPackageId();
 
   if (!packageIdFromUrl) return;
 
@@ -10139,6 +10169,8 @@ useEffect(() => {
 
   async function syncAfterCheckout() {
     setCurrentPackageId(packageIdFromUrl);
+    rememberActiveBidPackage(packageIdFromUrl);
+    setShouldRestoreStoredPdf(true);
 
    const unlocked = await checkPackageUnlock(packageIdFromUrl!, authUser.id);
 
@@ -11755,7 +11787,7 @@ async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
 
     setCurrentPackageId(packageId);
     if (packageId) {
-      localStorage.setItem("crewbids_last_package_id", packageId);
+      rememberActiveBidPackage(packageId);
     }
 
     setCurrentFileHash(fileHash);
